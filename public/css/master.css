@@ -29,18 +29,15 @@ header.sticking {
     backdrop-filter: blur(10px);
 }
 
-/* Logo */
 .mainlogo {
     height: 50px;
     margin-top: -10px;
 }
 
-/* Navigation container */
 header nav {
     display: flex;
 }
 
-/* Nav list */
 header nav ul {
     display: flex;
     list-style: none;
@@ -48,12 +45,10 @@ header nav ul {
     padding: 0;
 }
 
-/* Nav item */
 header nav ul li {
     margin: 0;
 }
 
-/* Nav link */
 header nav ul li a {
     display: block;
     padding: 0.5rem 1rem;

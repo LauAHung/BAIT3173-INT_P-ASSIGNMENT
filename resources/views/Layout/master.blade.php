@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'My Application')</title>
+    <title>@yield('title', 'TravelFree')</title>
     <link rel="stylesheet" href="{{ asset('css/master.css') }}">
     @stack('styles')
 </head>
 <body>
-        <header>
+    <header>
         <div>
             <img src="{{ asset('images/logo_black.png') }}" alt="Logo" id="logo">
         </div>

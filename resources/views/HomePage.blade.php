@@ -9,10 +9,8 @@
 @section('content')
 <video id="bg-video" autoplay muted loop playsinline>
     <source src="{{ asset('video/HomePage_BGVideo.mp4') }}" type="video/mp4">
-    Your browser does not support HTML5 video.
 </video>
 
-    
     <div class="trip-toggle">
         <button class="toggle-btn inactive">Return</button>
         <button class="toggle-btn active">One Way</button>
