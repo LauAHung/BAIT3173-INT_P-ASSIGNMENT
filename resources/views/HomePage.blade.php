@@ -7,11 +7,13 @@
 @endpush
 
 @section('content')
-    <div class="ticket-search-container">
+    
     <div class="trip-toggle">
         <button class="toggle-btn inactive">Return</button>
         <button class="toggle-btn active">One Way</button>
     </div>
+
+<div class="ticket-search-container">
 
     <form class="search-form">
         <div class="form-group">
