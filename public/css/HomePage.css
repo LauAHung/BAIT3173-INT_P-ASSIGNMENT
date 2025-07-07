@@ -1,0 +1,78 @@
+.ticket-search-container {
+    margin: 50px auto;
+    padding: 30px;
+    max-width: 1000px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.trip-toggle {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.toggle-btn {
+    padding: 10px 20px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 10px;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn.active {
+    background: #3d2176;
+    color: white;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 150px;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px;
+    border: 2px solid #3d2176;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.swap-group {
+    position: relative;
+}
+
+.swap-btn {
+    position: absolute;
+    right: 10px;
+    top: 35px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #3d2176;
+}
+
+.search-btn {
+    margin-top: 20px;
+    padding: 10px 40px;
+    background: #3d2176;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
