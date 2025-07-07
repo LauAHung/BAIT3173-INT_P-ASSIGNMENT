@@ -1,4 +1,18 @@
+#bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;            
+    object-position: center center;  
+    z-index: -1;    
+    pointer-events: none;
+}
+
+
 .ticket-search-container {
+    margin-top:  100px;
     margin: 50px auto;
     padding: 30px;
     max-width: 1000px;
