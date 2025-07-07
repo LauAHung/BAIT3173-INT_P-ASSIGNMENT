@@ -1,2 +1,3 @@
 import './bootstrap';
-import '../css/HomePage.css';
+import '../css/master.css';
+import './master.js'; 

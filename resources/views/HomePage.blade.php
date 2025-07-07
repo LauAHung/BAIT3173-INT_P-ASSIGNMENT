@@ -2,9 +2,7 @@
 
 @section('title', 'Home Page')
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/HomePage.css') }}">
-@endpush
+@vite(['resources/js/HomePage.js'])
 
 @section('content')
 <video id="bg-video" autoplay muted loop playsinline>
