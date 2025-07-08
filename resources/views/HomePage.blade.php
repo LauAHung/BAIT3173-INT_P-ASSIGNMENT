@@ -4,6 +4,8 @@
 
 @vite(['resources/js/HomePage.js'])
 
+
+
 @section('content')
 <video id="bg-video" autoplay muted loop playsinline>
     <source src="{{ asset('video/HomePage_BGVideo.mp4') }}" type="video/mp4">

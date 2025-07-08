@@ -23,7 +23,7 @@
         <nav>
             <ul>
                 <li><a href="#">Booking</a></li>
-                <li><a href="#">Account</a></li>
+                <li><a href="{{ route('signin') }}">Account</a></li>
             </ul>
         </nav>
         <div class="nav-animate"></div>
