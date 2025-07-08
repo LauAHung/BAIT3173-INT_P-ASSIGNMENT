@@ -1,1 +1,5 @@
+*.log
 /node_modules
+/package.json
+.env
+/public/hot
