@@ -11,8 +11,10 @@
 @section('content')
   <div class="container">
     <div class="left">
-      <button>Back to website</button>
-      <p>Capturing Moments,<br />Creating Memories</p>
+      <div class="left-inner">
+        <button>Back to website</button>
+        <p>Capturing Moments,<br />Creating Memories</p>
+      </div>
     </div>
     <div class="right">
       <div class="form-wrapper">
