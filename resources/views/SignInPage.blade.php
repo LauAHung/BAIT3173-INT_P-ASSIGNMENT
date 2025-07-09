@@ -22,7 +22,7 @@
         <a href="#">Already have an account? Log in</a>
 
         <div class="form-group">
-          <input type="text" placeholder="First name" value="Fletcher">
+          <input type="text" placeholder="First name" >
           <input type="text" placeholder="Last name">
         </div>
         <div class="form-group">
