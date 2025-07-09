@@ -14,7 +14,7 @@
         </div>
         <nav>
             <ul>
-                <li><a href="#">Ticketing</a></li>
+                <li><a href="{{ route('HomePage') }}">Ticketing</a></li>
                 <li><a href="#">Discover</a></li>
                 <li><a href="#">Feedback</a></li>
                 <li><a href="#">Schedule</a></li>
@@ -23,7 +23,7 @@
         <nav>
             <ul>
                 <li><a href="#">Booking</a></li>
-                <li><a href="{{ route('signin') }}">Account</a></li>
+                <li><a href="{{ route('signup') }}">Account</a></li>
             </ul>
         </nav>
         <div class="nav-animate"></div>
