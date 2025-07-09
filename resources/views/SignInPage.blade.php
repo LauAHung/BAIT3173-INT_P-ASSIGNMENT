@@ -2,11 +2,10 @@
 
 @section('title', 'Sign In')
 
-@vite(['resources/js/SignInPage.js'])
-
-@section('styles')
+@push('styles')
+    <link href="css/SignInPage.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-@endsection
+@endpush
 
 @section('content')
   <div class="container">

@@ -2,9 +2,9 @@
 
 @section('title', 'Home Page')
 
-@vite(['resources/js/HomePage.js'])
-
-
+@push('styles')
+    <link href="css/HomePage.css" rel="stylesheet">
+@endpush
 
 @section('content')
 <video id="bg-video" autoplay muted loop playsinline>
