@@ -20,25 +20,41 @@
         <h1>Create an account</h1>
         <p>Already have an account? <a href="{{ route('signin') }}">Log in</a></p>
 
-        <div class="form-group">
-          <input type="text" placeholder="First name">
-          <input type="text" placeholder="Last name">
-        </div>
-        <div class="form-group">
-          <input type="email" placeholder="Email">
-        </div>
-        <div class="form-group">
-          <input type="password" placeholder="Enter your password">
-        </div>
-        <div class="checkbox">
-          <input type="checkbox" checked>
-          <label>I agree to the <a href="#">Terms & Conditions</a></label>
-        </div>
-        <button class="create-btn">Create account</button>
+        <form action="{{ route('signup.handle') }}" method="POST">
+          @csrf
+          <div class="form-group">
+            <input type="text" name="first_name" placeholder="First name" value="{{ old('first_name') }}" required>
+            @error('first_name') <div class="error">{{ $message }}</div> @enderror
+            <input type="text" name="last_name" placeholder="Last name" value="{{ old('last_name') }}" required>
+            @error('last_name') <div class="error">{{ $message }}</div> @enderror
+          </div>
+          <div class="form-group">
+            <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
+            @error('email') <div class="error">{{ $message }}</div> @enderror
+          </div>
+          <div class="form-group">
+            <input type="password" name="password" placeholder="Enter your password" required>
+            @error('password') <div class="error">{{ $message }}</div> @enderror
+          </div>
+          <div class="checkbox">
+            <input type="checkbox" name="terms" required>
+            <label>I agree to the <a href="#">Terms & Conditions</a></label>
+          </div>
+          <button class="create-btn" type="submit">Create account</button>
+        </form>
+
         <div class="or">Or register with</div>
         <div class="oauth-btns">
-          <button><img src="{{ asset('images/google_logo.png') }}" alt="Google Logo" id="google_logo">Google</button>
-          <button><img src="{{ asset('images/facebook_logo.png') }}" alt="Facebook Logo" id="facebook_logo">Facebook</button>
+          <a href="{{ route('google.login') }}" id="google_login">
+            <button>
+              <img src="{{ asset('images/google_logo.png') }}" alt="Google Logo" id="google_logo">Google
+            </button>
+          </a>
+          <a href="#" id="facebook_login" id="google_login">
+            <button>
+              <img src="{{ asset('images/facebook_logo.png') }}" alt="Facebook Logo" id="facebook_logo">Facebook
+            </button>
+          </a>
         </div>
       </div>
     </div>
