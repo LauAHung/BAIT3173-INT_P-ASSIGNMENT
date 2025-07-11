@@ -22,20 +22,17 @@ public function handleGoogleCallback()
     // Check if the user already exists in your database
     $user = User::where('email', $googleUser->getEmail())->first();
 
-    // If not, create a new user
     if (!$user) {
         $user = User::create([
             'first_name' => $googleUser->user['given_name'] ?? '',
             'last_name'  => $googleUser->user['family_name'] ?? '',
             'email'      => $googleUser->getEmail(),
-            'password'   => bcrypt(Str::random(16)), // Set random password
+            'password'   => bcrypt(Str::random(16)),
         ]);
     }
 
-    // Log the user in
     Auth::login($user);
 
-    // Redirect to a page (e.g., profile)
     return redirect()->route('profile');
 }
 
