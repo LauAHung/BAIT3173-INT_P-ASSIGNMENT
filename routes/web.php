@@ -16,7 +16,7 @@ Route::get('/signin', function () {
     return view('SignInPage');
 })->name('signin');
 
-Route::get('/signup', [SignupController::class, 'showForm'])
+Route::get('/ignup', [SignupController::class, 'showForm'])
 ->name('signup');
 
 Route::post('/signup', [SignupController::class, 'handleSignup'])
