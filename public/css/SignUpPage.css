@@ -199,6 +199,7 @@
       font-weight: 600;
       letter-spacing: 2px;
     }
+
     .oauth-btns button:hover {
     background: #2b1e53;
     box-shadow: 0 0 30px 5px #6d54b5;
