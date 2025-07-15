@@ -84,20 +84,26 @@
                 <thead>
                     <tr>
                         <th>Train No</th>
-                        <th>Time</th>
+                        <th>Departure Time to Arrival Time</th>
+                        <th>Available Seats</th>
                         <th>Price</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>011</td>
+                        <td>T-011</td>
                         <td>3pm - 6pm</td>
+                        <td>999</td>
                         <td>RM 26</td>
+                        <td><a href="{{ route('signin') }}"><button class="btn-select">Select</button></a></td>
                     </tr>
                     <tr>
-                        <td>012</td>
+                        <td>T-012</td>
                         <td>4pm - 7pm</td>
+                        <td>778</td>
                         <td>RM 24</td>
+                        <td><a href="{{ route('signin') }}"><button class="btn-select">Select</button></a></td>
                     </tr>
                 </tbody>
             </table>

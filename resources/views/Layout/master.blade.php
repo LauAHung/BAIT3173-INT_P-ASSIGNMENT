@@ -38,7 +38,7 @@
     </main>
     <footer>
         <div class="footer">
-            <div class="container">
+            <div class="footer-container">
                 <div class="footer-section">
                     <h3>Contact Us</h3>
                     <ul>
