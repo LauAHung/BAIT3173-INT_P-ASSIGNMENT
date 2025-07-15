@@ -10,11 +10,13 @@
 <body>
     <header>
         <div>
-            <img src="{{ asset('images/logo_black.png') }}" alt="Logo" id="logo">
+            <a href="{{ route('HomePage') }}">
+                <img src="{{ asset('images/logo_black.png') }}" alt="Logo" id="logo">
+            </a>
         </div>
         <nav>
             <ul>
-                <li><a href="{{ route('HomePage') }}">Ticketing</a></li>
+                <li><a href="{{ route('TrainSelectionPage') }}">Ticketing</a></li>
                 <li><a href="#">Discover</a></li>
                 <li><a href="#">Feedback</a></li>
                 <li><a href="#">Schedule</a></li>

@@ -16,7 +16,11 @@ Route::get('/signin', function () {
     return view('SignInPage');
 })->name('signin');
 
-Route::get('/ignup', [SignupController::class, 'showForm'])
+Route::get('/train_selection', function () {
+    return view('TrainSelectionPage');
+})->name('TrainSelectionPage');
+
+Route::get('/signup', [SignupController::class, 'showForm'])
 ->name('signup');
 
 Route::post('/signup', [SignupController::class, 'handleSignup'])
