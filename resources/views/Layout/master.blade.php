@@ -36,7 +36,62 @@
         @yield('content')
     </main>
     <footer>
-        
+        <div class="footer">
+            <div class="container">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                    </ul>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>About</h3>
+                    <ul>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Other Services</h3>
+                    <ul>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Can be Anything</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Payment Methods</h3>
+                    <div class="payment-methods">
+                        <img src="{{ asset('images/payment/mastercard.png') }}" alt="Mastercard">
+                        <img src="{{ asset('images/payment/tng.png') }}" alt="TNG">
+                        <img src="{{ asset('images/payment/visa.png') }}" alt="Visa">
+                    </div>
+                    <h3>Our Partners</h3>
+                    <div class="partners">
+                        <img src="{{ asset('images/partners/google.png') }}" alt="Google">
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>Copyright © 2025 TravelFree Malaysia Sdn. Bhd. All rights reserved</p>
+                <p>Site Operator: TravelFree Malaysia Sdn. Bhd.</p>
+            </div>
+        </div>
     </footer>
     <script src="{{ asset('js/master.js') }}" defer></script>
 </body>

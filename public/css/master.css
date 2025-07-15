@@ -110,3 +110,78 @@ header > :nth-child(3) {
     flex-basis: 0;
     justify-content: flex-end;
 }
+
+
+/* === footer part === */
+.footer {
+    background-color: #1d1d1d;
+    padding: 30px 0;
+    color: #eeeded;
+    font-size: 14px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 20px;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 30px;
+}
+
+@media (min-width: 768px) {
+    .container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.footer-section h3 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+    color: #a7a6a6;
+    text-decoration: none;
+}
+
+.footer-section ul li a:hover {
+    text-decoration: underline;
+}
+
+.social-icons {
+    margin-top: 10px;
+}
+
+.social-icons a {
+    margin-right: 10px;
+    color: #eeeded;;
+    font-size: 16px;
+}
+
+.payment-methods img,
+.partners img {
+    height: 24px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.payment-methods {
+    margin-bottom: 15px;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 12px;
+}
