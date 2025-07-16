@@ -457,7 +457,7 @@ section {
 /* === Section 4 === */
 
 .multi-banner-section {
-  width: 100vw;
+  width: 100%;
   min-height: 100vh;
   overflow: hidden;
   padding: 0;
