@@ -20,6 +20,10 @@ Route::get('/train_selection', function () {
     return view('TrainSelectionPage');
 })->name('TrainSelectionPage');
 
+Route::get('/admin', function () {
+    return view('AdminPage');
+})->name('AdminPage');
+
 Route::get('/signup', [SignupController::class, 'showForm'])
 ->name('signup');
 
@@ -34,3 +38,4 @@ Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
 ->name('google.login');
 
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+
