@@ -11,12 +11,14 @@ body {
 /* === Video Background === */
 .first-section {
     position: relative;
-    height: 40vh;
+    min-height: 40vh;
+    height: auto;
     scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 20px;
 }
 
 .video-wrapper {
@@ -38,7 +40,10 @@ body {
 
 /* === Whole Search Bar === */
 .search-bar {
-    margin-top: 250px;
+    margin-top: 100px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
 }
 
 /* === Train Type Toggle === */
@@ -156,9 +161,9 @@ body {
     cursor: pointer;
 }
 
-/* === train select section === */
+/* === Train Select Section === */
 .train-select-section {
-    padding: 80px;
+    padding: 40px 20px; /* Reduce padding for smaller screens */
     background-color: #fff;
 }
 
@@ -166,10 +171,11 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
+    flex-direction: row; /* Default to row for larger screens */
     gap: 20px;
 }
 
-/* === train select filter === */
+/* === Train Select Filter === */
 .filter-container {
     width: 20%;
     padding: 15px;
@@ -192,8 +198,7 @@ body {
     margin-right: 5px;
 }
 
-
-/* === train select === */
+/* === Train Select === */
 .train-select {
     width: 80%;
     padding: 15px;
@@ -208,7 +213,7 @@ body {
 
 .train-select th,
 .train-select td {
-    padding: 20px 20px;
+    padding: 15px; /* Slightly reduce padding */
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
@@ -222,9 +227,9 @@ body {
     background-color: #f9f9f9;
 }
 
-/* === select button === */
+/* === Select Button === */
 .btn-select {
-    background-color: #b9d864; /* Matching blue from your search button */
+    background-color: #b9d864;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -235,10 +240,32 @@ body {
 }
 
 .btn-select:hover {
-    background-color: #a1b850; /* Darker shade on hover */
+    background-color: #a1b850;
 }
 
 .btn-select:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(199, 245, 72, 0.5); /* Focus ring */
+    box-shadow: 0 0 0 2px rgba(199, 245, 72, 0.5);
+}
+
+/* === Media Queries for Responsiveness === */
+@media (max-width: 768px) {
+    .train-select-section {
+        padding: 20px 10px;
+    }
+
+    .train-select-container {
+        flex-direction: column; /* Stack filter and table vertically */
+    }
+
+    .filter-container,
+    .train-select {
+        width: 100%; /* Full width for both */
+    }
+
+    .train-select th,
+    .train-select td {
+        padding: 10px; /* Further reduce padding */
+        font-size: 14px; /* Smaller font size */
+    }
 }
