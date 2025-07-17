@@ -85,6 +85,7 @@
                     <h3>Our Partners</h3>
                     <div class="partners">
                         <img src="{{ asset('images/google_logo.png') }}" alt="Google">
+                        <img src="{{ asset('images/facebook_logo.png') }}" alt="Google">
                     </div>
                 </div>
             </div>
