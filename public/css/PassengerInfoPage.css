@@ -25,7 +25,7 @@
     padding: 20px;
     gap: 20px;
     margin: 0 auto;
-    width: 60%;
+    width: 55%;
 }
 
 .passenger-info-form {
@@ -91,7 +91,7 @@
     font-size: 14px;
 }
 
-.info-value[placeholder] {
+.info-value:placeholder {
     color: #888;
 }
 

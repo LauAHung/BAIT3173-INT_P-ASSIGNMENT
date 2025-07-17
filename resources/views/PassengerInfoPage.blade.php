@@ -10,6 +10,7 @@
 
 <section>
 
+<form action="#" data-selectseat-url="{{ route('selectseat') }}">
     <div class="heading">
     <h2>Passenger Details</h2>
     </div>
@@ -22,34 +23,34 @@
                 <div class="passenger-info">
                     <div class="info-item">
                         <span class="info-label">Name<a>*</a></span>
-                        <input type="text" class="info-value">
+                        <input type="text" class="info-value" required>
                     </div>
                     <div class="info-item">
                         <span class="info-label">MyKad no.<a>**</a></span>
-                        <input type="text" class="info-value" placeholder="Required for Malaysian">
+                         <input type="text" class="info-value" id="mykad" name="mykad" placeholder="Required for Malaysian">
                     </div>
                     <div class="info-item">
                         <span class="info-label">Passport no.<a>**</a></span>
-                        <input type="text" class="info-value" placeholder="Required for non-Malaysian">
+                        <input type="text" class="info-value" id="passport" name="passport" placeholder="Required for non-Malaysian">
                     </div>
                     <div class="info-item">
                         <span class="info-label">Passport expiry date<a>**</a></span>
-                        <input type="text" class="info-value">
+                        <input type="date" class="info-value" id="passportExpiry" name="passport_expiry">
                     </div>
                     <div class="info-item">
                         <span class="info-label">Contact no.<a>*</a></span>
-                        <input type="text" class="info-value">
+                        <input type="text" class="info-value" required>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Gender<a>*</a></span>
                         <div class="gender">
-                        <label><input type="radio" name="gender" value="male">Male</label>
+                        <label><input type="radio" name="gender" value="male" required>Male</label>
                         <label><input type="radio" name="gender" value="female">Female</label>
                         </div>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Ticket Type<a>*</a></span>
-                        <select name="ticket-type" id="ticket-type">
+                        <select name="ticket-type" id="ticket-type" required>
                             <option value="" disabled selected>-- Please Select --</option>
                             <option value="">Dewasa/Adult</option>
                             <option value="">Kanak-kanak/Child</option>
@@ -76,11 +77,12 @@
         </div>
 
         <div class="btn-container">
-            <a href="{{ route('TrainSelectionPage') }}"><button type="submit" class="btn-submit">BACK</button></a>
+            <a href="{{ route('TrainSelectionPage') }}"><button type="button" class="btn-submit">BACK</button></a>
             <a href="{{ route('selectseat') }}"><button type="submit" class="btn-submit">NEXT</button></a>
             </div>
     </div>
-
+</form>
 </section>
+<script src="{{ asset('js/PassengerInfoPage.js') }}" defer></script>
 
 @endsection
