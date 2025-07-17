@@ -20,6 +20,14 @@ Route::get('/train_selection', function () {
     return view('TrainSelectionPage');
 })->name('TrainSelectionPage');
 
+Route::get('/seat_select', function () {
+    return view('SelectSeatPage');
+})->name('selectseat');
+
+Route::get('/passenger_info', function () {
+    return view('PassengerInfoPage');
+})->name('passengerinfo');
+
 Route::get('/admin', function () {
     return view('AdminPage');
 })->name('AdminPage');
