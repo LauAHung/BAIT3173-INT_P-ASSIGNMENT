@@ -14,13 +14,14 @@
         <aside class="sidebar">
             <h2 class="sidebar-title">Admin Panel</h2>
             <ul class="sidebar-menu">
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Train Management</a></li>
-                <li><a href="#">User Management</a></li>
-                <li><a href="#">News Email Publish</a></li>
-                <li><a href="#">Concession Card Approval</a></li>
-                <li><a href="#">Scan QR Code</a></li>
+                <li><a href="#"><img src="{{ asset('images/icon/dashboard.png') }}" /> <span>Dashboard</span></a></li>
+                <li><a href="#"><img src="{{ asset('images/icon/train.png') }}" /> <span>Train Management</span></a></li>
+                <li><a href="#"><img src="{{ asset('images/icon/user.png') }}" /> <span>User Management</span></a></li>
+                <li><a href="#"><img src="{{ asset('images/icon/email.png') }}" /> <span>News Email Publish</span></a></li>
+                <li><a href="#"><img src="{{ asset('images/icon/application.png') }}" /> <span>Concession Card Approval</span></a></li>
+                <li><a href="#"><img src="{{ asset('images/icon/scan.png') }}" /> <span>Scan QR Code</span></a></li>
             </ul>
+
         </aside>
 
         <div class="dashboard-container">
@@ -79,6 +80,7 @@
             </div>
         </div>
     </div>
+    <script src="{{ asset('js/AdminPage.js') }}" defer></script>
 </body>
 
 </html>
