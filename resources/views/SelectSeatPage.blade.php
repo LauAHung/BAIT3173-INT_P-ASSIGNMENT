@@ -12,7 +12,7 @@
     <div class="passenger-info-box">
         <div class="passenger-head-info">
             <h2>Passenger Details</h2>
-            <a href="#" class="change-journey">Change Journey</a>
+            <a href="{{ route('TrainSelectionPage') }}" class="change-journey">Change Journey</a>
         </div>
         <div class="passenger-container">
             <div class="passenger-info-details">
@@ -71,7 +71,7 @@
 
 <section class="select-seat-section">
     <div class="seat-info-box">
-        
+        <h2>Select Seats</h2>
 
     </div>
 </section>
