@@ -14,11 +14,11 @@
         <aside class="sidebar">
             <h2 class="sidebar-title">Admin Panel</h2>
             <ul class="sidebar-menu">
-                <li><a href="#"><img src="{{ asset('images/icon/dashboard.png') }}" /> <span>Dashboard</span></a></li>
-                <li><a href="#"><img src="{{ asset('images/icon/train.png') }}" /> <span>Train Management</span></a></li>
-                <li><a href="#"><img src="{{ asset('images/icon/user.png') }}" /> <span>User Management</span></a></li>
-                <li><a href="#"><img src="{{ asset('images/icon/email.png') }}" /> <span>News Email Publish</span></a></li>
-                <li><a href="#"><img src="{{ asset('images/icon/application.png') }}" /> <span>Concession Card Approval</span></a></li>
+                <li><a href="#" title="Dashboard"><img src="{{ asset('images/icon/dashboard.png') }}" /> <span>Dashboard</span></a></li>
+                <li><a href="#" title="Train Management"><img src="{{ asset('images/icon/train.png') }}" /> <span>Train Management</span></a></li>
+                <li><a href="#" title="User Management"><img src="{{ asset('images/icon/user.png') }}" /> <span>User Management</span></a></li>
+                <li><a href="#" title="News Email Publish"><img src="{{ asset('images/icon/email.png') }}" /> <span>News Email Publish</span></a></li>
+                <li><a href="#" title="Concession Card Approval"><img src="{{ asset('images/icon/application.png') }}" /> <span>Concession Card Approval</span></a></li>
                 <li><a href="#"><img src="{{ asset('images/icon/scan.png') }}" /> <span>Scan QR Code</span></a></li>
             </ul>
 
