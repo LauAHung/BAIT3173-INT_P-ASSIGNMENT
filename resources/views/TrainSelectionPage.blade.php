@@ -74,7 +74,7 @@
 <section class="train-select-section">
     <div class="train-select-container">
         <div class="filter-container">
-            <h3>Filter</h3>
+            <h3>Filters</h3>
             <label><input type="checkbox" name="price"> Price</label>
             <label><input type="checkbox" name="xxx"> XXX</label>
             <label><input type="checkbox" name="xxx2"> XXX</label>
@@ -96,14 +96,14 @@
                         <td>3pm - 6pm</td>
                         <td>999</td>
                         <td>RM 26</td>
-                        <td><a href="{{ route('signin') }}"><button class="btn-select">Select</button></a></td>
+                        <td><a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a></td>
                     </tr>
                     <tr>
                         <td>T-012</td>
                         <td>4pm - 7pm</td>
                         <td>778</td>
                         <td>RM 24</td>
-                        <td><a href="{{ route('signin') }}"><button class="btn-select">Select</button></a></td>
+                        <td><a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a></td>
                     </tr>
                 </tbody>
             </table>
