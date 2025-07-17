@@ -78,13 +78,13 @@
                 <div class="footer-section">
                     <h3>Payment Methods</h3>
                     <div class="payment-methods">
-                        <img src="{{ asset('images/payment/mastercard.png') }}" alt="Mastercard">
-                        <img src="{{ asset('images/payment/tng.png') }}" alt="TNG">
-                        <img src="{{ asset('images/payment/visa.png') }}" alt="Visa">
+                        <img src="{{ asset('images/mastercard_logo.png') }}" alt="Mastercard">
+                        <img src="{{ asset('images/tng_logo.png') }}" alt="TNG">
+                        <img src="{{ asset('images/visa_logo.png') }}" alt="Visa">
                     </div>
                     <h3>Our Partners</h3>
                     <div class="partners">
-                        <img src="{{ asset('images/partners/google.png') }}" alt="Google">
+                        <img src="{{ asset('images/google_logo.png') }}" alt="Google">
                     </div>
                 </div>
             </div>
