@@ -1,0 +1,127 @@
+.train-management-container {
+    margin-left: 250px;
+    padding: 40px;
+    width: calc(100% - 250px);
+    margin-top: 30px;
+}
+
+.page-title {
+    font-size: 2.2rem;
+    color: #fff;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #6d54b5;
+}
+
+.management-cards {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.management-card {
+    background: #2c2638;
+    border-radius: 15px;
+    box-shadow: 0 2px 12px rgba(109,84,181,0.18);
+    padding: 28px 24px;
+    min-width: 320px;
+    flex: 1 1 350px;
+    color: #fff;
+}
+
+.management-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 18px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1rem;
+    color: #bbb;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    background: #453f53;
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #3a7bd5 60%, #00d2ff 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 28px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(109,84,181,0.18);
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #00d2ff 60%, #3a7bd5 100%);
+}
+
+.data-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.tab-btn {
+    background: #453f53;
+    color: #fff;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    outline: none;
+}
+
+.tab-btn.active, .tab-btn:hover {
+    background: linear-gradient(90deg, #3a7bd5 60%, #00d2ff 100%);
+    color: #fff;
+}
+
+.tab-content {
+    background: #2c2638;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 2px 12px rgba(109,84,181,0.10);
+    padding: 24px;
+    color: #fff;
+}
+
+.tab-content table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+}
+
+.tab-content th, .tab-content td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #453f53;
+    text-align: left;
+}
+
+.tab-content th {
+    background: #3a7bd5;
+    color: #fff;
+}

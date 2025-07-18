@@ -1,0 +1,81 @@
+.user-management-container {
+    margin-left: 250px;
+    padding: 40px;
+    width: calc(100% - 250px);
+    margin-top: 30px;
+}
+
+.page-title {
+    font-size: 2.2rem;
+    color: #fff;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #6d54b5;
+}
+
+.user-table-section {
+    background: #2c2638;
+    border-radius: 15px;
+    box-shadow: 0 2px 12px rgba(109,84,181,0.10);
+    padding: 24px;
+    color: #fff;
+}
+
+.user-table-section table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+}
+
+.user-table-section th, .user-table-section td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #453f53;
+    text-align: left;
+}
+
+.user-table-section th {
+    background: #3a7bd5;
+    color: #fff;
+}
+
+select {
+    background: #453f53;
+    color: #fff;
+    border-radius: 6px;
+    border: none;
+    padding: 6px 12px;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #3a7bd5 60%, #00d2ff 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(109,84,181,0.18);
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #00d2ff 60%, #3a7bd5 100%);
+}
+
+.user-table-filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 18px;
+    align-items: center;
+}
+
+.user-table-filters input,
+.user-table-filters select {
+    background: #453f53;
+    color: #fff;
+    border-radius: 6px;
+    border: none;
+    padding: 8px 14px;
+    font-size: 1rem;
+}

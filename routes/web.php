@@ -28,10 +28,8 @@ Route::get('/passenger_info', function () {
     return view('PassengerInfoPage');
 })->name('passengerinfo');
 
-Route::get('/admin', function () {
-    return view('AdminPage');
-})->name('AdminPage');
 
+// Signup Page & Profile Page
 Route::get('/signup', [SignupController::class, 'showForm'])
 ->name('signup');
 
@@ -46,4 +44,30 @@ Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
 ->name('google.login');
 
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+
+
+// Admin Page
+Route::get('dashboard', function () {
+    return view('AdminPage/Dashboard');
+})->name('dashboard');
+
+Route::get('train-management', function () {
+    return view('AdminPage/TrainManagement');
+})->name('train-management');
+
+Route::get('user-management', function () {
+    return view('AdminPage/UserManagement');
+})->name('user-management');
+
+Route::get('news-email-publish', function () {
+    return view('AdminPage/NewsEmailPublish');
+})->name('news-email-publish');
+
+Route::get('card-approval', function () {
+    return view('AdminPage/CardApproval');
+})->name('card-approval');
+
+Route::get('scan-qr', function () {
+    return view('AdminPage/ScanQR');
+})->name('scan-qr');
 

@@ -1,0 +1,125 @@
+.news-email-container {
+    margin-left: 250px;
+    padding: 40px;
+    width: calc(100% - 250px);
+    margin-top: 30px;
+}
+
+.page-title {
+    font-size: 2.2rem;
+    color: #fff;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #6d54b5;
+}
+
+.email-send-card {
+    background: #2c2638;
+    border-radius: 15px;
+    box-shadow: 0 2px 12px rgba(109,84,181,0.10);
+    padding: 28px 24px;
+    margin-bottom: 32px;
+    color: #fff;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1rem;
+    color: #bbb;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    background: #453f53;
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.to-all {
+    font-weight: 600;
+    color: #00d2ff;
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #3a7bd5 60%, #00d2ff 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 28px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(109,84,181,0.18);
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #00d2ff 60%, #3a7bd5 100%);
+}
+
+.subscriber-section {
+    background: #2c2638;
+    border-radius: 15px;
+    box-shadow: 0 2px 12px rgba(109,84,181,0.10);
+    padding: 24px;
+    color: #fff;
+}
+
+.subscriber-filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 18px;
+    align-items: center;
+}
+
+.subscriber-filters input {
+    background: #453f53;
+    color: #fff;
+    border-radius: 6px;
+    border: none;
+    padding: 8px 14px;
+    font-size: 1rem;
+}
+
+.subscriber-section table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+}
+
+.subscriber-section th, .subscriber-section td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #453f53;
+    text-align: left;
+}
+
+.subscriber-section th {
+    background: #3a7bd5;
+    color: #fff;
+}
+
+.btn-danger {
+    background: #ff416c;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-danger:hover {
+    background: #ff4b2b;
+}
