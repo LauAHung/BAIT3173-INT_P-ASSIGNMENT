@@ -25,7 +25,7 @@
         </nav>
         <nav>
             <ul>
-                <li><a href="#">Booking</a></li>
+                <li><a href="{{ route('booking') }}">Booking</a></li>
                 <li><a href="{{ route('signup') }}">Account</a></li>
             </ul>
         </nav>
@@ -40,11 +40,11 @@
         <div class="footer">
             <div class="footer-container">
                 <div class="footer-section">
-                    <h3>Contact Us</h3>
+                    <h3>Address</h3>
                     <ul>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
+                        <li><span>No. 114, Jalan Damai 5/3,</span></li>
+                        <li><span>Taman Damai Utama,</span></li>
+                        <li><span>47180 Puchong, Selangor.</span></li>
                     </ul>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>

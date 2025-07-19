@@ -171,12 +171,350 @@
     background: #fff;
     border: 2px solid #000;
     padding: 20px;
-    width: 100%;
+    width: 69%;
     box-sizing: border-box;
     border-radius: 5px;
     min-height: 400px;
 }
 
-.passenger-info-confirm-section, .select-seat-section {
-    /* Styles can be added here if these sections are implemented */
+.seat-head-info {
+    margin-top: 5px;
+}
+
+/* === Seat status part === */
+.seat-status {
+    padding: 15px;
+    margin-top: 10px;
+    display: flex;
+    gap: 20px;
+    justify-content: left;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-color {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border-radius: 4px;
+}
+
+.available {
+    background-color: #bada55;
+    border: 2px solid #000;
+}
+
+.selected {
+    background-color: #FF9800;
+    border: 2px solid #000;
+}
+
+.unavailable {
+    background-color: #F42536;
+    border: 2px solid #000;
+}
+
+.status-label {
+    font-size: 16px;
+    color: #333;
+}
+
+/* === select coach part ===*/
+.coach-select {
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coach-select label {
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+}
+
+.coach-select select {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.coach-select select:focus {
+    outline: none;
+    border-color: #6d54b5;
+    box-shadow: 0 0 5px rgba(109, 84, 181, 0.3);
+}
+
+/* === Seat select Content Part === */
+*,*:before,*:after {
+  box-sizing: border-box;
+}
+html {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+}
+
+.train {
+  margin: 20px auto;
+  max-width: 250px;
+}
+
+.exit {
+  display: flex;
+  flex-direction: row;
+  padding: .5rem 0;
+  div {
+    flex: 1;
+    background: #d8d8d8;
+    text-align: center;
+    justify-content: center;
+    height: 40px;
+    line-height: 40px;
+    &:nth-child(2) {
+      flex: 0 1 20%;
+      background: #fff;
+    }
+  }
+  &.back {
+    flex-direction: row-reverse;
+  }
+}
+
+.train-body {
+  border-right: 5px solid #d8d8d8;
+  border-left: 5px solid #d8d8d8;
+}
+
+ol {
+  list-style :none;
+  padding: 0;
+  margin: 0;
+}
+
+.seats {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;  
+}
+
+.seat {
+  display: flex;
+  flex: 0 0 21%;
+  padding: 5px;
+  position: relative;  
+  &:nth-child(2) {
+    margin-right: 15%;
+  }
+  input[type=checkbox] {
+    position: absolute;
+    opacity: 0;
+  }
+  input[type=checkbox]:checked {
+    + label {
+      background: #FF9800;      
+      -webkit-animation-name: rubberBand;
+          animation-name: rubberBand;
+      animation-duration: 300ms;
+      animation-fill-mode: both;
+    }
+  }
+  input[type=checkbox]:disabled {
+    + label {
+      background: #dddddd;
+      text-indent: -9999px;
+      overflow: hidden;
+      &:after {
+        content: "X";
+        text-indent: 0;
+        position: absolute;
+        top: 4px;
+        left: 50%;
+        transform: translate(-50%, 0%);
+      }
+      &:hover {
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+    }
+  }
+  label {    
+    display: block;
+    position: relative;    
+    width: 100%;    
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.5rem;
+    padding: 4px 0;
+    background: #bada55;
+    border-radius: 5px;
+    animation-duration: 300ms;
+    animation-fill-mode: both;
+    
+    &:before {
+      content: "";
+      position: absolute;
+      width: 75%;
+      height: 75%;
+      top: 1px;
+      left: 50%;
+      transform: translate(-50%, 0%);
+      background: rgba(255,255,255,.4);
+      border-radius: 3px;
+    }
+    &:hover {
+      cursor: pointer;
+      box-shadow: 0 0 0px 2px #5C6AFF;
+    }
+    
+  }
+}
+
+@-webkit-keyframes rubberBand {
+  0% {
+    -webkit-transform: scale3d(1, 1, 1);
+            transform: scale3d(1, 1, 1);
+  }
+
+  30% {
+    -webkit-transform: scale3d(1.25, 0.75, 1);
+            transform: scale3d(1.25, 0.75, 1);
+  }
+
+  40% {
+    -webkit-transform: scale3d(0.75, 1.25, 1);
+            transform: scale3d(0.75, 1.25, 1);
+  }
+
+  50% {
+    -webkit-transform: scale3d(1.15, 0.85, 1);
+            transform: scale3d(1.15, 0.85, 1);
+  }
+
+  65% {
+    -webkit-transform: scale3d(.95, 1.05, 1);
+            transform: scale3d(.95, 1.05, 1);
+  }
+
+  75% {
+    -webkit-transform: scale3d(1.05, .95, 1);
+            transform: scale3d(1.05, .95, 1);
+  }
+
+  100% {
+    -webkit-transform: scale3d(1, 1, 1);
+            transform: scale3d(1, 1, 1);
+  }
+}
+
+@keyframes rubberBand {
+  0% {
+    -webkit-transform: scale3d(1, 1, 1);
+            transform: scale3d(1, 1, 1);
+  }
+
+  30% {
+    -webkit-transform: scale3d(1.25, 0.75, 1);
+            transform: scale3d(1.25, 0.75, 1);
+  }
+
+  40% {
+    -webkit-transform: scale3d(0.75, 1.25, 1);
+            transform: scale3d(0.75, 1.25, 1);
+  }
+
+  50% {
+    -webkit-transform: scale3d(1.15, 0.85, 1);
+            transform: scale3d(1.15, 0.85, 1);
+  }
+
+  65% {
+    -webkit-transform: scale3d(.95, 1.05, 1);
+            transform: scale3d(.95, 1.05, 1);
+  }
+
+  75% {
+    -webkit-transform: scale3d(1.05, .95, 1);
+            transform: scale3d(1.05, .95, 1);
+  }
+
+  100% {
+    -webkit-transform: scale3d(1, 1, 1);
+            transform: scale3d(1, 1, 1);
+  }
+}
+
+.rubberBand {
+  -webkit-animation-name: rubberBand;
+          animation-name: rubberBand;
+}
+
+@media (max-width: 768px) {
+    .ticket-info-section {
+        width: 100%;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .passenger-info-box, .ticket-details-box {
+        width: 90%;
+        padding: 15px;
+        margin: 0 auto;
+        min-height: 270px;
+    }
+
+    .passenger-head-info {
+        flex-direction: column;
+    }
+
+    .passenger-container, .passenger-info-details {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .passenger-info {
+        flex: 1 1 100%;
+        padding: 8px;
+    }
+
+    .trip-details .trip-segment {
+        margin: 10px 0;
+    }
+
+    .change-journey {
+        padding-right: 0;
+        padding-left: 5px;
+    }
+
+    .select-seat-section {
+        width: 95%;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .seat-info-box {
+        width: 100%;
+        padding: 15px;
+        min-height: 300px;
+    }
+
+    .seat-status {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+        justify-content: center;
+    }
+
 }

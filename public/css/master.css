@@ -154,6 +154,10 @@ header > :nth-child(3) {
     text-decoration: none;
 }
 
+.footer-section ul li span {
+    color: #a7a6a6;
+}
+
 .footer-section ul li a:hover {
     text-decoration: underline;
 }
