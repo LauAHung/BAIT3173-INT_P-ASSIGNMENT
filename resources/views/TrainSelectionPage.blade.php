@@ -75,38 +75,35 @@
     <div class="train-select-container">
         <div class="filter-container">
             <h3>Filters</h3>
-            <label><input type="checkbox" name="price"> Price</label>
-            <label><input type="checkbox" name="xxx"> XXX</label>
-            <label><input type="checkbox" name="xxx2"> XXX</label>
+            <a>Service Type</a>
+            <label><input type="checkbox" name="ets"> ETS</label>
+            <label><input type="checkbox" name="ktm"> KTM</label>
+            <label><input type="checkbox" name="komuter"> KOMUTER</label>
+
+            <a>Depart Time</a>
+            <label><input type="checkbox" name="time1"> 8:00am - 12:00pm</label>
+            <label><input type="checkbox" name="time2"> 12:00pm - 4:00pm</label>
+            <label><input type="checkbox" name="time3"> 4:00pm - 6:00pm</label>
+            <label><input type="checkbox" name="time4"> 6:00pm - 12:00pm</label>
         </div>
         <div class="train-select">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Train No</th>
-                        <th>Departure Time to Arrival Time</th>
-                        <th>Available Seats</th>
-                        <th>Price</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>T-011</td>
-                        <td>3pm - 6pm</td>
-                        <td>999</td>
-                        <td>RM 26</td>
-                        <td><a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a></td>
-                    </tr>
-                    <tr>
-                        <td>T-012</td>
-                        <td>4pm - 7pm</td>
-                        <td>778</td>
-                        <td>RM 24</td>
-                        <td><a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="train-select-header">
+                <div class="header-cell">Departing Train</div>
+            </div>
+            <div class="train-select-row">
+                <div class="row-cell"><img src="{{ asset('images/logo/ets_logo.png') }}"></div>
+                <div class="row-cell">3pm - 6pm</div>
+                <div class="row-cell">999</div>
+                <div class="row-cell">RM 26</div>
+                <div class="row-cell"><a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a></div>
+            </div>
+            <div class="train-select-row">
+                <div class="row-cell">T-012</div>
+                <div class="row-cell">4pm - 7pm</div>
+                <div class="row-cell">778</div>
+                <div class="row-cell">RM 24</div>
+                <div class="row-cell"><a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a></div>
+            </div>
         </div>
     </div>
 </section>
