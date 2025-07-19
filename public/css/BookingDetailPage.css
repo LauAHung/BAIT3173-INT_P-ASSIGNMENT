@@ -1,0 +1,189 @@
+body {
+    font-family: 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin-top: 100px;
+}
+
+.booking-detail {
+    min-height: 600px;
+    margin-bottom: 50px;
+}
+
+.booking-heading {
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin: 0 15px 0 15px;
+    background: linear-gradient(to right, #421e72, #8f5ad4);
+}
+
+.booking-item {
+    margin: 15px 0 15px 50px;
+    padding: 15px;
+    font-size: 14px;
+}
+
+.booking-item img{
+    height: 48px;
+}
+
+.booking-info {
+    padding: 5px;
+}
+
+.booking-label {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.booking-value {
+    font-size: 14px;
+    color: rgb(90, 89, 89);
+}
+
+.qr-ticket-container {
+    display: flex;
+    gap: 30px;
+    margin-left: 50px;
+}
+
+.ticket-container {
+  max-width: 245px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgb(202, 202, 204);
+  border-radius: 2px;
+}
+
+.details {
+  padding: 26px;
+  background:white;
+  border-top: 1px dashed #c3c3c3;
+}
+
+.info {
+  font-size: 0.5em;
+  font-weight: 300;
+  color: #c3c3c3;
+  font-family: 'Roboto', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin:7px 0;
+}
+
+.data {
+  font-size: 0.7em;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 0.5px;
+  margin:7px 0;
+}
+
+.name {
+  font-size: 1.3em;
+  font-weight: 300;
+}
+
+.link {
+  text-align: center;
+  margin-top:10px;
+}
+
+a {
+  text-decoration: none;
+  color:#55C9E6;  
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 0.7px;
+  font-size: 0.7em;
+}
+
+.hqr{
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  margin: 0px auto;
+}
+
+.left-one{
+  background-repeat: no-repeat;
+  background-image: radial-gradient(circle at 0 96% , rgba(0,0,0,0) .2em, gray .3em, white .1em);
+}
+
+.right-one{
+  background-repeat: no-repeat;
+  background-image: radial-gradient(circle at 100% 96% , rgba(0,0,0,0) .2em, gray .3em, white .1em);
+}
+
+.column
+{
+    display: table-cell;
+    padding: 37px 0px;
+}
+
+.center{
+  background:white;
+}
+
+.qrcode img{
+  height:70px;
+  width:70px;
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+.masinfo{
+  display:block;
+}
+
+.left,.right{
+    width: 70%;
+  display:inline-table;
+}
+
+.nesp{
+  letter-spacing: 0px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-content img {
+    width: 300px;
+    height: 300px;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}

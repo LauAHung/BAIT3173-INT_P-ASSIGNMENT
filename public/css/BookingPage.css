@@ -1,0 +1,76 @@
+body {
+    font-family: 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin-top: 100px;
+}
+
+.on-going-booking  {
+    min-height: 400px;
+}
+
+.booking-heading {
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin: 0 15px 0 15px;
+    background: linear-gradient(to right, #421e72, #8f5ad4);
+}
+
+/* === whole booking box === */
+.booking-item {
+    margin: 15px 20px 15px 20px;
+    border: 1px solid #7c7c7c;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    box-shadow:  0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* === ongoing booking part === */
+.booking-item img{
+    height: 48px;
+}
+
+.booking-info {
+    padding: 5px;
+}
+
+.booking-label {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.booking-value {
+    font-size: 14px;
+    color: rgb(90, 89, 89);
+}
+
+.btn-view {
+    margin: auto 40px;
+}
+
+.btn-view button {
+    background-color: #43b492;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+}
+
+.btn-view button:hover {
+    background-color: #6ee29e;
+}
+
+@media (max-width: 768px) {
+    .btn-view {
+    margin: auto 15px;
+    }
+}
