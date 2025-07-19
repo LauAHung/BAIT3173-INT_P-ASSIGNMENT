@@ -46,6 +46,7 @@ body {
     display: flex;
     gap: 30px;
     margin-left: 50px;
+    margin-right: 20px;
 }
 
 .ticket-container {
@@ -186,4 +187,21 @@ a {
     color: #000;
     text-decoration: none;
     cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .booking-item {
+        margin-left: 10px;
+    }   
+
+    .qr-ticket-container {
+        flex-wrap: wrap;
+        gap: 30px;
+        margin-left: 20px;
+    }
+
+    .ticket-container {
+        max-width: 210px;
+        flex: 0 0 calc(50% - 15px); /* Adjusts to 2 per row, accounting for gap */
+    }
 }
