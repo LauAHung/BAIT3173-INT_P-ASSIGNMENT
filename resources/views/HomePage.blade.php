@@ -5,6 +5,8 @@
 @push('styles')
     <link href="css/HomePage.css" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 @endpush
 
 @section('content')
@@ -45,20 +47,31 @@
                         <input type="text" placeholder="Where from?">
                     </div>
 
-                    <div class="form-group swap-group">
+                    <div class="swap-btn-container">
+                        <button type="button" class="swap-btn" onclick="swapLocations()">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                    </div>
+
+                    <div class="form-group">
                         <label>To Location</label>
                         <input type="text" placeholder="Where to?">
-                        <span class="swap-btn">⇄</span>
                     </div>
 
                     <div class="form-group">
                         <label>Departure Date</label>
-                        <input type="date">
+                        <div class="date-input-container">
+                            <i class="fas fa-calendar-alt date-icon"></i>
+                            <input type="text" id="depart-date" placeholder="Select date" readonly>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label>Return Date</label>
-                        <input type="date" disabled>
+                        <div class="date-input-container">
+                            <i class="fas fa-calendar-alt date-icon"></i>
+                            <input type="text" id="return-date" placeholder="Select date" readonly disabled>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -70,7 +83,7 @@
                         </select>
                     </div>
                 </form>
-
+                
                 <button class="search-btn">Search</button>
             </div>
         </section>
@@ -92,41 +105,41 @@
                         <div class="item">
                             <img src="{{ asset('images/kl.jpeg') }}" />
                             <div class="content">
-                                <p>Singapore</p>
-                                <h2>The Radiant Jewel of Asia</h2>
-                                <p>
-                                    A harmonious blend of futuristic skyscrapers, verdant gardens, and rich cultural heritage, Singapore is a vibrant city-state where innovation meets timeless tradition.
-                                </p>
+                            <p>Kuala Lumpur</p>
+                            <h2>The Beating Heart of Malaysia</h2>
+                            <p>
+                                A dynamic fusion of soaring skyscrapers, historic landmarks, and diverse cultures, Kuala Lumpur is a captivating city where modern ambition intertwines with deep-rooted heritage.
+                            </p>    
                             </div>
                         </div>
                         <div class="item">
                             <img src="{{ asset('images/johor.jpg') }}" />
-                            <div class="content">
-                                <p>BANGKOK, Thailand</p>
-                                <h2>The Land of Smiles and Splendor</h2>
-                                <p>
-                                    Thailand enchants with its golden temples, pristine beaches, and warm hospitality, offering a perfect harmony of cultural richness and natural beauty.
-                                </p>
+                            <div class="content">           
+                            <p>Johor Bahru</p>
+                            <h2>The Gateway to Southern Malaysia</h2>
+                            <p>
+                                A vibrant city that seamlessly blends Malay traditions with modern urban flair, Johor Bahru is a gateway to the rich cultural tapestry of Malaysia's southern states.
+                            </p>
                             </div>
                         </div>
                         <div class="item">
-                            <img src="{{ asset('images/perak.jpg') }}" />
+                            <img src="{{ asset('images/perak.jpeg') }}" />
                             <div class="content">
-                                <p>YUNNAN, China</p>
-                                <h2>The Timeless Heart of Asia</h2>
-                                <p>
-                                    A vast land of ancient wonders, dynamic cities, and diverse landscapes, China is a living tapestry of history, culture, and modern marvels.
-                                </p>
+                            <p>Perak</p>
+                            <h2>The Heart of Malaysia's Heritage</h2>
+                            <p>
+                                A land of ancient temples, vibrant markets, and serene landscapes, Perak is a treasure trove of Malaysia's cultural and natural diversity.
+                            </p>
                             </div>
                         </div>
                         <div class="item">
                             <img src="{{ asset('images/penang2.jpg') }}" />
                             <div class="content">
-                                <p>Osaka, Japan</p>
-                                <h2>The Eternal Land of the Rising Sun</h2>
-                                <p>
-                                    Japan captivates with its seamless blend of ancient traditions, cutting-edge innovation, and breathtaking natural landscapes, creating an unparalleled cultural journey.
-                                </p>
+                            <p>Penang</p>
+                            <h2>The Enchanted Heights of Penang</h2>
+                            <p>
+                                A vibrant city that seamlessly blends Malay traditions with modern urban flair, Johor Bahru is a gateway to the rich cultural tapestry of Malaysia's southern states.
+                            </p>
                             </div>
                         </div>
                     </div>
@@ -194,20 +207,31 @@
 
 <section class="multi-banner-section">
 
-  <div class="banner-block" style="background-image: url('{{ asset('images/ets_bg.jpeg') }}');">
+  <div class="banner-block ets-banner">
     <div class="banner-content">
-      <img src="{{ asset('images/ets_logo.png') }}" alt="ETS Logo" class="banner-logo">
+      <img src="{{ asset('images/logo/ets_logo.png') }}" alt="ETS Logo" class="banner-logo">
       <h2>Look inside ETS</h2>
       <p>If you need to travel a long distance quickly, you should think of us</p>
       <button>Read More</button>
     </div>
   </div>
 
-  <div class="banner-block" style="background-image: url('{{ asset('images/intercity_bg.jpeg') }}');">
+  <div class="banner-block intercity-banner">
     <div class="banner-content">
-      <img src="{{ asset('images/ktm_intercity_logo.png') }}" alt="KTM Logo" class="banner-logo">
+      <img src="{{ asset('images/logo/intercity_logo.png') }}" alt="Intercity Logo" class="banner-logo">
       <h2>Groundbreaking with KTM INTERCITY</h2>
       <p>The chance to enjoy travelling along the iconic line</p>
+      <button>Read More</button>
+    </div>
+  </div>
+
+</section>
+<section>
+  <div class="banner-block komuter-banner">
+    <div class="banner-content">
+      <img src="{{ asset('images/logo/komuter_logo.png') }}" alt="KTM Logo" class="banner-logo">
+      <h2>Hassle-free with KTM KOMUTER</h2>
+      <p>Country's pioneer rail provider</p>
       <button>Read More</button>
     </div>
   </div>
@@ -219,5 +243,6 @@
 
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="{{ asset('js/HomePage.js') }}" defer></script>
 @endsection
