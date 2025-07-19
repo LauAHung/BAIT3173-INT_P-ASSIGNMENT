@@ -1,7 +1,6 @@
 .train-management-container {
-    margin-left: 250px;
     padding: 40px;
-    width: calc(100% - 250px);
+    width: 100%;
     margin-top: 30px;
 }
 

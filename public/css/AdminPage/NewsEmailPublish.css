@@ -1,7 +1,6 @@
 .news-email-container {
-    margin-left: 250px;
     padding: 40px;
-    width: calc(100% - 250px);
+    width: 100%;
     margin-top: 30px;
 }
 
@@ -50,22 +49,29 @@
     font-size: 1.1rem;
 }
 
-.btn-primary {
-    background: linear-gradient(90deg, #3a7bd5 60%, #00d2ff 100%);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 28px;
-    font-size: 1.05rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(109,84,181,0.18);
-    transition: background 0.2s;
-}
 
-.btn-primary:hover {
-    background: linear-gradient(90deg, #00d2ff 60%, #3a7bd5 100%);
-}
+.btn-primary {
+    background-color: #6d54b5;
+    border: none;
+    padding: 12px;
+    width: 25%;
+    border-radius: 7px;
+    letter-spacing: 4px;
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.5s;
+    transition-property: box-shadow;
+    box-shadow: 0 0 25px #6d54b5;
+  }
+  
+  .btn-primary:hover {
+      box-shadow: 0 0 5px #6d54b5,
+            0 0 25px #6d54b5,
+            0 0 50px #6d54b5,
+            0 0 100px #6d54b5;
+  }
 
 .subscriber-section {
     background: #2c2638;
