@@ -60,6 +60,11 @@ Route::get('/payment', function () {
 Route::get('/booking', function () {
     return view('BookingPage');
 })->name('booking');
+
+Route::get('/booking_detail', function () {
+    return view('BookingDetailPage');
+})->name('bookingdetail');
+
 // Admin Page
 Route::get('dashboard', function () {
     return view('AdminPage/Dashboard');

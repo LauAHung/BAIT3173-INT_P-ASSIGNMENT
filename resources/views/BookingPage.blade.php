@@ -7,3 +7,16 @@
 @endpush
 
 @section('content')
+
+<section>
+    <div class="on-going-booking">
+
+    </div>
+
+    <div class="booking-history">
+
+    </div>
+    
+</section>
+
+@endsection
