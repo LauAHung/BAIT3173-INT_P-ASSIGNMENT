@@ -6,7 +6,13 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Events\\UserStatusChanged' => $baseDir . '/app/Events/UserStatusChanged.php',
+    'App\\Http\\Controllers\\Admin\\DashboardController' => $baseDir . '/app/Http/Controllers/Admin/DashboardController.php',
+    'App\\Http\\Controllers\\Admin\\NewsController' => $baseDir . '/app/Http/Controllers/Admin/NewsController.php',
+    'App\\Http\\Controllers\\Admin\\TrainController' => $baseDir . '/app/Http/Controllers/Admin/TrainController.php',
+    'App\\Http\\Controllers\\Admin\\UserController' => $baseDir . '/app/Http/Controllers/Admin/UserController.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
+    'App\\Http\\Controllers\\FacebookAuthController' => $baseDir . '/app/Http/Controllers/FacebookAuthController.php',
     'App\\Http\\Controllers\\GoogleAuthController' => $baseDir . '/app/Http/Controllers/GoogleAuthController.php',
     'App\\Http\\Controllers\\SignupController' => $baseDir . '/app/Http/Controllers/SignupController.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
@@ -2185,6 +2191,7 @@ return array(
     'Illuminate\\Support\\Facades\\Lang' => $vendorDir . '/laravel/framework/src/Illuminate/Support/Facades/Lang.php',
     'Illuminate\\Support\\Facades\\Log' => $vendorDir . '/laravel/framework/src/Illuminate/Support/Facades/Log.php',
     'Illuminate\\Support\\Facades\\Mail' => $vendorDir . '/laravel/framework/src/Illuminate/Support/Facades/Mail.php',
+    'Illuminate\\Support\\Facades\\MaintenanceMode' => $vendorDir . '/laravel/framework/src/Illuminate/Support/Facades/MaintenanceMode.php',
     'Illuminate\\Support\\Facades\\Notification' => $vendorDir . '/laravel/framework/src/Illuminate/Support/Facades/Notification.php',
     'Illuminate\\Support\\Facades\\ParallelTesting' => $vendorDir . '/laravel/framework/src/Illuminate/Support/Facades/ParallelTesting.php',
     'Illuminate\\Support\\Facades\\Password' => $vendorDir . '/laravel/framework/src/Illuminate/Support/Facades/Password.php',
@@ -2346,6 +2353,7 @@ return array(
     'Illuminate\\View\\Compilers\\Concerns\\CompilesComments' => $vendorDir . '/laravel/framework/src/Illuminate/View/Compilers/Concerns/CompilesComments.php',
     'Illuminate\\View\\Compilers\\Concerns\\CompilesComponents' => $vendorDir . '/laravel/framework/src/Illuminate/View/Compilers/Concerns/CompilesComponents.php',
     'Illuminate\\View\\Compilers\\Concerns\\CompilesConditionals' => $vendorDir . '/laravel/framework/src/Illuminate/View/Compilers/Concerns/CompilesConditionals.php',
+    'Illuminate\\View\\Compilers\\Concerns\\CompilesContexts' => $vendorDir . '/laravel/framework/src/Illuminate/View/Compilers/Concerns/CompilesContexts.php',
     'Illuminate\\View\\Compilers\\Concerns\\CompilesEchos' => $vendorDir . '/laravel/framework/src/Illuminate/View/Compilers/Concerns/CompilesEchos.php',
     'Illuminate\\View\\Compilers\\Concerns\\CompilesErrors' => $vendorDir . '/laravel/framework/src/Illuminate/View/Compilers/Concerns/CompilesErrors.php',
     'Illuminate\\View\\Compilers\\Concerns\\CompilesFragments' => $vendorDir . '/laravel/framework/src/Illuminate/View/Compilers/Concerns/CompilesFragments.php',

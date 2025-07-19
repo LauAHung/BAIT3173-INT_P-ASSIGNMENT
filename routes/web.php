@@ -2,6 +2,7 @@
 use App\Http\Controllers\SignupController;
 use App\Http\Controllers\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FacebookAuthController;
 
 Route::get('/', function () {
     //return "hi";
@@ -40,10 +41,15 @@ Route::get('/profile', function () {
     return view('ProfilePage');
 })->name('profile');
 
+//Googleeee
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
 ->name('google.login');
 
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+
+// Facebookkkkkk
+Route::get('/auth/facebook/redirect', [FacebookAuthController::class, 'redirectToFacebook'])->name('facebook.redirect');
+Route::get('/auth/facebook/callback', [FacebookAuthController::class, 'handleFacebookCallback'])->name('facebook.callback');
 
 Route::get('/feedback', function () {
     return view('FeedbackPage');

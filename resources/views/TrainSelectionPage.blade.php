@@ -15,94 +15,158 @@
             </video>
         </div>
 
-        <div class="search-bar">
-            <div class="train-type-toggle">
-                <div class="toggle-container">
-                    <input type="radio" id="return-train" name="train-type" class="train-option" checked
-                        onclick="handleTrainTypeChange()">
-                    <label for="return-train">Return</label>
+        <div class="ticket-search-container">
 
-                    <input type="radio" id="one-way-train" name="train-type" class="train-option"
-                        onclick="handleTrainTypeChange()">
-                    <label for="one-way-train">One Way</label>
-
-                    <span class="toggle-switch"></span>
+            <form class="search-form">
+                <div class="form-group">
+                    <label>Depart Location</label>
+                    <input type="text" placeholder="Where from?">
                 </div>
-            </div>
 
+                <div class="swap-btn-container">
+                    <button type="button" class="swap-btn" onclick="swapLocations()">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+                </div>
 
+                <div class="form-group">
+                    <label>To Location</label>
+                    <input type="text" placeholder="Where to?">
+                </div>
 
-            <div class="ticket-search-container">
-
-                <form class="search-form">
-                    <div class="form-group">
-                        <label>Depart Location</label>
-                        <input type="text" placeholder="Where from?">
+                <div class="form-group">
+                    <label>Departure Date</label>
+                    <div class="date-input-container">
+                        <i class="fas fa-calendar-alt date-icon"></i>
+                        <input type="text" id="depart-date" placeholder="Select date" readonly>
                     </div>
+                </div>
 
-                    <div class="form-group swap-group">
-                        <label>To Location</label>
-                        <input type="text" placeholder="Where to?">
-                        <span class="swap-btn">⇄</span>
+                <div class="form-group">
+                    <label>Return Date</label>
+                    <div class="date-input-container">
+                        <i class="fas fa-calendar-alt date-icon"></i>
+                        <input type="text" id="return-date" placeholder="Select date" readonly disabled>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label>Departure Date</label>
-                        <input type="date">
-                    </div>
+                <div class="form-group">
+                    <label>Passengers</label>
+                    <select>
+                        <option>1 Passenger</option>
+                        <option>2 Passengers</option>
+                        <option>3 Passengers</option>
+                    </select>
+                </div>
+            </form>
 
-                    <div class="form-group">
-                        <label>Return Date</label>
-                        <input type="date" disabled>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Passengers</label>
-                        <select>
-                            <option>1 Passenger</option>
-                            <option>2 Passengers</option>
-                            <option>3 Passengers</option>
-                        </select>
-                    </div>
-                </form>
-
-                <button class="search-btn">Search</button>
-            </div>
-        </div>    
+        <button class="search-btn">Search</button>
+    </div>
 </section>
 
 <section class="train-select-section">
     <div class="train-select-container">
         <div class="filter-container">
-            <h3>Filters</h3>
-            <a>Service Type</a>
-            <label><input type="checkbox" name="ets"> ETS</label>
-            <label><input type="checkbox" name="ktm"> KTM</label>
-            <label><input type="checkbox" name="komuter"> KOMUTER</label>
+            <h2>Filters</h2>
+            <br />
+            <div class="filter-section">
+                <h4>Train Type</h4>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="direct" />
+                    <label for="direct">ETS</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="oneStop" />
+                    <label for="oneStop">KTM Komuter</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="twoStops" />
+                    <label for="twoStops">KTM Intercity</label>
+                </div>
+            </div>
 
-            <a>Depart Time</a>
-            <label><input type="checkbox" name="time1"> 8:00am - 12:00pm</label>
-            <label><input type="checkbox" name="time2"> 12:00pm - 4:00pm</label>
-            <label><input type="checkbox" name="time3"> 4:00pm - 6:00pm</label>
-            <label><input type="checkbox" name="time4"> 6:00pm - 12:00pm</label>
+            <!-- Departure Time -->
+            <div class="filter-section">
+                <h4>Departure Time</h4>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="early" />
+                    <label for="early">Early Train (00:00 - 06:00)</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="morning" />
+                    <label for="morning">Morning Train (06:00 - 12:00)</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="afternoon" />
+                    <label for="afternoon">Afternoon Train (12:00 - 18:00)</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="night" />
+                    <label for="night">Night Train (18:00 - 00:00)</label>
+                </div>
+                <button class="filter-submit-button">Filter Now</button>
+            </div>
         </div>
         <div class="train-select">
             <div class="train-select-header">
                 <div class="header-cell">Departing Train</div>
             </div>
-            <div class="train-select-row">
-                <div class="row-cell"><img src="{{ asset('images/logo/ets_logo.png') }}"></div>
-                <div class="row-cell">3pm - 6pm</div>
-                <div class="row-cell">999</div>
-                <div class="row-cell">RM 26</div>
-                <div class="row-cell"><a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a></div>
+            <div class="train-card">
+                <div class="train-col train-name">
+                    <img src="{{ asset('images/logo/ets_logo.png') }}" class="train-logo" alt="ETS Logo">
+                    ETS-2039
+                </div>
+                <div class="train-col train-type">Gold</div>
+                <div class="train-col train-time">
+                    <div><b>07:00 PM</b> &mdash; <b>08:05 PM</b></div>
+                    <div class="train-desc">(1 hour, Direct)</div>
+                </div>
+                <div class="train-col train-capacity">
+                    200
+                    <div class="capacity-desc">(seat left)</div>
+                </div>
+                <div class="train-col train-action">
+                    <span class="train-price">RM105</span>
+                    <a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a>
+                </div>
             </div>
-            <div class="train-select-row">
-                <div class="row-cell">T-012</div>
-                <div class="row-cell">4pm - 7pm</div>
-                <div class="row-cell">778</div>
-                <div class="row-cell">RM 24</div>
-                <div class="row-cell"><a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a></div>
+            <div class="train-card">
+                <div class="train-col train-name">
+                    <img src="{{ asset('images/logo/ets_logo.png') }}" class="train-logo" alt="ETS Logo">
+                    ETS-1192
+                </div>
+                <div class="train-col train-type">Silver</div>
+                <div class="train-col train-time">
+                    <div><b>09:00 PM</b> &mdash; <b>10:05 PM</b></div>
+                    <div class="train-desc">(1 hour 05 minutes)</div>
+                </div>
+                <div class="train-col train-capacity">
+                    29
+                    <div class="capacity-desc">(seat left)</div>
+                </div>
+                <div class="train-col train-action">
+                    <span class="train-price">RM210</span>
+                    <a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a>
+                </div>
+            </div>
+            <div class="train-card">
+                <div class="train-col train-name">
+                    <img src="{{ asset('images/logo/komuter_logo.png') }}" class="train-logo" alt="ETS Logo">
+                    KTM-3923
+                </div>
+                <div class="train-col train-type">Komuter</div>
+                <div class="train-col train-time">
+                    <div><b>08:05 PM</b> &mdash; <b>11.00 PM</b></div>
+                    <div class="train-desc">(3 hour 05 minutes)</div>
+                </div>
+                <div class="train-col train-capacity">
+                    70
+                    <div class="capacity-desc">(seat left)</div>
+                </div>
+                <div class="train-col train-action">
+                    <span class="train-price">RM210</span>
+                    <a href="{{ route('passengerinfo') }}"><button class="btn-select">Select</button></a>
+                </div>
             </div>
         </div>
     </div>

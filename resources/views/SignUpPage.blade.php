@@ -50,7 +50,7 @@
               <img src="{{ asset('images/google_logo.png') }}" alt="Google Logo" id="google_logo">Google
             </button>
           </a>
-          <a href="#" id="facebook_login" id="google_login">
+          <a href="{{ route('facebook.redirect') }}" id="google_login">
             <button>
               <img src="{{ asset('images/facebook_logo.png') }}" alt="Facebook Logo" id="facebook_logo">Facebook
             </button>

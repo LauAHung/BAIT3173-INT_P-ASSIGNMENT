@@ -31,15 +31,16 @@ class SignupController extends Controller
     public function handleOAuth(Request $request)
     {
         $authContext = null;
-
+    
         if ($request->has('google')) {
             $authContext = new AuthContext(new GoogleAuthStrategy());
         } elseif ($request->has('facebook')) {
             $authContext = new AuthContext(new FacebookAuthStrategy());
         }
-
+    
         $result = $authContext->executeStrategy();
-
+    
         return redirect()->route('home')->with('status', $result);
     }
+    
 }

@@ -1,12 +1,16 @@
 <?php
 
 namespace App\Strategies;
+use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class FacebookAuthStrategy implements AuthStrategy
 {
     public function authenticate()
     {
-        // Facebook authentication logic here
-        return 'Facebook authentication successful';
+
+        return 'Successfully authenticated with Facebook';
     }
 }
