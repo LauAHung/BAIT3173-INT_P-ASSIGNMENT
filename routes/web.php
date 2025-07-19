@@ -45,7 +45,21 @@ Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
 
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 
+Route::get('/feedback', function () {
+    return view('FeedbackPage');
+})->name('feedback');
 
+Route::get('/selectrating', function () {
+    return view('SelectRatingPage');
+})->name('selectrating');
+
+Route::get('/payment', function () {
+    return view('PaymentPage');
+})->name('payment');
+
+Route::get('/booking', function () {
+    return view('BookingPage');
+})->name('booking');
 // Admin Page
 Route::get('dashboard', function () {
     return view('AdminPage/Dashboard');
