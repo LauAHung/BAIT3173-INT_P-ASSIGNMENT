@@ -129,3 +129,37 @@ body {
   background-color: rgb(51, 37, 95);
   color: #333;
 }
+
+.theme-toggle {
+    position: fixed;
+    top: 24px;
+    right: 36px;
+    z-index: 2000;
+}
+.theme-toggle button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #ffeb3b;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+.theme-toggle button.active,
+.theme-toggle button:hover {
+    color: #ffd600;
+}
+body.light-mode,
+.main-layout.light-mode {
+    background: #f5f5f5;
+    color: #222;
+}
+body.light-mode .sidebar,
+.main-layout.light-mode .sidebar {
+    background: #fff;
+    color: #222;
+}
+body.light-mode .main-content,
+.main-layout.light-mode .main-content {
+    background: #fff;
+    color: #222;
+}

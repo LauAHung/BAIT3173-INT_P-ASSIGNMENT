@@ -71,3 +71,7 @@ Route::get('scan_qr', function () {
     return view('AdminPage/ScanQR');
 })->name('scan_qr');
 
+Route::get('log', function () {
+    return view('AdminPage/Log');
+})->name('log');
+

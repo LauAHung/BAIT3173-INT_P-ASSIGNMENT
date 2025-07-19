@@ -20,13 +20,20 @@
                 <li><a href="{{ route('news-email-publish') }}" title="News Email Publish"><img src="{{ asset('images/icon/email.png') }}" /> <span>News Email Publish</span></a></li>
                 <li><a href="{{ route('card-approval') }}" title="Concession Card Approval"><img src="{{ asset('images/icon/application.png') }}" /> <span>Concession Card Approval</span></a></li>
                 <li><a href="{{ route('scan_qr') }}"><img src="{{ asset('images/icon/scan.png') }}" /> <span>Scan QR Code</span></a></li>
+                <li><a href="{{ route('log') }}"><img src="{{ asset('images/icon/log.png') }}" /> <span>Log</span></a></li>
             </ul>
         </aside>
+
+        <div class="theme-toggle">
+            <button id="theme-toggle-btn" title="Toggle Dark/Light Mode">
+                <i class="fas fa-lightbulb"></i>
+            </button>
+        </div>
 
         <main class="main-content">
             @yield('content')
         </main>
-
+    </div>
     <script src="{{ asset('js/AdminPage.js') }}" defer></script>
 </body>
 
