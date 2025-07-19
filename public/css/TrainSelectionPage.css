@@ -13,6 +13,9 @@
     width: 100%;
     height: 100%;
     z-index: -1;
+    overflow: hidden; /* 让圆角生效 */
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
 }
 
 .video-wrapper video {
@@ -21,6 +24,8 @@
     object-fit: cover;
     object-position: center;
     pointer-events: none;
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
 }
 
 /* === Whole Search Bar === */
