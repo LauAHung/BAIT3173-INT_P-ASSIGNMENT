@@ -67,7 +67,7 @@ Route::get('card-approval', function () {
     return view('AdminPage/CardApproval');
 })->name('card-approval');
 
-Route::get('scan-qr', function () {
+Route::get('scan_qr', function () {
     return view('AdminPage/ScanQR');
-})->name('scan-qr');
+})->name('scan_qr');
 

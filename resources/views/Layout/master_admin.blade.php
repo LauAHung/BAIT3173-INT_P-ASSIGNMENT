@@ -19,14 +19,13 @@
                 <li><a href="{{ route('user-management') }}" title="User Management"><img src="{{ asset('images/icon/user.png') }}" /> <span>User Management</span></a></li>
                 <li><a href="{{ route('news-email-publish') }}" title="News Email Publish"><img src="{{ asset('images/icon/email.png') }}" /> <span>News Email Publish</span></a></li>
                 <li><a href="{{ route('card-approval') }}" title="Concession Card Approval"><img src="{{ asset('images/icon/application.png') }}" /> <span>Concession Card Approval</span></a></li>
-                <li><a href="#"><img src="{{ asset('images/icon/scan.png') }}" /> <span>Scan QR Code</span></a></li>
+                <li><a href="{{ route('scan_qr') }}"><img src="{{ asset('images/icon/scan.png') }}" /> <span>Scan QR Code</span></a></li>
             </ul>
-
         </aside>
 
-        
+        <main class="main-content">
             @yield('content')
-        
+        </main>
 
     <script src="{{ asset('js/AdminPage.js') }}" defer></script>
 </body>

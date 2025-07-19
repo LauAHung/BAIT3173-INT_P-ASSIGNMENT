@@ -120,3 +120,12 @@ body {
   font-size: 0.95rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.18);
 }
+
+/* ========== Main Content ========== */
+.main-content {
+  flex: 1;
+  margin-left: 250px; 
+  min-height: 100vh;
+  background-color: rgb(51, 37, 95);
+  color: #333;
+}
