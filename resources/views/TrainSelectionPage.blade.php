@@ -4,6 +4,8 @@
 
 @push('styles')
     <link href="css/TrainSelectionPage.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 @endpush
 
 @section('content')
@@ -173,5 +175,6 @@
 </section>
 
 <script src="{{ asset('js/HomePage.js') }}" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 @endsection
