@@ -1,3 +1,62 @@
+/* Sidebar Layout */
+.booking-main-layout {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    min-height: 600px;
+}
+
+.booking-sidebar {
+    width: 180px;
+    background: #ffffff;
+    border-radius: 0;
+    box-shadow: 2px 0 8px rgba(80, 60, 120, 0.08);
+    margin-right: 32px;
+    margin-left: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100vh;
+    min-height: 600px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+.booking-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    border-top: 1px solid #5d4a8c;
+    border-bottom: 1px solid #5d4a8c;
+}
+.sidebar-tab {
+    width: 100%;
+    padding: 18px 0 18px 0;
+    text-align: left;
+    font-size: 1.08em;
+    color: #cfc6e6;
+    background: none;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    margin: 0;
+    border-bottom: 1px solid #5d4a8c;
+    padding-left: 32px;
+    transition: background 0.2s, color 0.2s;
+    letter-spacing: 0.5px;
+}
+.sidebar-tab.active, .sidebar-tab:hover {
+    background: #6d54b5;
+    color: #fff;
+}
+
+.booking-content {
+    flex: 1 1 0;
+    min-width: 0;
+}
 body {
     font-family: 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     margin-top: 100px;
@@ -5,8 +64,9 @@ body {
 }
 
 section {
-    width: 60%;
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .on-going-booking  {
@@ -29,7 +89,6 @@ section {
     border: 1px solid #7c7c7c;
     border-radius: 12px;
     padding: 15px;
-    display: flex;
     justify-content: space-between;
     font-size: 14px;
     box-shadow:  0 2px 5px rgba(0, 0, 0, 0.1);
@@ -54,10 +113,6 @@ section {
     color: rgb(90, 89, 89);
 }
 
-.btn-view {
-    margin: auto 30px;
-}
-
 .btn-view button {
     background-color: #43b492;
     color: white;
@@ -73,6 +128,183 @@ section {
 
 .btn-view button:hover {
     background-color: #6ee29e;
+}
+
+/* Booking Flex Layout */
+.booking-flex-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 16px 24px;
+    margin-bottom: 16px;
+    min-height: 64px;
+    gap: 40px;
+    width: 100%;
+}
+.booking-col-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 120px;
+    gap: 6px;
+}
+.booking-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: #f5f5f5;
+}
+.train-number {
+    font-weight: 600;
+    color: #4e2a84;
+}
+.ticket-id {
+    font-size: 0.95em;
+    color: #888;
+}
+.booking-col-middle {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 180px;
+}
+.route {
+    font-weight: 600;
+    font-size: 1.1em;
+}
+.time {
+    font-size: 1em;
+    color: #1976d2;
+}
+.date, .status {
+    font-size: 0.95em;
+    color: #888;
+}
+.booking-col-right {
+    display: flex;
+    flex-direction: column;     
+    align-items: flex-end;       
+    justify-content: flex-end; 
+    min-width: 140px;
+    min-height: 90px;            
+    margin-left: auto;
+    gap: 12px;                 
+}
+.btn-view {
+    background: #6d54b5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-view:hover {
+    background: #4e2a84;
+}
+.btn-rate {
+    background: #43b492;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 0;
+    transition: background 0.2s;
+}
+.btn-rate:hover {
+    background: #2e8c6d;
+}
+
+.route-row, .time-row, .info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+.train-icon {
+    color: #4e2a84;
+    font-size: 1.2em;
+    margin: 0 8px;
+}
+.station {
+    font-weight: 600;
+    font-size: 1.1em;
+}
+.time {
+    color: #1976d2;
+    font-weight: 500;
+}
+.info-row {
+    font-size: 0.95em;
+    color: #888;
+    justify-content: flex-start;
+    gap: 30px;
+}
+.status {
+    color: #43b492;
+    font-weight: bold;
+}
+
+.route-row.dashed-line,
+.time-row.dashed-line {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 4px;
+}
+.route-row.dashed-line::before,
+.route-row.dashed-line::after,
+.time-row.dashed-line::before,
+.time-row.dashed-line::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1.5px dashed #bdbdbd;
+    margin: 0 8px;
+    height: 0;
+}
+.center-icon {
+    flex-shrink: 0;
+    background: #fff;
+    z-index: 1;
+    padding: 0 6px;
+    font-size: 1.2em;
+    color: #4e2a84;
+}
+
+.route-row .station,
+.time-row .time {
+    min-width: 70px;
+    text-align: center;
+}
+
+.info-row {
+    font-size: 0.95em;
+    color: #888;
+    margin-top: 8px;
+    margin-bottom: 0;
+    gap: 0;
+}
+
+.status-row {
+    margin-top: 2px;
+}
+.status {
+    color: #43b492;
+    font-weight: bold;
+    font-size: 1em;
 }
 
 @media (max-width: 768px) {
