@@ -1,3 +1,7 @@
+body {
+    min-width: 1400px;
+}
+
 /* === Video Background === */
 .first-section {
     position: relative;
@@ -48,7 +52,7 @@
     margin: 0 auto;
     display: flex;
     flex-direction: row;
-    gap: 20px;
+    margin-bottom: 20px;
 }
 
 .filter-container {
@@ -204,14 +208,10 @@
 
 .search-form {
     display: flex;
-    flex-wrap: nowrap;  
+    flex-wrap: wrap;  
     gap: 16px; 
     align-items: flex-end; 
-    justify-content: center; 
-}
-.search-form .form-group {
-    flex: 1 1 0;
-    min-width: 0;
+    justify-content: space-between; 
 }
 
 .form-group {
@@ -220,6 +220,7 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
+    text-align: center;
 }
 
 .form-group label {
@@ -412,33 +413,6 @@
     width: 100%;
 }
 
-/* === Responsiveness === */
-@media (max-width: 768px) {
-    .train-select-section {
-        padding: 20px 10px;
-    }
-
-    .train-select-container {
-        flex-direction: column; /* Stack filter and table vertically */
-    }
-
-    .filter-container,
-    .train-select {
-        width: 100%; /* Full width for both */
-    }
-
-    .header-cell,
-    .row-cell {
-        padding: 20px; /* Maintain padding */
-        font-size: 14px; /* Smaller font size */
-    }
-
-    .row-cell:last-child {
-        text-align: right;
-        padding-right: 10px;
-    }
-}
-
 .train-card {
     display: grid;
     grid-template-columns: 180px 90px 2.2fr 80px minmax(100px, 120px) 1fr;
@@ -618,3 +592,156 @@
             0 0 50px #6d54b5,
             0 0 100px #6d54b5;
   }
+
+  /* === Responsiveness === */
+@media (max-width: 768px) {
+    body {
+        min-width: 492px;
+    }
+    /* Adjust first section and video background */
+    .first-section {  
+        padding-top: 70px;
+        margin-bottom: 120px; /* Adjust margin to accommodate search form */
+    }
+
+    .video-wrapper,
+    .video-wrapper video {
+        border-bottom-left-radius: 16px; /* Smaller radius for mobile */
+        border-bottom-right-radius: 16px;
+    }
+
+    /* Ticket search container */
+    .ticket-search-container {
+        position: relative;
+        min-width: 0;
+        width: 100%;
+        padding: 16px;
+        margin: 0 auto 30px auto;
+        z-index: 10;
+    }
+
+    .search-form {  
+        gap: 5px;
+    }
+
+    .form-group {
+        flex: 1;
+        min-width: 150px;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+
+    .search-btn {
+        width: 100%; /* Full width button */
+        padding: 10px; /* Adjust padding */
+        font-size: 14px; /* Smaller font */
+        letter-spacing: 2px; /* Reduce letter spacing */
+        box-shadow: 0 0 15px #6d54b5; /* Softer shadow */
+    }
+
+    .search-btn:hover {
+        box-shadow: 0 0 5px #6d54b5, 0 0 15px #6d54b5; /* Adjusted hover effect */
+    }
+
+    /* Train select section */
+    .train-select-section {
+        padding: 0 12px;
+    }
+
+    .train-select-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .filter-container {
+        width: 100%; /* Full width */
+        padding: 16px; /* Reduce padding */
+        border-radius: 10px;
+    }
+
+    .filter-section h4 {
+        font-size: 16px; 
+    }
+
+    .filter-section label {
+        font-size: 14px;
+    }
+
+    .filter-submit-button {
+        padding: 10px;
+        font-size: 14px;
+        letter-spacing: 2px;
+        box-shadow: 0 0 15px #6d54b5; /* Softer shadow */
+    }
+
+    .filter-submit-button:hover {
+        box-shadow: 0 0 5px #6d54b5, 0 0 15px #6d54b5; /* Adjusted hover effect */
+    }
+
+    .train-select {
+        width: 100%; /* Full width */
+        padding: 10px; /* Reduce padding */
+        border-radius: 8px; /* Slightly smaller radius */
+    }
+
+    .train-select-header {
+        font-size: 16px; /* Smaller font */
+        padding: 8px; /* Reduce padding */
+        border-radius: 10px; /* Smaller radius */
+        gap: 8px; /* Reduce gap */
+    }
+
+    .train-card {
+        grid-template-columns: 1fr; /* Single column layout */
+        padding: 12px; /* Reduce padding */
+        margin-bottom: 12px; /* Reduce margin */
+        column-gap: 0; /* Remove column gap */
+        font-size: 14px; /* Smaller font */
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); /* Softer shadow */
+    }
+
+    .train-col {
+        justify-content: flex-start; /* Align left for better readability */
+        padding: 8px 0; /* Add vertical padding */
+    }
+
+    .train-col.train-name {
+        min-width: 0; /* Allow flexibility */
+        gap: 8px; /* Reduce gap */
+    }
+
+    .train-col.train-type,
+    .train-col.train-time,
+    .train-col.train-capacity,
+    .train-col.train-action {
+        min-width: 0; /* Allow flexibility */
+        text-align: left; /* Align left for consistency */
+        font-size: 16px;
+    }
+
+    .train-col.train-action {
+        flex-direction: row; /* Keep price and button in row */
+        justify-content: space-between; /* Space out price and button */
+        gap: 12px; /* Reduce gap */
+    }
+
+    .train-price {
+        font-size: 1.6em; /* Smaller font */
+    }
+
+    .btn-select {
+        padding: 10px 16px; /* Reduce padding */
+        font-size: 14px; /* Smaller font */
+    }
+
+    .train-desc,
+    .capacity-desc {
+        font-size: 0.85em; /* Smaller description text */
+    }
+
+    .header-cell {
+        padding: 10px; /* Reduce padding */
+        font-size: 14px; /* Smaller font */
+    }
+}
