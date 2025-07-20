@@ -1,5 +1,4 @@
 body {
-    font-family: 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     margin-top: 100px;
     min-width: 1400px;
 }
@@ -94,15 +93,6 @@ section {
 .link {
   text-align: center;
   margin-top:10px;
-}
-
-a {
-  text-decoration: none;
-  color:#55C9E6;  
-  font-weight: 400;
-  font-family: 'Roboto', sans-serif;
-  letter-spacing: 0.7px;
-  font-size: 0.7em;
 }
 
 .hqr{
