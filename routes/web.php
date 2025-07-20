@@ -100,3 +100,6 @@ Route::get('log', function () {
     return view('AdminPage/Log');
 })->name('log');
 
+Route::get('/concession_card',function(){
+    return view('ConcessionCardPage');
+})->name('concession_card');

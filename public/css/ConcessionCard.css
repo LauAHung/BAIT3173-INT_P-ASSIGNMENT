@@ -1,0 +1,109 @@
+/* === Reset & Basics === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+.first-section {
+    position: relative;
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex; /* Keep flexbox but change direction */
+    justify-content: center; /* Centers children horizontally */
+    align-items: center; /* Centers children vertically */
+    overflow: hidden;
+    background-image: url('../images/concession_bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    word-spacing: 3px;
+    letter-spacing: 1px;
+}
+
+.first-section div {
+    flex: 1; /* Allows divs to share space equally */
+    min-width: 0; /* Prevents overflow issues */
+    padding: 10px; /* Optional: Adds spacing inside divs */
+}
+
+.preface, .img_preface {
+    width: 50%; /* Sets equal width for both divs */
+}
+
+.first-section .preface{
+    width:50%;
+    border-radius: 10px;
+    align-self: left;
+    margin-left:0;
+    margin-top:70px;
+    height:90%;
+    justify-content: center;
+    display: flex;
+    padding:20px;
+    padding-left:50px;
+    text-wrap: 10px;
+    flex-direction: column;
+    z-index: 4;
+}
+
+.first-section .img_preface{
+    text-align: center;
+    justify-content: center;
+}
+
+.first-section .img_preface img{
+    border-radius:10px;
+    width:70%;
+    height:70%;
+}
+
+.first-section h1{
+    color:red;
+    font-size:30px;
+    text-align: center;
+    font-weight:bold;
+}
+
+.first-section p{
+    font-size:20px;
+}
+
+.first-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 1) 0%, /* White with 50% opacity on left */
+        rgba(255, 255, 255, 0) 20%, /* Fully transparent near left */
+        rgba(255, 255, 255, 0) 80%, /* Fully transparent near right */
+        rgba(255, 255, 255, 1) 100% /* White with 50% opacity on right */
+    );
+    z-index: 1; /* Places gradient above the background image */
+}
+
+.second-section {
+    position: relative;
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color:pink;
+}
