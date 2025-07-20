@@ -4,138 +4,159 @@
 
 @push('styles')
 <link href="css/BookingPage.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 @endpush
 
 @section('content')
 
+
 <body>
 <section>
-
-    <div class="on-going-booking">
-
-        <div class="booking-heading">
-        <h2>On-going Booking Ticket</h2>
-        </div>
-        <div class="booking-item-container">
-            <div class="booking-item">
-                <div class="booking-container">
-                    <div class="booking-info">
-                        <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type">
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Ticket ID: </label>
-                    <span class="booking-value">11524</span>
-                    </div>
-                    
-                    <div class="booking-info">
-                    <label class="booking-label">Route: </label>
-                    <span class="booking-value">KL Sentral to Ipoh</span>
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Departure: </label>
-                    <span class="booking-value">7:00 PM - 8:05 PM</span>
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Date: </label>
-                    <span class="booking-value">22 July 2025</span>
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Status: </label>
-                    <span class="booking-value">Booked</span>
+    <div class="booking-main-layout">
+        <!-- Sidebar -->
+        <aside class="booking-sidebar">
+            <ul>
+                <li class="sidebar-tab active" id="ongoing-tab">Ongoing</li>
+                <li class="sidebar-tab" id="past-tab">Past Trip</li>
+            </ul>
+        </aside>
+        <!-- Main Content -->
+        <div class="booking-content">
+            <!-- Ongoing Booking -->
+            <div class="on-going-booking" id="ongoing-content">
+                <div class="booking-heading">
+                    <h2>On-going Booking Ticket</h2>
+                </div>
+                <div class="booking-item-container">
+                    <div class="booking-item">
+                        <div class="booking-flex-row">
+                            <div class="booking-col booking-col-left">
+                                <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type" class="booking-logo">
+                                <div class="train-number">ETS-2039</div>
+                                <div class="ticket-id">Ticket ID: 11524</div>
+                            </div>
+                            <div class="booking-col booking-col-middle">
+                                <div class="route-row dashed-line">
+                                    <span class="station">KL Sentral</span>
+                                    <span class="train-icon center-icon">
+                                        <i class="fas fa-train"></i>
+                                    </span>
+                                    <span class="station">Ipoh</span>
+                                </div>
+                                <div class="time-row dashed-line">
+                                    <span class="time">7:00 PM</span>
+                                    <span class="train-icon center-icon">
+                                        <i class="fas fa-train"></i>
+                                    </span>
+                                    <span class="time">8:05 PM</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="date">Date: 22 July 2025</span>
+                                </div>
+                                <div class="status-row">
+                                    <span class="status">Status: Booked</span>
+                                </div>
+                            </div>
+                            <div class="booking-col booking-col-right">
+                                <a href="{{ route('bookingdetail') }}">
+                                    <button type="submit" class="btn-view">View QR Code</button>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- 可复制多条on-going booking -->
                     </div>
                 </div>
-
-                <div class="btn-view">
-                    <a href="{{ route('bookingdetail') }}"><button type="submit">View QR Code</button></a>
+            </div>
+            <!-- Past Trip -->
+            <div class="booking-history" id="past-content" style="display:none;">
+                <div class="booking-heading">
+                    <h2>Booking History</h2>
                 </div>
-
+                <div class="booking-item-container">
+                    <div class="booking-item">
+                        <div class="booking-flex-row">
+                            <div class="booking-col booking-col-left">
+                                <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type" class="booking-logo">
+                                <div class="train-number">ETS-2039</div>
+                                <div class="ticket-id">Ticket ID: 11521</div>
+                            </div>
+                            <div class="booking-col booking-col-middle">
+                                <div class="route-row dashed-line">
+                                    <span class="station">KL Sentral</span>
+                                    <span class="train-icon center-icon">
+                                        <i class="fas fa-train"></i>
+                                    </span>
+                                    <span class="station">Ipoh</span>
+                                </div>
+                                <div class="time-row dashed-line">
+                                    <span class="time">7:00 PM</span>
+                                    <span class="train-icon center-icon">
+                                        <i class="fas fa-train"></i>
+                                    </span>
+                                    <span class="time">8:05 PM</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="date">Date: 12 July 2025</span>
+                                </div>
+                                <div class="status-row">
+                                    <span class="status">Status: Completed</span>
+                                </div>
+                            </div>
+                            <div class="booking-col booking-col-right">
+                                <a href="{{ route('bookingdetail') }}">
+                                    <button type="button" class="btn-view">View QR Code</button>
+                                </a>
+                                <a href="#">
+                                    <button type="button" class="btn-rate">Rate Trip</button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="booking-item">
+                        <div class="booking-flex-row">
+                            <div class="booking-col booking-col-left">
+                                <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type" class="booking-logo">
+                                <div class="train-number">ETS-2039</div>
+                                <div class="ticket-id">Ticket ID: 11219</div>
+                            </div>
+                            <div class="booking-col booking-col-middle">
+                                <div class="route-row dashed-line">
+                                    <span class="station">KL Sentral</span>
+                                    <span class="train-icon center-icon">
+                                        <i class="fas fa-train"></i>
+                                    </span>
+                                    <span class="station">Ipoh</span>
+                                </div>
+                                <div class="time-row dashed-line">
+                                    <span class="time">7:00 PM</span>
+                                    <span class="train-icon center-icon">
+                                        <i class="fas fa-train"></i>
+                                    </span>
+                                    <span class="time">8:05 PM</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="date">Date: 08 July 2025</span>
+                                </div>
+                                <div class="status-row">
+                                    <span class="status">Status: Completed</span>
+                                </div>
+                            </div>
+                            <div class="booking-col booking-col-right">
+                                <a href="{{ route('bookingdetail') }}">
+                                    <button type="button" class="btn-view">View QR Code</button>
+                                </a>
+                                <a href="#">
+                                    <button type="button" class="btn-rate">Rate Trip</button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <div class="booking-history">
-        <div class="booking-heading">
-            <h2>Booking History</h2>
-        </div>
-
-        <div class="booking-item-container">
-            <div class="booking-item">
-                <div class="booking-container">
-                    <div class="booking-info">
-                        <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type">
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Ticket ID: </label>
-                    <span class="booking-value">11521</span>
-                    </div>
-                    
-                    <div class="booking-info">
-                    <label class="booking-label">Route: </label>
-                    <span class="booking-value">KL Sentral to Ipoh</span>
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Departure: </label>
-                    <span class="booking-value">7:00 PM - 8:05 PM</span>
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Date: </label>
-                    <span class="booking-value">12 July 2025</span>
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Status: </label>
-                    <span class="booking-value">Completed</span>
-                    </div>
-                </div>
-
-            </div>
-
-                    <div class="booking-item-container">
-            <div class="booking-item">
-                <div class="booking-container">
-                    <div class="booking-info">
-                        <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type">
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Ticket ID: </label>
-                    <span class="booking-value">11219</span>
-                    </div>
-                    
-                    <div class="booking-info">
-                    <label class="booking-label">Route: </label>
-                    <span class="booking-value">KL Sentral to Ipoh</span>
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Departure: </label>
-                    <span class="booking-value">7:00 PM - 8:05 PM</span>
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Date: </label>
-                    <span class="booking-value">08 July 2025</span>
-                    </div>
-
-                    <div class="booking-info">
-                    <label class="booking-label">Status: </label>
-                    <span class="booking-value">Completed</span>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-    </div>
-
 </section>
+<script src="{{ asset('js/BookingPage.js') }}" defer></script>
 </body>
 
 @endsection
