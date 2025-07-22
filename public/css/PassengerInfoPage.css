@@ -22,10 +22,10 @@
 
 /* === whole passenger info form === */
 .passenger-info-section {
-    padding: 20px;
+    padding: 0;
     gap: 20px;
-    margin: 0 auto;
-    width: 55%;
+    margin: 0;
+    width: 100%;
 }
 
 .passenger-info-form {
@@ -194,4 +194,102 @@
         width: 20%; /* Full width for submit button */
         padding: 10px;
     }
+}
+
+section {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.passenger-main-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: flex-start;
+}
+
+.passenger-info-panel {
+    flex: 2 1 0;
+    min-width: 0;
+}
+
+.passenger-side-info {
+    flex: 1 1 320px;
+    min-width: 320px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.side-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(80,60,120,0.08);
+  padding: 24px 28px;
+  margin-bottom: 0;
+}
+
+.side-title {
+  font-weight: bold;
+  color: #2a2a2a;
+  font-size: 1.08em;
+  margin-bottom: 8px;
+}
+
+.side-price {
+  color: #1a357e;
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.side-summary {
+  font-size: 1em;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.side-flight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1em;
+  margin: 8px 0;
+}
+
+.side-plane {
+  color: #1976d2;
+  font-size: 1.2em;
+}
+
+.side-btn {
+  width: 100%;
+  padding: 12px 0;
+  border-radius: 24px;
+  border: 2px solid #1a357e;
+  background: #fff;
+  color: #1a357e;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.side-btn.main {
+  background: #1a357e;
+  color: #fff;
+  border: none;
+}
+.side-btn:hover {
+  background: #e6eaff;
+  color: #1a357e;
+}
+.side-btn.main:hover {
+  background: #2546a6;
+  color: #fff;
 }
