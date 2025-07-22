@@ -1,0 +1,340 @@
+body {
+    margin: 0;
+    font-family: 'Mona Sans', sans-serif;
+    background-color: #f5f5f5;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-top: 60px;
+    width: 100%;
+}
+
+.header-section {
+    position: relative;
+    height: 400px;
+    display: flex;
+    overflow: hidden;
+}
+
+.header-left {
+    flex: 1;
+    background: linear-gradient(45deg, #000000, #4b0082);
+    padding: 40px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    font-style: italic;
+}
+
+.header-left h1 {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.header-left h2 {
+    font-size: 1.5rem;
+    margin: 10px 0;
+}
+
+.header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    overflow: hidden;
+}
+
+.header-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.blur-overlay {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50px;
+    height: 100%;
+    background: linear-gradient(to right, rgba(75, 0, 130, 0.7), rgba(255, 255, 255, 0));
+    filter: blur(15px);
+    transform: translateX(-50%);
+    z-index: 0;
+}
+
+.services-section, .background-section, .tips-section, .contact-section {
+    padding: 40px;
+    background: white;
+}
+
+.services-section h2, .background-section h2, .tips-section h2, .contact-section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.services-grid, .background-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.service-card, .background-card {
+    background: transparent;
+    border-radius: 50px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+    text-align: center;
+    padding: 20px;
+}
+
+.service-card img, .background-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.service-card h3, .background-card h3 {
+    font-size: 1.25rem;
+    margin: 15px 0;
+}
+
+.service-card p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.background-card p {
+    font-size: 0.9rem;
+    color: white;
+    margin-bottom: 15px;
+    font-size: 16pt;
+}
+
+.background-section {
+    background-image: url('../images/discover5.jpg');
+    position: relative;
+}
+
+.background-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+.background-section > * {
+    position: relative;
+    z-index: 2;
+}
+
+.explore-btn {
+    display: inline-block;
+    background: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.explore-btn:hover {
+    transform: scale(1.05);
+    background: #d602fb;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5), 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.tips-section .tips-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.tips-image {
+    flex: 1;
+    max-width: 40%;
+    background: transparent;
+    border-radius: 50px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    padding: 20px;
+}
+
+.tips-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.tips-content {
+    flex: 1;
+    max-width: 60%;
+    text-align: left;
+    margin-left: 10%;
+}
+
+.tips-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.tips-content p {
+    font-size: 16pt;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.tips-content ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.tips-content ul li {
+    font-size: 16pt;
+    color: #333;
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.tips-content ul li:before {
+    content: '\2713';
+    color: #03b81e;
+    position: absolute;
+    left: 0;
+}
+
+.contact-section {
+    display: flex;
+    padding: 40px;
+    background: white;
+}
+
+.contact-image {
+    flex: 1;
+    width: 50%;
+    overflow: hidden;
+}
+
+.contact-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.contact-content {
+    flex: 1;
+    width: 50%;
+    padding-left: 40px;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    margin-left: 5%;
+}
+
+.contact-details {
+    display: flex;
+    align-items: flex-start;
+    gap: 100px;
+    width: 100%;
+}
+
+.contact-qr {
+    flex: 0 0 auto;
+    width: 100px;
+}
+
+.contact-qr img {
+    width: 150%;
+    height: auto;
+    display: block;
+}
+
+.contact-qr p {
+    font-size: 12pt;
+    color: #666;
+    text-align: center;
+    margin-top: 5px;
+    width: 150%;
+}
+
+.contact-text {
+    flex: 1;
+    list-style-type: '\27A2';
+    margin-top: 5%;
+    font-size: 16pt;
+    width: 100%;
+}
+
+.contact-text ul {
+    padding: 0;
+    margin: 0;
+}
+
+.contact-text ul li {
+    font-size: 1rem;
+    color: #333;
+    margin: 5px 0;
+    padding-left: 20px;
+}
+
+@media (max-width: 768px) {
+    .header-section {
+        flex-direction: column;
+        height: auto;
+    }
+    .header-left, .header-right {
+        width: 100%;
+    }
+    .header-right img {
+        width: 100%;
+        height: auto;
+    }
+    .blur-overlay {
+        display: none;
+    }
+    .tips-section .tips-container, .contact-section {
+        flex-direction: column;
+    }
+    .tips-image {
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+    .tips-content {
+        max-width: 100%;
+    }
+    .contact-section {
+        padding: 20px;
+    }
+    .contact-image {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .contact-content {
+        width: 80%;
+        padding-left: 0;
+    }
+}

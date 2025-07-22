@@ -18,7 +18,7 @@
         <nav>
             <ul>
                 <li><a href="{{ route('TrainSelectionPage') }}">Ticketing</a></li>
-                <li><a href="#">Discover</a></li>
+                <li><a href="{{ route('DiscoverPage') }}">Discover</a></li>
                 <li><a href="#">Feedback</a></li>
                 <li><a href="#">Schedule</a></li>
             </ul>
@@ -55,24 +55,24 @@
                 <div class="footer-section">
                     <h3>About</h3>
                     <ul>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">About TravelFree</a></li>
+                        <li><a href="#">News</a></li>
+                        <li><a href="#">Carrer</a></li>
+                        <li><a href="#">Terms and Condition</a></li>
+                        <li><a href="#">Privacy Statement</a></li>
+                        <li><a href="#">Accessibility Statement</a></li>
+                        <li><a href="#">Do Not Sell My Personal Information</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h3>Other Services</h3>
                     <ul>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
-                        <li><a href="#">Can be Anything</a></li>
+                        <li><a href="#">Investor Relations</a></li>
+                        <li><a href="#">TravelFree Rewards</a></li>
+                        <li><a href="#">List Your Property</a></li>
+                        <li><a href="#">Affiliate Program</a></li>
+                        <li><a href="#">Become a Supplier</a></li>
+                        <li><a href="#">Security</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
