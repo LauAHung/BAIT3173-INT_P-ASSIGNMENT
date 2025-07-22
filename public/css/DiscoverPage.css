@@ -9,6 +9,7 @@ body {
     flex-direction: column;
     min-height: 100vh;
     padding-top: 60px;
+    width: 100%;
 }
 
 .header-section {
@@ -258,6 +259,7 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 100px;
+    width: 100%;
 }
 
 .contact-qr {
@@ -284,6 +286,7 @@ body {
     list-style-type: '\27A2';
     margin-top: 5%;
     font-size: 16pt;
+    width: 100%;
 }
 
 .contact-text ul {
@@ -331,7 +334,7 @@ body {
         margin-bottom: 20px;
     }
     .contact-content {
-        width: 100%;
+        width: 80%;
         padding-left: 0;
     }
 }
