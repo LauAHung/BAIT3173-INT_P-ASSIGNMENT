@@ -158,7 +158,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="disability">Disability Information *</label>
-                                <textarea id="disability" name="disability" rows="3"></textarea>
+                                <textarea id="disability" name="disability" rows="1"></textarea>
                                 <span class="error-message"></span>
                             </div>
                         </div>

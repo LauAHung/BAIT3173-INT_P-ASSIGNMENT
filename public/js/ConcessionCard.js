@@ -28,8 +28,8 @@ class OKUApplicationHandler extends ApplicationHandler {
         if (!application.disability) {
             return { valid: false, message: 'Disability information is required' };
         }
-        if (!application.ic || application.ic.length !== 12) {
-            return { valid: false, message: 'IC number must be 12 digits' };
+        if (!application.ic || application.ic.length !== 12 || !/^\d+$/.test(application.ic)) {
+            return { valid: false, message: 'IC number must be exactly 12 digits and contain only numbers' };
         }
         return { valid: true };
     }
