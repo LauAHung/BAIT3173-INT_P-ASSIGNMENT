@@ -107,3 +107,8 @@ Route::get('/concession_card',function(){
 Route::get('/test',function(){
     return view('test');
 })->name('concession_card');
+
+//Discover
+Route::get('/discover', function () {
+    return view('DiscoverPage');
+})->name('DiscoverPage');
