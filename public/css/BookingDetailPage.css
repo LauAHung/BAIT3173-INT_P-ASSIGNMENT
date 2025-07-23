@@ -58,9 +58,16 @@ section {
 
 .qr-ticket-container {
     display: flex;
+    flex-wrap: wrap;
     gap: 30px;
     margin-left: 50px;
     margin-right: 20px;
+    justify-content: center;
+}
+
+.qr-ticket-container > * {
+    flex: 0 0 calc(25% - 30px); /* Ensures 4 items per row with gap adjustment */
+    box-sizing: border-box; /* Prevents padding/margins from breaking layout */
 }
 
 .ticket-container {
