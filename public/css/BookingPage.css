@@ -10,53 +10,76 @@ body {
     flex-direction: row;
     width: 100%;
     min-height: 600px;
+    overflow: hidden;
 }
 
 .booking-sidebar {
-    width: 180px;
-    background: #ffffff;
-    border-radius: 0;
-    box-shadow: 2px 0 8px rgba(80, 60, 120, 0.08);
-    margin-right: 32px;
+    width: 200px;
+    background: linear-gradient(to right, #fff, #edd5fd);
+    box-shadow: 0 0 12px #929292;
+    margin-right: 40px;
     margin-left: 0;
-    padding: 0;
+    padding: 24px 0;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     height: 100vh;
     min-height: 600px;
     position: sticky;
-    top: 0;
+    top: 16px;
     left: 0;
     z-index: 10;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
 .booking-sidebar ul {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 16px 0;
     width: 100%;
-    border-top: 1px solid #5d4a8c;
-    border-bottom: 1px solid #5d4a8c;
+    border-top: 1px solid rgba(93, 74, 140, 0.2);
+    border-bottom: 1px solid rgba(93, 74, 140, 0.2);
 }
+
 .sidebar-tab {
     width: 100%;
-    padding: 18px 0 18px 0;
+    padding: 16px 0 16px 28px;
     text-align: left;
-    font-size: 1.08em;
-    color: #cfc6e6;
-    background: none;
+    font-size: 1.1em;
+    font-weight: 550;
+    color: #4a3a7a;
+    background: transparent;
     border: none;
-    border-radius: 0;
+    border-radius: 8px;
     cursor: pointer;
-    margin: 0;
-    border-bottom: 1px solid #5d4a8c;
-    padding-left: 32px;
-    transition: background 0.2s, color 0.2s;
-    letter-spacing: 0.5px;
+    margin: 4px 8px;
+    transition: all 0.3s ease;
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
 }
-.sidebar-tab.active, .sidebar-tab:hover {
-    background: #6d54b5;
-    color: #fff;
+
+.sidebar-tab:hover {
+    background: #f1edff;
+    color: #2e2366;
+    transform: translateX(4px);
+}
+
+.sidebar-tab.active {
+    background: linear-gradient(to right, #421e72, #8f5ad4);
+    color: #ffffff;
+    box-shadow: 0 0 6px #2e2366;
+    transform: translateX(4px);
+}
+
+.sidebar-tab.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #4a3a7a;
 }
 
 .booking-content {
