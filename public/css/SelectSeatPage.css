@@ -10,7 +10,7 @@
 /* === whole passenger info box === */
 .passenger-info-box {
     background: #fff;
-    border: 2px solid #000;
+    border: 1px solid #000;
     padding: 20px;
     width: 70%;
     box-sizing: border-box;
@@ -27,11 +27,12 @@
 /* === whole ticket info box === */
 .ticket-details-box {
     background: #fff;
-    border: 2px solid #000;
-    padding: 20px;
+    border: 1px solid #000;
+    padding: 10px;
     width: 30%;
     box-sizing: border-box;
     border-radius: 5px;
+    
 }
 
 /* === heading of both info box === */
@@ -62,7 +63,9 @@
     flex-direction: row;
     flex: 1 1 50%; /* Each passenger block takes 50% width */
     padding: 10px;
-    background-color: rgb(245, 245, 252);
+    background: rgb(245, 245, 252);
+    border-radius: 12px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.08);
 }
 
 .passenger-item, .details-item {
@@ -96,9 +99,30 @@
 }
 
 /* === trip details part === */
-.trip-details .trip-segment {
+.trip-details {
     margin-top: 15px;
     margin-bottom: 15px;
+}
+
+.trip-details img {
+    height: 75px;
+    width: 90px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: #eaf8f4;
+}
+
+.trip-details-col {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.trip-info {
+    padding: 10px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.08);
 }
 
 .trip-details .label {
@@ -156,6 +180,7 @@
     border-radius: 5px;
     width: 100%;
     margin-top: 10px;
+    margin-bottom: 5px;
 }
 
 /* === Select Seat Part === */
@@ -169,8 +194,8 @@
 
 .seat-info-box {
     background: #fff;
-    border: 2px solid #000;
-    padding: 20px;
+    border: 1px solid #000;
+    padding: 15px;
     width: 69%;
     box-sizing: border-box;
     border-radius: 5px;
@@ -194,6 +219,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.seat-info {
+    padding: 15px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.08);
 }
 
 .status-color {
