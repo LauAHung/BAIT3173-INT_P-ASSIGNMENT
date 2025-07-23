@@ -10,38 +10,40 @@
 
 <section class="ticket-info-section">
     <div class="passenger-info-box">
-        <div class="passenger-head-info">
-            <h2>Passenger Details</h2>
-            <a href="{{ route('TrainSelectionPage') }}" class="change-journey">Change Journey</a>
-        </div>
-        <div class="passenger-container">
-            <div class="passenger-info-details">
-                <div class="passenger-info">
-                    <div class="passenger-item">
-                        <span class="passenger-label">Passenger 1</span>
-                        <span class="passenger-subtext">KL SENTRAL KUALA LUMPUR > IPOH, A-1AC (MYR 24.00)</span>
+        <div class="passenger-info-container">
+            <div class="passenger-head-info">
+                <h2>Passenger Details</h2>
+                <a href="{{ route('TrainSelectionPage') }}" class="change-journey">Change Journey</a>
+            </div>
+            <div class="passenger-container">
+                <div class="passenger-info-details">
+                    <div class="passenger-info">
+                        <div class="passenger-item">
+                            <span class="passenger-label">Passenger 1</span>
+                            <span class="passenger-subtext">KL SENTRAL KUALA LUMPUR > IPOH, A-1AC (MYR 24.00)</span>
+                        </div>
+                        <div class="details-item">
+                            <span class="details-label">Ticket type</span>
+                            <span class="details-value">DEWASA/ADULT</span>
+                            <span class="details-label">MyKad no. / passport</span>
+                            <span class="details-value">************</span>
+                            <span class="details-label">Contact no.</span>
+                            <span class="details-value">************</span>
+                        </div>
                     </div>
-                    <div class="details-item">
-                        <span class="details-label">Ticket type</span>
-                        <span class="details-value">DEWASA/ADULT</span>
-                        <span class="details-label">MyKad no. / passport</span>
-                        <span class="details-value">************</span>
-                        <span class="details-label">Contact no.</span>
-                        <span class="details-value">************</span>
-                    </div>
-                </div>
-                <div class="passenger-info">
-                    <div class="passenger-item">
-                        <span class="passenger-label">Passenger 2</span>
-                        <span class="passenger-subtext">KL SENTRAL KUALA LUMPUR > IPOH, B-2BD (MYR 24.00)</span>
-                    </div>
-                    <div class="details-item">
-                        <span class="details-label">Ticket type</span>
-                        <span class="details-value">DEWASA/CHILD</span>
-                        <span class="details-label">MyKad no. / passport</span>
-                        <span class="details-value">************</span>
-                        <span class="details-label">Contact no.</span>
-                        <span class="details-value">************</span>
+                    <div class="passenger-info">
+                        <div class="passenger-item">
+                            <span class="passenger-label">Passenger 2</span>
+                            <span class="passenger-subtext">KL SENTRAL KUALA LUMPUR > IPOH, B-2BD (MYR 24.00)</span>
+                        </div>
+                        <div class="details-item">
+                            <span class="details-label">Ticket type</span>
+                            <span class="details-value">DEWASA/CHILD</span>
+                            <span class="details-label">MyKad no. / passport</span>
+                            <span class="details-value">************</span>
+                            <span class="details-label">Contact no.</span>
+                            <span class="details-value">************</span>
+                        </div>
                     </div>
                 </div>
             </div>

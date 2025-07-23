@@ -53,6 +53,9 @@
 
             </div>
 
+            <div class="ticket-heading">
+            <h2>Your Tickets: </h2>
+            </div>
             <div class="qr-ticket-container">
                 <div class="ticket-container">
                     <div class="ticket">

@@ -10,12 +10,19 @@
 /* === whole passenger info box === */
 .passenger-info-box {
     background: #fff;
-    border: 1px solid #000;
-    padding: 20px;
+    border: 1px solid #b6b6b6;
+    padding: 15px;
     width: 70%;
     box-sizing: border-box;
-    border-radius: 5px;
+    border-radius: 12px;
     min-height: 400px;
+}
+
+.passenger-info-container {
+    padding: 15px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.08);
 }
 
 /* === passenger info heading ==== */
@@ -27,12 +34,11 @@
 /* === whole ticket info box === */
 .ticket-details-box {
     background: #fff;
-    border: 1px solid #000;
-    padding: 10px;
+    border: 1px solid #b6b6b6;
+    padding: 15px;
     width: 30%;
     box-sizing: border-box;
-    border-radius: 5px;
-    
+    border-radius: 12px;
 }
 
 /* === heading of both info box === */
@@ -62,7 +68,7 @@
     display: flex;
     flex-direction: row;
     flex: 1 1 50%; /* Each passenger block takes 50% width */
-    padding: 10px;
+    padding: 15px;
     background: rgb(245, 245, 252);
     border-radius: 12px;
     box-shadow: 0 5px 12px rgba(0,0,0,0.08);
@@ -194,11 +200,11 @@
 
 .seat-info-box {
     background: #fff;
-    border: 1px solid #000;
+    border: 1px solid #b6b6b6;
     padding: 15px;
     width: 69%;
     box-sizing: border-box;
-    border-radius: 5px;
+    border-radius: 12px;
     min-height: 400px;
 }
 
