@@ -53,6 +53,9 @@
 
             </div>
 
+            <div class="ticket-heading">
+            <h2>Your Tickets: </h2>
+            </div>
             <div class="qr-ticket-container">
                 <div class="ticket-container">
                     <div class="ticket">
@@ -108,63 +111,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>             
 
-                <div class="ticket-container">
-                    <div class="ticket">
-                        <div class="hqr">
-                            <div class="column left-one"></div>
-                            <div class="column center">
-                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
-                            </div>
-                            <div class="column right-one"></div>
-                        </div>
-                    </div>
-                    <div class="details">
-                        <div class="info">
-                            Full name
-                        </div>
-                        <div class="data name">
-                            Jimmy
-                        </div>
-                        <div class="info">
-                            Ticket type
-                        </div>
-                        <div class="data">
-                            Dewasa/Adult
-                        </div>
-                        <div class="info">
-                            Journey ID
-                        </div>
-                        <div class="data">
-                            J152
-                        </div>
-                        <div class="info">
-                            Seat No.
-                        </div>
-                        <div class="data">
-                            13A
-                        </div>
-                        <div class="masinfo">
-                            <div class="left">
-                                <div class="info">
-                                    date
-                                </div>
-                                <div class="data nesp">
-                                    MON. APR 09 2025
-                                </div>
-                            </div>
-                            <div class="right">
-                                <div class="info">
-                                    time
-                                </div>
-                                <div class="data nesp">
-                                    7:00 PM - 8:05 PM
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
 
 
                 <div class="ticket-container">
@@ -223,6 +172,116 @@
                     </div>
                 </div>
 
+                <div class="ticket-container">
+                    <div class="ticket">
+                        <div class="hqr">
+                            <div class="column left-one"></div>
+                            <div class="column center">
+                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
+                            </div>
+                            <div class="column right-one"></div>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <div class="info">
+                            Full name
+                        </div>
+                        <div class="data name">
+                            Jimmy
+                        </div>
+                        <div class="info">
+                            Ticket type
+                        </div>
+                        <div class="data">
+                            Dewasa/Adult
+                        </div>
+                        <div class="info">
+                            Journey ID
+                        </div>
+                        <div class="data">
+                            J152
+                        </div>
+                        <div class="info">
+                            Seat No.
+                        </div>
+                        <div class="data">
+                            13A
+                        </div>
+                        <div class="masinfo">
+                            <div class="left">
+                                <div class="info">
+                                    date
+                                </div>
+                                <div class="data nesp">
+                                    MON. APR 09 2025
+                                </div>
+                            </div>
+                            <div class="right">
+                                <div class="info">
+                                    time
+                                </div>
+                                <div class="data nesp">
+                                    7:00 PM - 8:05 PM
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ticket-container">
+                    <div class="ticket">
+                        <div class="hqr">
+                            <div class="column left-one"></div>
+                            <div class="column center">
+                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
+                            </div>
+                            <div class="column right-one"></div>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <div class="info">
+                            Full name
+                        </div>
+                        <div class="data name">
+                            Jimmy
+                        </div>
+                        <div class="info">
+                            Ticket type
+                        </div>
+                        <div class="data">
+                            Dewasa/Adult
+                        </div>
+                        <div class="info">
+                            Journey ID
+                        </div>
+                        <div class="data">
+                            J152
+                        </div>
+                        <div class="info">
+                            Seat No.
+                        </div>
+                        <div class="data">
+                            13A
+                        </div>
+                        <div class="masinfo">
+                            <div class="left">
+                                <div class="info">
+                                    date
+                                </div>
+                                <div class="data nesp">
+                                    MON. APR 09 2025
+                                </div>
+                            </div>
+                            <div class="right">
+                                <div class="info">
+                                    time
+                                </div>
+                                <div class="data nesp">
+                                    7:00 PM - 8:05 PM
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="ticket-container">
                     <div class="ticket">
@@ -279,6 +338,63 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="ticket-container">
+                    <div class="ticket">
+                        <div class="hqr">
+                            <div class="column left-one"></div>
+                            <div class="column center">
+                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
+                            </div>
+                            <div class="column right-one"></div>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <div class="info">
+                            Full name
+                        </div>
+                        <div class="data name">
+                            Jimmy
+                        </div>
+                        <div class="info">
+                            Ticket type
+                        </div>
+                        <div class="data">
+                            Dewasa/Adult
+                        </div>
+                        <div class="info">
+                            Journey ID
+                        </div>
+                        <div class="data">
+                            J152
+                        </div>
+                        <div class="info">
+                            Seat No.
+                        </div>
+                        <div class="data">
+                            13A
+                        </div>
+                        <div class="masinfo">
+                            <div class="left">
+                                <div class="info">
+                                    date
+                                </div>
+                                <div class="data nesp">
+                                    MON. APR 09 2025
+                                </div>
+                            </div>
+                            <div class="right">
+                                <div class="info">
+                                    time
+                                </div>
+                                <div class="data nesp">
+                                    7:00 PM - 8:05 PM
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>

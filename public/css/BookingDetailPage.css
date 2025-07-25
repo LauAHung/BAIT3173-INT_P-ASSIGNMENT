@@ -10,7 +10,12 @@ section {
 
 .booking-detail {
     min-height: 600px;
+    margin: 0 10px;
     margin-bottom: 50px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 24px rgba(0,0,0,0.18);
 }
 
 .booking-heading {
@@ -47,11 +52,22 @@ section {
     color: rgb(90, 89, 89);
 }
 
+.ticket-heading {
+  margin: 30px 0 20px 60px
+}
+
 .qr-ticket-container {
     display: flex;
+    flex-wrap: wrap;
     gap: 30px;
     margin-left: 50px;
     margin-right: 20px;
+    justify-content: center;
+}
+
+.qr-ticket-container > * {
+    flex: 0 0 calc(25% - 30px); /* Ensures 4 items per row with gap adjustment */
+    box-sizing: border-box; /* Prevents padding/margins from breaking layout */
 }
 
 .ticket-container {
@@ -199,6 +215,9 @@ section {
         margin-left: 10px;
     }   
 
+    .ticket-heading {
+      margin: 30px 0 15px 20px
+    }
     .qr-ticket-container {
         flex-wrap: wrap;
         gap: 30px;
