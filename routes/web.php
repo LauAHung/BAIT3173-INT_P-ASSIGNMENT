@@ -3,9 +3,10 @@ use App\Http\Controllers\SignupController;
 use App\Http\Controllers\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FacebookAuthController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\StripeController;
 
 Route::get('/', function () {
-    //return "hi";
     return view('HomePage');
 })->name('HomePage');
 
@@ -112,3 +113,11 @@ Route::get('/test',function(){
 Route::get('/discover', function () {
     return view('DiscoverPage');
 })->name('DiscoverPage');
+
+Route::get('/payment', [PaymentController::class, 'showPaymentForm']);
+Route::post('/payment', [PaymentController::class, 'processPayment']);
+
+
+Route::get('/stripe', [StripeController::class, 'index'])->name('stripe.index');
+Route::post('/stripe/checkout', [StripeController::class, 'checkout'])->name('checkout');
+Route::get('/stripe/success', [StripeController::class, 'success'])->name('success');
