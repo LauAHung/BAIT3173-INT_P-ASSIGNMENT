@@ -14,11 +14,7 @@
         <h1>Sign in to your account</h1>
         <p>Don't have an account? <a href="{{ route('signup') }}">Sign up</a></p>
 
-        @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+        {{-- Success messages are handled by the success modal component --}}
 
         @if($errors->any())
             <div class="alert alert-danger">
@@ -68,4 +64,10 @@
       </div>
     </div>
   </div>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <x-error-modal />
+  <x-success-modal />
 @endsection

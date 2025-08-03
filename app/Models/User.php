@@ -19,6 +19,8 @@ class User extends Authenticatable
         'last_name', 
         'email', 
         'password',
+        'gender',
+        'date_of_birth',
         'profile_picture',
         'social_provider',
         'social_provider_id',
@@ -77,6 +79,22 @@ class User extends Authenticatable
     public function hasSocialLogin(): bool
     {
         return !is_null($this->social_provider);
+    }
+
+    /**
+     * Check if user has a password set
+     */
+    public function hasPassword(): bool
+    {
+        return !empty($this->password) && $this->password !== 'social_login_no_password';
+    }
+
+    /**
+     * Check if user needs to set a password
+     */
+    public function needsPasswordSetup(): bool
+    {
+        return $this->hasSocialLogin() && !$this->hasPassword();
     }
 
     /**

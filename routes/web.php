@@ -29,6 +29,9 @@ Route::post('/reset-password', [LoginController::class, 'handleResetPassword'])-
 // Email verification
 Route::get('/verify-email/{token}', [LoginController::class, 'verifyEmail'])->name('verification.verify');
 
+// Clear session messages
+Route::post('/clear-session', [LoginController::class, 'clearSession'])->name('clear.session');
+
 Route::get('/train_selection', function () {
     return view('TrainSelectionPage');
 })->name('TrainSelectionPage');
@@ -49,9 +52,41 @@ Route::get('/signup', [SignupController::class, 'showForm'])
 Route::post('/signup', [SignupController::class, 'handleSignup'])
 ->name('signup.handle');
 
-Route::get('/profile', function () {
-    return view('ProfilePage');
-})->name('profile');
+// Profile routes
+Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile');
+Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+Route::post('/profile/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+Route::get('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'showChangePassword'])->name('profile.change-password');
+Route::post('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'changePassword'])->name('profile.change-password.post');
+Route::post('/profile/email-subscription', [App\Http\Controllers\ProfileController::class, 'updateEmailSubscription'])->name('profile.email-subscription');
+Route::post('/profile/delete-account', [App\Http\Controllers\ProfileController::class, 'deleteAccount'])->name('profile.delete-account');
+Route::get('/profile/activity', [App\Http\Controllers\ProfileController::class, 'activity'])->name('profile.activity');
+
+// Admin routes
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/users', [App\Http\Controllers\AdminController::class, 'users'])->name('admin.users');
+    Route::get('/trains', [App\Http\Controllers\AdminController::class, 'trains'])->name('admin.trains');
+    Route::get('/qr-scanner', [App\Http\Controllers\AdminController::class, 'qrScanner'])->name('admin.qr-scanner');
+    Route::get('/newsletter', [App\Http\Controllers\AdminController::class, 'newsletter'])->name('admin.newsletter');
+    Route::get('/refunds', [App\Http\Controllers\AdminController::class, 'refunds'])->name('admin.refunds');
+    Route::get('/system-info', [App\Http\Controllers\AdminController::class, 'systemInfo'])->name('admin.system-info');
+    
+    // API endpoints for AJAX
+    Route::get('/api/dashboard/stats', [App\Http\Controllers\AdminController::class, 'getDashboardStats']);
+    Route::get('/api/users', [App\Http\Controllers\AdminController::class, 'getUsers']);
+    Route::put('/api/users/{id}/status', [App\Http\Controllers\AdminController::class, 'updateUserStatus']);
+    Route::get('/api/trains', [App\Http\Controllers\AdminController::class, 'getTrains']);
+    Route::post('/api/trains', [App\Http\Controllers\AdminController::class, 'addTrain']);
+    Route::put('/api/trains/{id}', [App\Http\Controllers\AdminController::class, 'updateTrain']);
+    Route::delete('/api/trains/{id}', [App\Http\Controllers\AdminController::class, 'deleteTrain']);
+    Route::post('/api/qr/scan', [App\Http\Controllers\AdminController::class, 'scanQR']);
+    Route::post('/api/qr/generate', [App\Http\Controllers\AdminController::class, 'generateQR']);
+    Route::post('/api/newsletter/send', [App\Http\Controllers\AdminController::class, 'sendNewsletter']);
+    Route::post('/api/refunds/process', [App\Http\Controllers\AdminController::class, 'processRefund']);
+    Route::get('/api/export', [App\Http\Controllers\AdminController::class, 'exportData']);
+    Route::get('/api/system/info', [App\Http\Controllers\AdminController::class, 'getSystemInfo']);
+});
 
 //Googleeee
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])

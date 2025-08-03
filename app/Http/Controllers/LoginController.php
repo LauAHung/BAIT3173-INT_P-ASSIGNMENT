@@ -55,12 +55,12 @@ class LoginController extends Controller
                 ]);
             }
 
-            // Redirect based on user role or to dashboard
+            // Redirect based on user role or to profile page
             if ($user->role === 'admin') {
                 return redirect()->route('dashboard')->with('success', 'Welcome back, ' . $user->first_name . '!');
             }
 
-            return redirect()->route('HomePage')->with('success', 'Welcome back, ' . $user->first_name . '!');
+            return redirect()->route('profile')->with('success', 'Welcome back, ' . $user->first_name . '!');
         }
 
         // Authentication failed
@@ -152,5 +152,14 @@ class LoginController extends Controller
         }
 
         return redirect()->route('signin')->withErrors(['email' => 'Invalid verification token.']);
+    }
+
+    /**
+     * Clear session messages
+     */
+    public function clearSession(Request $request)
+    {
+        $request->session()->forget(['success', 'error', 'warning', 'info']);
+        return response()->json(['success' => true]);
     }
 } 

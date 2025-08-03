@@ -45,7 +45,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Welcome to {{ config('app.name', 'TravelFree') }}!</h1>
+        <h1>Welcome to TRAVEL FREE!</h1>
     </div>
     
     <div class="content">
@@ -58,7 +58,7 @@
         </div>
         
         <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
-        <p style="word-break: break-all; color: #4F46E5;">{{ $verificationUrl }}</p>
+        <p style="word-break: break-all; color:rgb(255, 255, 255); text-decoration: none;">{{ $verificationUrl }}</p>
         
         <p>This verification link will expire in 24 hours.</p>
         

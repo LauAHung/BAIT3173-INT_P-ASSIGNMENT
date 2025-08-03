@@ -14,6 +14,7 @@ class ProfileController extends Controller
     public function __construct(UserRegistrationService $userRegistrationService)
     {
         $this->userRegistrationService = $userRegistrationService;
+        $this->middleware('auth');
     }
 
     /**
@@ -22,7 +23,7 @@ class ProfileController extends Controller
     public function show()
     {
         $user = Auth::user();
-        return view('profile.show', compact('user'));
+        return view('ProfilePage', compact('user'));
     }
 
     /**
@@ -44,11 +45,26 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $user->user_id . ',user_id',
+            'gender' => 'sometimes|string|in:male,female',
+            'date_of_birth' => 'sometimes|date',
             'profile_picture' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'confirm_password' => 'sometimes|string',
             'newsletter' => 'boolean',
             'marketing' => 'boolean',
             'updates' => 'boolean',
         ]);
+
+        // Handle email update with password confirmation
+        if ($request->has('email') && $request->email !== $user->email) {
+            // For social login users without password, skip password confirmation
+            if ($user->hasPassword()) {
+                if (!$request->has('confirm_password') || !Hash::check($request->confirm_password, $user->password)) {
+                    return back()->withErrors(['confirm_password' => 'Password is incorrect.']);
+                }
+            }
+            $validated['email'] = $request->email;
+        }
 
         // Handle profile picture upload
         if ($request->hasFile('profile_picture')) {
@@ -67,7 +83,12 @@ class ProfileController extends Controller
 
         $updatedUser = $this->userRegistrationService->updateUserProfile($user, $validated);
 
-        return redirect()->route('profile.show')->with('success', 'Profile updated successfully!');
+        $message = 'Profile updated successfully!';
+        if (isset($validated['email'])) {
+            $message = 'Email updated successfully!';
+        }
+
+        return redirect()->route('profile')->with('success', $message);
     }
 
     /**
@@ -83,24 +104,41 @@ class ProfileController extends Controller
      */
     public function changePassword(Request $request)
     {
-        $request->validate([
-            'current_password' => 'required|string',
-            'password' => 'required|string|min:8',
-            'password_confirmation' => 'nullable|string|same:password',
-        ]);
-
         $user = Auth::user();
-        $success = $this->userRegistrationService->changePassword(
-            $user,
-            $request->current_password,
-            $request->password
-        );
 
-        if ($success) {
-            return redirect()->route('profile.show')->with('success', 'Password changed successfully!');
+        // If user has no password (social login), allow setting password without current password
+        if ($user->needsPasswordSetup()) {
+            $request->validate([
+                'password' => 'required|string|min:8',
+                'password_confirmation' => 'nullable|string|same:password',
+            ]);
+
+            $success = $this->userRegistrationService->setPassword($user, $request->password);
+            
+            if ($success) {
+                return redirect()->route('profile')->with('success', 'Password set successfully!');
+            }
+        } else {
+            $request->validate([
+                'current_password' => 'required|string',
+                'password' => 'required|string|min:8',
+                'password_confirmation' => 'nullable|string|same:password',
+            ]);
+
+            $success = $this->userRegistrationService->changePassword(
+                $user,
+                $request->current_password,
+                $request->password
+            );
+
+            if ($success) {
+                return redirect()->route('profile')->with('success', 'Password changed successfully!');
+            }
+
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
 
-        return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        return back()->withErrors(['password' => 'Password update failed.']);
     }
 
     /**

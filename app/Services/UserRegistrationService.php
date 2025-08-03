@@ -119,6 +119,15 @@ class UserRegistrationService
             if (isset($profileData['last_name'])) {
                 $user->last_name = trim($profileData['last_name']);
             }
+            if (isset($profileData['email'])) {
+                $user->email = trim(strtolower($profileData['email']));
+            }
+            if (isset($profileData['gender'])) {
+                $user->gender = $profileData['gender'];
+            }
+            if (isset($profileData['date_of_birth'])) {
+                $user->date_of_birth = $profileData['date_of_birth'];
+            }
             if (isset($profileData['profile_picture'])) {
                 $user->profile_picture = $profileData['profile_picture'];
             }
@@ -208,6 +217,25 @@ class UserRegistrationService
             return true;
         } catch (Exception $e) {
             throw new Exception('Password reset failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Set password for social login users who don't have a password
+     */
+    public function setPassword(User $user, string $newPassword): bool
+    {
+        try {
+            if (strlen($newPassword) < 8) {
+                throw new Exception('Password must be at least 8 characters long');
+            }
+
+            $user->password = Hash::make($newPassword);
+            $user->save();
+
+            return true;
+        } catch (Exception $e) {
+            throw new Exception('Password setup failed: ' . $e->getMessage());
         }
     }
 
