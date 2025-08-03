@@ -1,15 +1,13 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Services\UserRegistrationService;
-use App\Strategies\AuthContext;
-use App\Strategies\GoogleAuthStrategy;
-use App\Strategies\FacebookAuthStrategy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
-class SignupController extends Controller
+class LoginController extends Controller
 {
     private UserRegistrationService $userRegistrationService;
 
@@ -18,58 +16,83 @@ class SignupController extends Controller
         $this->userRegistrationService = $userRegistrationService;
     }
 
-    public function showForm()
+    /**
+     * Show the login form
+     */
+    public function showLoginForm()
     {
-        return view('SignUpPage');
-    }
-
-    public function handleSignup(Request $request)
-    {
-        // Validate input
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
-            'password_confirmation' => 'nullable|string|same:password',
-            'newsletter' => 'boolean',
-            'marketing' => 'boolean',
-            'updates' => 'boolean',
-        ]);
-
-        // Create the user using the Builder pattern
-        $user = $this->userRegistrationService->registerUser($validated);
-
-        // Log the user in
-        Auth::login($user);
-
-        // Redirect to the login page or dashboard
-        return redirect()->route('signin')->with('success', 'Registration successful! Please check your email to verify your account.');
-    }
-
-    public function handleOAuth(Request $request)
-    {
-        $authContext = null;
-    
-        if ($request->has('google')) {
-            $authContext = new AuthContext(new GoogleAuthStrategy());
-        } elseif ($request->has('facebook')) {
-            $authContext = new AuthContext(new FacebookAuthStrategy());
-        }
-    
-        $result = $authContext->executeStrategy();
-    
-        return redirect()->route('home')->with('status', $result);
+        return view('SignInPage');
     }
 
     /**
-     * Handle forgot password request
+     * Handle user login
+     */
+    public function handleLogin(Request $request)
+    {
+        // Validate login credentials
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $credentials = [
+            'email' => $request->email,
+            'password' => $request->password,
+        ];
+
+        // Attempt to authenticate user
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::user();
+            
+            // Update last login timestamp
+            $this->userRegistrationService->handleUserLogin($user);
+            
+            // Check if user is active
+            if (!$user->isActive()) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Your account is not active. Please check your email for verification.',
+                ]);
+            }
+
+            // Redirect based on user role or to dashboard
+            if ($user->role === 'admin') {
+                return redirect()->route('dashboard')->with('success', 'Welcome back, ' . $user->first_name . '!');
+            }
+
+            return redirect()->route('HomePage')->with('success', 'Welcome back, ' . $user->first_name . '!');
+        }
+
+        // Authentication failed
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->withInput($request->only('email'));
+    }
+
+    /**
+     * Handle user logout
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect()->route('HomePage')->with('success', 'You have been successfully logged out.');
+    }
+
+    /**
+     * Show forgot password form
      */
     public function showForgotPasswordForm()
     {
         return view('auth.forgot-password');
     }
 
+    /**
+     * Handle forgot password request
+     */
     public function handleForgotPassword(Request $request)
     {
         $request->validate([
@@ -130,4 +153,4 @@ class SignupController extends Controller
 
         return redirect()->route('signin')->withErrors(['email' => 'Invalid verification token.']);
     }
-}
+} 

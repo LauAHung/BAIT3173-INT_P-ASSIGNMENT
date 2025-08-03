@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\SignupController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FacebookAuthController;
@@ -14,9 +15,19 @@ Route::get('/signup', function () {
     return view('SignUpPage');
 })->name('signup');
 
-Route::get('/signin', function () {
-    return view('SignInPage');
-})->name('signin');
+// Login routes
+Route::get('/signin', [LoginController::class, 'showLoginForm'])->name('signin');
+Route::post('/login', [LoginController::class, 'handleLogin'])->name('login.handle');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Password reset routes
+Route::get('/forgot-password', [LoginController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [LoginController::class, 'handleForgotPassword'])->name('password.email');
+Route::get('/reset-password/{token}', [LoginController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [LoginController::class, 'handleResetPassword'])->name('password.update');
+
+// Email verification
+Route::get('/verify-email/{token}', [LoginController::class, 'verifyEmail'])->name('verification.verify');
 
 Route::get('/train_selection', function () {
     return view('TrainSelectionPage');

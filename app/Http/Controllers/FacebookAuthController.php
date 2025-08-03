@@ -5,11 +5,19 @@ namespace App\Http\Controllers;
 
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
+use App\Services\UserRegistrationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class FacebookAuthController extends Controller
 {
+    private UserRegistrationService $userRegistrationService;
+
+    public function __construct(UserRegistrationService $userRegistrationService)
+    {
+        $this->userRegistrationService = $userRegistrationService;
+    }
+
     public function redirectToFacebook()
     {
         return Socialite::driver('facebook')->redirect();
@@ -22,12 +30,21 @@ class FacebookAuthController extends Controller
         $user = User::where('email', $facebookUser->getEmail())->first();
 
         if (!$user) {
-            $user = User::create([
+            // Create new user using the Builder pattern
+            $socialData = [
                 'first_name' => $facebookUser->user['first_name'] ?? '',
                 'last_name'  => $facebookUser->user['last_name'] ?? '',
                 'email'      => $facebookUser->getEmail(),
-                'password'   => bcrypt(Str::random(16)),
-            ]);
+                'provider'   => 'facebook',
+                'provider_id' => $facebookUser->getId(),
+                'provider_data' => $facebookUser->user,
+                'profile_picture' => $facebookUser->getAvatar() ?? ''
+            ];
+
+            $user = $this->userRegistrationService->registerSocialMediaUser($socialData);
+        } else {
+            // Update last login for existing user
+            $user = $this->userRegistrationService->handleUserLogin($user);
         }
 
         Auth::login($user);

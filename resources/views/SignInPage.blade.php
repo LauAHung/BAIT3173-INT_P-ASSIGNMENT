@@ -14,29 +14,56 @@
         <h1>Sign in to your account</h1>
         <p>Don't have an account? <a href="{{ route('signup') }}">Sign up</a></p>
 
-        <div class="form-group">
-          <input type="email" placeholder="Email">
-        </div>
-        <div class="form-group">
-          <input type="password" placeholder="Enter your password">
-        </div>
-        <div class="checkbox">
-          <input type="checkbox" checked>
-          <label>Remember me</label>
-        </div>
-        <button class="create-btn">Log In</button>
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('login.handle') }}">
+            @csrf
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <div class="checkbox">
+                <input type="checkbox" name="remember" value="1" {{ old('remember') ? 'checked' : '' }}>
+                <label>Remember me</label>
+            </div>
+            <button type="submit" class="create-btn">Log In</button>
+        </form>
 
         <div class="or">Or log in with</div>
         <div class="oauth-btns">
-          <button><img src="{{ asset('images/google_logo.png') }}" alt="Google Logo" id="google_logo">Google</button>
-          <button><img src="{{ asset('images/facebook_logo.png') }}" alt="Facebook Logo" id="facebook_logo">Facebook</button>
+            <a href="{{ route('google.login') }}" class="oauth-btn">
+                <img src="{{ asset('images/google_logo.png') }}" alt="Google Logo" id="google_logo">Google
+            </a>
+            <a href="{{ route('facebook.redirect') }}" class="oauth-btn">
+                <img src="{{ asset('images/facebook_logo.png') }}" alt="Facebook Logo" id="facebook_logo">Facebook
+            </a>
+        </div>
+
+        <div class="forgot-password">
+            <a href="{{ route('password.request') }}">Forgot your password?</a>
         </div>
       </div>
     </div>
 
     <div class="right">
       <div class="left-inner">
-        <button>Back to website</button>
+        <a href="{{ route('HomePage') }}" class="back-btn">Back to website</a>
         <p>Capturing Moments,<br />Creating Memories</p>
       </div>
     </div>
