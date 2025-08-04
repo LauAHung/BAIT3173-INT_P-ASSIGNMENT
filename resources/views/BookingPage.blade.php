@@ -33,7 +33,7 @@
                             <div class="booking-col booking-col-left">
                                 <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type" class="booking-logo">
                                 <div class="train-number">ETS-2039</div>
-                                <div class="ticket-id">Ticket ID: 11524</div>
+                                <div class="booking-id">Booking ID: 11524</div>
                             </div>
                             <div class="booking-col booking-col-middle">
                                 <div class="route-row dashed-line">
@@ -78,7 +78,7 @@
                             <div class="booking-col booking-col-left">
                                 <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type" class="booking-logo">
                                 <div class="train-number">ETS-2039</div>
-                                <div class="ticket-id">Ticket ID: 11521</div>
+                                <div class="booking-id">Booking ID: 11521</div>
                             </div>
                             <div class="booking-col booking-col-middle">
                                 <div class="route-row dashed-line">
@@ -117,7 +117,7 @@
                             <div class="booking-col booking-col-left">
                                 <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type" class="booking-logo">
                                 <div class="train-number">ETS-2039</div>
-                                <div class="ticket-id">Ticket ID: 11219</div>
+                                <div class="booking-id">Booking ID: 11219</div>
                             </div>
                             <div class="booking-col booking-col-middle">
                                 <div class="route-row dashed-line">
