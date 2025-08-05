@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FacebookAuthController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\TrainSelectionController;
 
 Route::get('/', function () {
     return view('HomePage');
@@ -87,6 +88,10 @@ Route::prefix('admin')->group(function () {
     Route::get('/api/export', [App\Http\Controllers\AdminController::class, 'exportData']);
     Route::get('/api/system/info', [App\Http\Controllers\AdminController::class, 'getSystemInfo']);
 });
+
+// Booking Module
+Route::get('/train-selection', [TrainSelectionController::class, 'index'])->name('train.selection');
+Route::get('/passengerinfo', [TrainSelectionController::class, 'showPassengerInfo'])->name('passengerinfo');
 
 //Googleeee
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
