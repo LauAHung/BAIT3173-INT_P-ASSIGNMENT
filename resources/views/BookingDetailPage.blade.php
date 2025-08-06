@@ -44,7 +44,7 @@
                             <div class="booking-info">
                                 <label class="booking-label">Date: </label>
                                 <span
-                                    class="booking-value">{{ \Carbon\Carbon::parse($booking->Journey->JourneyDate ?? '')->format('d F Y') }}</span>
+                                    class="booking-value">{{ \Carbon\Carbon::parse($booking->Journey->DepartureTime ?? '')->format('d F Y') }}</span>
                             </div>
 
                             <div class="booking-info">
