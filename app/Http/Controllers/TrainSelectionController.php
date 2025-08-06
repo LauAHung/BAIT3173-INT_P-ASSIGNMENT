@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Journey;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TrainSelectionController extends Controller
 {
     public function index(Request $request)
     {
 
-        $query = Journey::query()->with('train');
+        $query = Journey::query()->with('train')
+            ->orderBy('DepartureTime', 'asc');
+        $journeys = $query->get();
+
+        // Debug the journeydate input
+        $journeydate = $request->input('journeydate');
+        Log::info('Journey date input: ', ['journeydate' => $journeydate]);
 
         // Track if any meaningful filters (excluding passengers) are applied
         $hasSearchFilters = false;
@@ -24,9 +31,15 @@ class TrainSelectionController extends Controller
             $query->where('ToLocation', 'like', '%' . $request->input('tolocation') . '%');
             $hasSearchFilters = true;
         }
-        if ($request->has('journeydate') && $request->filled('journeydate')) {
-            $query->whereDate('DepartureTime', $request->input('journeydate'));
-            $hasSearchFilters = true;
+        if ($request->has('journeydate') && $request->input('journeydate')) {
+            $inputDate = $request->input('journeydate');
+            $parsedDate = \DateTime::createFromFormat('M j, Y', $inputDate);
+            if ($parsedDate) {
+                $query->whereDate('DepartureTime', $parsedDate->format('Y-m-d'));
+                $hasSearchFilters = true;
+            } else {
+                Log::warning('Failed to parse journeydate: ', ['input' => $inputDate]);
+            }
         }
 
         // Apply filter for train service type

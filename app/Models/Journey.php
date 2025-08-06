@@ -10,7 +10,6 @@ class Journey extends Model
     protected $primaryKey = 'JourneyID';
     protected $fillable = [
         'TrainID',
-        'JourneyDate',
         'FromLocation',
         'ToLocation',
         'DepartureTime',

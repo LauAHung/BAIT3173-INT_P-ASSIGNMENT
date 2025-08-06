@@ -7,6 +7,8 @@ use App\Http\Controllers\FacebookAuthController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TrainSelectionController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\BookingDetailController;
 
 Route::get('/', function () {
     return view('HomePage');
@@ -92,6 +94,12 @@ Route::prefix('admin')->group(function () {
 // Booking Module
 Route::get('/train-selection', [TrainSelectionController::class, 'index'])->name('train.selection');
 Route::get('/passengerinfo', [TrainSelectionController::class, 'showPassengerInfo'])->name('passengerinfo');
+Route::get('/booking', [BookingController::class, 'index'])->name('booking');
+Route::get('/booking_detail/{bookingId}', [BookingDetailController::class, 'show'])->name('bookingdetail');
+
+Route::get('/booking_detail', function () {
+    return view('BookingDetailPage');
+})->name('bookingdetails');
 
 //Googleeee
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
@@ -114,14 +122,6 @@ Route::get('/selectrating', function () {
 Route::get('/payment', function () {
     return view('PaymentPage');
 })->name('payment');
-
-Route::get('/booking', function () {
-    return view('BookingPage');
-})->name('booking');
-
-Route::get('/booking_detail', function () {
-    return view('BookingDetailPage');
-})->name('bookingdetail');
 
 // Admin Page
 Route::get('dashboard', function () {
