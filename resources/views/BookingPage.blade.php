@@ -9,7 +9,6 @@
 
 @section('content')
 
-<body>
     <section>
         <div class="booking-main-layout">
             <!-- Sidebar -->
@@ -158,6 +157,5 @@
         });
     });
     </script>
-</body>
 
 @endsection

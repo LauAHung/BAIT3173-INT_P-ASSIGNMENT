@@ -8,7 +8,6 @@
 
 @section('content')
 
-<body>
     <section>
         <div class="booking-detail">
             <div class="booking-detail-container">
@@ -144,6 +143,5 @@
         }
     }
     </script>
-</body>
 
 @endsection
