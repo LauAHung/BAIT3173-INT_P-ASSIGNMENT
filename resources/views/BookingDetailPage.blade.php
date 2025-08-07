@@ -23,7 +23,7 @@
                             </div>
 
                             <div class="booking-info">
-                                <label class="booking-label">Ticket ID: </label>
+                                <label class="booking-label">Booking ID: </label>
                                 <span class="booking-value">{{ $booking->BookingID ?? 'Unknown' }}</span>
                             </div>
 
