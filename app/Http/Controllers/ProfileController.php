@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\UserRegistrationService;
+use App\Factories\UserFactoryManager;
+use App\Factories\MailFactoryManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -10,10 +12,17 @@ use Illuminate\Support\Facades\Hash;
 class ProfileController extends Controller
 {
     private UserRegistrationService $userRegistrationService;
+    private UserFactoryManager $userFactoryManager;
+    private MailFactoryManager $mailFactoryManager;
 
-    public function __construct(UserRegistrationService $userRegistrationService)
-    {
+    public function __construct(
+        UserRegistrationService $userRegistrationService,
+        UserFactoryManager $userFactoryManager,
+        MailFactoryManager $mailFactoryManager
+    ) {
         $this->userRegistrationService = $userRegistrationService;
+        $this->userFactoryManager = $userFactoryManager;
+        $this->mailFactoryManager = $mailFactoryManager;
         $this->middleware('auth');
     }
 

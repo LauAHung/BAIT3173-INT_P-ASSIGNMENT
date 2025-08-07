@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\Builders\UserBuilder;
+use App\Factories\UserFactoryManager;
+use App\Factories\MailFactoryManager;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -12,11 +13,15 @@ use Exception;
 
 class UserRegistrationService
 {
-    private UserBuilder $userBuilder;
+    private UserFactoryManager $userFactoryManager;
+    private MailFactoryManager $mailFactoryManager;
 
-    public function __construct(UserBuilder $userBuilder)
-    {
-        $this->userBuilder = $userBuilder;
+    public function __construct(
+        UserFactoryManager $userFactoryManager,
+        MailFactoryManager $mailFactoryManager
+    ) {
+        $this->userFactoryManager = $userFactoryManager;
+        $this->mailFactoryManager = $mailFactoryManager;
     }
 
     /**
@@ -28,20 +33,8 @@ class UserRegistrationService
             // Validate required fields
             $this->validateUserData($userData);
 
-            $user = $this->userBuilder
-                ->setBasicInfo(
-                    $userData['first_name'],
-                    $userData['last_name'],
-                    $userData['email']
-                )
-                ->setPassword($userData['password'])
-                ->setEmailSubscription(
-                    $userData['newsletter'] ?? false,
-                    $userData['marketing'] ?? false,
-                    $userData['updates'] ?? false
-                )
-                ->setAccountStatus('pending_verification')
-                ->build();
+            // Create user using Factory pattern
+            $user = $this->userFactoryManager->createUser('regular', $userData);
 
             // Send verification email
             $this->sendVerificationEmail($user);
@@ -63,23 +56,12 @@ class UserRegistrationService
             // Validate required social media fields
             $this->validateSocialMediaData($socialData);
 
-            $user = $this->userBuilder
-                ->setBasicInfo(
-                    $socialData['first_name'] ?? '',
-                    $socialData['last_name'] ?? '',
-                    $socialData['email']
-                )
-                ->setSocialMediaPassword()
-                ->setSocialMediaInfo(
-                    $socialData['provider'],
-                    $socialData['provider_id'],
-                    $socialData['provider_data'] ?? []
-                )
-                ->setProfilePicture($socialData['profile_picture'] ?? '')
-                ->setEmailVerified(true) // Social media users are typically pre-verified
-                ->setAccountStatus('active')
-                ->setLastLogin()
-                ->build();
+            // Determine provider type
+            $provider = $socialData['provider'] ?? '';
+            $factoryType = $this->getFactoryTypeFromProvider($provider);
+
+            // Create user using Factory pattern
+            $user = $this->userFactoryManager->createUser($factoryType, $socialData);
 
             return $user;
         } catch (ValidationException $e) {
@@ -95,7 +77,9 @@ class UserRegistrationService
     public function createUserFromArray(array $userData): User
     {
         try {
-            return $this->userBuilder->createFromArray($userData);
+            // Determine user type based on data
+            $userType = $this->determineUserType($userData);
+            return $this->userFactoryManager->createUser($userType, $userData);
         } catch (ValidationException $e) {
             throw new Exception('Custom user creation failed: ' . $e->getMessage());
         } catch (Exception $e) {
@@ -383,15 +367,15 @@ class UserRegistrationService
     /**
      * Send verification email
      */
-    private function sendVerificationEmail(User $user): void
+    public function sendVerificationEmail(User $user): void
     {
         try {
             $token = Str::random(64);
             $user->email_verification_token = $token;
             $user->save();
 
-            // Send actual verification email
-            Mail::to($user->email)->send(new \App\Mail\EmailVerificationMail($user, $token));
+            // Send actual verification email using Factory pattern
+            $this->mailFactoryManager->sendMail('email_verification', $user, ['token' => $token]);
         } catch (Exception $e) {
             throw new Exception('Failed to send verification email: ' . $e->getMessage());
         }
@@ -403,22 +387,53 @@ class UserRegistrationService
     private function sendPasswordResetEmail(User $user, string $token): void
     {
         try {
-            // Send actual password reset email
-            Mail::to($user->email)->send(new \App\Mail\PasswordResetMail($user, $token));
+            // Send actual password reset email using Factory pattern
+            $this->mailFactoryManager->sendMail('password_reset', $user, ['token' => $token]);
         } catch (Exception $e) {
             throw new Exception('Failed to send password reset email: ' . $e->getMessage());
         }
     }
 
     /**
-     * Create user with custom builder configuration
+     * Get factory type from provider
      */
-    public function createUserWithCustomConfig(callable $builderCallback): User
+    private function getFactoryTypeFromProvider(string $provider): string
+    {
+        $providerMap = [
+            'facebook' => 'facebook',
+            'google' => 'google',
+        ];
+
+        return $providerMap[$provider] ?? 'regular';
+    }
+
+    /**
+     * Determine user type based on data
+     */
+    private function determineUserType(array $userData): string
+    {
+        if (isset($userData['provider'])) {
+            return $this->getFactoryTypeFromProvider($userData['provider']);
+        }
+
+        if (isset($userData['auth_provider'])) {
+            return $this->getFactoryTypeFromProvider($userData['auth_provider']);
+        }
+
+        return 'regular';
+    }
+
+    /**
+     * Create user with custom configuration
+     */
+    public function createUserWithCustomConfig(callable $factoryCallback): User
     {
         try {
-            $this->userBuilder->reset();
-            $builderCallback($this->userBuilder);
-            return $this->userBuilder->build();
+            // This method is now simplified since we use Factory pattern
+            // You can pass custom data and use the appropriate factory
+            $userData = $factoryCallback();
+            $userType = $this->determineUserType($userData);
+            return $this->userFactoryManager->createUser($userType, $userData);
         } catch (ValidationException $e) {
             throw new Exception('Custom user creation failed: ' . $e->getMessage());
         } catch (Exception $e) {
@@ -432,17 +447,21 @@ class UserRegistrationService
     public function validateUserDataOnly(array $userData): array
     {
         try {
-            $this->userBuilder->reset();
+            $userType = $this->determineUserType($userData);
+            $factory = $this->userFactoryManager->getFactory($userType);
             
-            if (isset($userData['first_name']) && isset($userData['last_name']) && isset($userData['email'])) {
-                $this->userBuilder->setBasicInfo($userData['first_name'], $userData['last_name'], $userData['email']);
+            // Validate data using factory
+            if (!$factory->validateUserData($userData)) {
+                return [
+                    'valid' => false,
+                    'errors' => $factory->getErrors()
+                ];
             }
 
-            if (isset($userData['password'])) {
-                $this->userBuilder->setPassword($userData['password']);
-            }
-
-            return $this->userBuilder->buildForValidation();
+            return [
+                'valid' => true,
+                'errors' => []
+            ];
         } catch (Exception $e) {
             throw new Exception('Data validation failed: ' . $e->getMessage());
         }

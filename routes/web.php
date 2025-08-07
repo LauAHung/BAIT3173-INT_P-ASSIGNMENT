@@ -32,6 +32,25 @@ Route::post('/reset-password', [LoginController::class, 'handleResetPassword'])-
 // Email verification
 Route::get('/verify-email/{token}', [LoginController::class, 'verifyEmail'])->name('verification.verify');
 
+// Debug route for testing email verification
+Route::get('/debug/verify-email/{token}', function($token) {
+    $user = \App\Models\User::where('email_verification_token', $token)->first();
+    if ($user) {
+        return response()->json([
+            'found' => true,
+            'user_id' => $user->user_id,
+            'email' => $user->email,
+            'token' => $user->email_verification_token,
+            'status' => $user->account_status
+        ]);
+    } else {
+        return response()->json([
+            'found' => false,
+            'token' => $token
+        ]);
+    }
+})->name('debug.verification');
+
 // Clear session messages
 Route::post('/clear-session', [LoginController::class, 'clearSession'])->name('clear.session');
 

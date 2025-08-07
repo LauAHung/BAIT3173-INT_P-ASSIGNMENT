@@ -3,19 +3,29 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\UserRegistrationService;
-use App\Strategies\AuthContext;
-use App\Strategies\GoogleAuthStrategy;
-use App\Strategies\FacebookAuthStrategy;
+use App\Factories\UserFactoryManager;
+use App\Factories\AuthFactoryManager;
+use App\Factories\MailFactoryManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SignupController extends Controller
 {
     private UserRegistrationService $userRegistrationService;
+    private UserFactoryManager $userFactoryManager;
+    private AuthFactoryManager $authFactoryManager;
+    private MailFactoryManager $mailFactoryManager;
 
-    public function __construct(UserRegistrationService $userRegistrationService)
-    {
+    public function __construct(
+        UserRegistrationService $userRegistrationService,
+        UserFactoryManager $userFactoryManager,
+        AuthFactoryManager $authFactoryManager,
+        MailFactoryManager $mailFactoryManager
+    ) {
         $this->userRegistrationService = $userRegistrationService;
+        $this->userFactoryManager = $userFactoryManager;
+        $this->authFactoryManager = $authFactoryManager;
+        $this->mailFactoryManager = $mailFactoryManager;
     }
 
     public function showForm()
@@ -37,29 +47,49 @@ class SignupController extends Controller
             'updates' => 'boolean',
         ]);
 
-        // Create the user using the Builder pattern
-        $user = $this->userRegistrationService->registerUser($validated);
+        try {
+            // Create the user using the Factory pattern
+            $user = $this->userFactoryManager->createUser('regular', $validated);
 
-        // Log the user in
-        Auth::login($user);
+            // Send email verification using UserRegistrationService
+            $this->userRegistrationService->sendVerificationEmail($user);
 
-        // Redirect to the login page or dashboard
-        return redirect()->route('signin')->with('success', 'Registration successful! Please check your email to verify your account.');
+            // Log the user in
+            Auth::login($user);
+
+            // Redirect to the login page or dashboard
+            return redirect()->route('signin')->with('success', 'Registration successful! Please check your email to verify your account.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Registration failed: ' . $e->getMessage()]);
+        }
     }
 
     public function handleOAuth(Request $request)
     {
-        $authContext = null;
-    
-        if ($request->has('google')) {
-            $authContext = new AuthContext(new GoogleAuthStrategy());
-        } elseif ($request->has('facebook')) {
-            $authContext = new AuthContext(new FacebookAuthStrategy());
+        try {
+            if ($request->has('google')) {
+                $user = $this->authFactoryManager->authenticate('social', [
+                    'provider' => 'google',
+                    'provider_id' => $request->input('google_id'),
+                ]);
+            } elseif ($request->has('facebook')) {
+                $user = $this->authFactoryManager->authenticate('social', [
+                    'provider' => 'facebook',
+                    'provider_id' => $request->input('facebook_id'),
+                ]);
+            } else {
+                return redirect()->route('home')->with('error', 'Invalid OAuth provider');
+            }
+
+            if ($user) {
+                Auth::login($user);
+                return redirect()->route('home')->with('success', 'OAuth login successful');
+            } else {
+                return redirect()->route('home')->with('error', 'OAuth authentication failed');
+            }
+        } catch (\Exception $e) {
+            return redirect()->route('home')->with('error', 'OAuth authentication error: ' . $e->getMessage());
         }
-    
-        $result = $authContext->executeStrategy();
-    
-        return redirect()->route('home')->with('status', $result);
     }
 
     /**

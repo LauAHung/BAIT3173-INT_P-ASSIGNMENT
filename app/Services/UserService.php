@@ -3,11 +3,19 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Factories\UserFactoryManager;
 use Illuminate\Support\Facades\Hash;
 use Exception;
 
 class UserService
 {
+    private UserFactoryManager $userFactoryManager;
+
+    public function __construct(UserFactoryManager $userFactoryManager)
+    {
+        $this->userFactoryManager = $userFactoryManager;
+    }
+
     /**
      * Get all users with pagination and search
      */
@@ -217,6 +225,84 @@ class UserService
             return [
                 'success' => false,
                 'message' => 'Failed to export users: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Get available user factory types
+     */
+    public function getAvailableUserTypes()
+    {
+        try {
+            $types = $this->userFactoryManager->getAvailableTypes();
+            
+            return [
+                'success' => true,
+                'data' => $types
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to get user types: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Validate user data using factory pattern
+     */
+    public function validateUserData($userType, $userData)
+    {
+        try {
+            if (!$this->userFactoryManager->isSupported($userType)) {
+                return [
+                    'success' => false,
+                    'message' => "Unsupported user type: {$userType}"
+                ];
+            }
+
+            $factory = $this->userFactoryManager->getFactory($userType);
+            $isValid = $factory->validateUserData($userData);
+
+            return [
+                'success' => $isValid,
+                'valid' => $isValid,
+                'errors' => $factory->getErrors()
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to validate user data: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Get user statistics by factory type
+     */
+    public function getUserStatsByType()
+    {
+        try {
+            $types = $this->userFactoryManager->getAvailableTypes();
+            $stats = [];
+
+            foreach ($types as $type) {
+                $factory = $this->userFactoryManager->getFactory($type);
+                $stats[$type] = [
+                    'factory_class' => get_class($factory),
+                    'supported' => true
+                ];
+            }
+
+            return [
+                'success' => true,
+                'data' => $stats
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to get user stats by type: ' . $e->getMessage()
             ];
         }
     }

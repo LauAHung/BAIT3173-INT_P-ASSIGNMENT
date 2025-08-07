@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\UserRegistrationService;
+use App\Factories\AuthFactoryManager;
+use App\Factories\MailFactoryManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -10,10 +12,17 @@ use Illuminate\Validation\ValidationException;
 class LoginController extends Controller
 {
     private UserRegistrationService $userRegistrationService;
+    private AuthFactoryManager $authFactoryManager;
+    private MailFactoryManager $mailFactoryManager;
 
-    public function __construct(UserRegistrationService $userRegistrationService)
-    {
+    public function __construct(
+        UserRegistrationService $userRegistrationService,
+        AuthFactoryManager $authFactoryManager,
+        MailFactoryManager $mailFactoryManager
+    ) {
         $this->userRegistrationService = $userRegistrationService;
+        $this->authFactoryManager = $authFactoryManager;
+        $this->mailFactoryManager = $mailFactoryManager;
     }
 
     /**
@@ -40,27 +49,36 @@ class LoginController extends Controller
             'password' => $request->password,
         ];
 
-        // Attempt to authenticate user
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $user = Auth::user();
+        // Attempt to authenticate user using Factory pattern
+        try {
+            $user = $this->authFactoryManager->authenticate('email', $credentials);
             
-            // Update last login timestamp
-            $this->userRegistrationService->handleUserLogin($user);
-            
-            // Check if user is active
-            if (!$user->isActive()) {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'Your account is not active. Please check your email for verification.',
-                ]);
-            }
+            if ($user) {
+                // Update last login timestamp
+                $this->userRegistrationService->handleUserLogin($user);
+                
+                // Check if user is active
+                if ($user->account_status !== 'active') {
+                    Auth::logout();
+                    return back()->withErrors([
+                        'email' => 'Your account is not active. Please check your email for verification.',
+                    ]);
+                }
 
-            // Redirect based on user role or to profile page
-            if ($user->role === 'admin') {
-                return redirect()->route('dashboard')->with('success', 'Welcome back, ' . $user->first_name . '!');
-            }
+                // Log the user in
+                Auth::login($user, $request->boolean('remember'));
 
-            return redirect()->route('profile')->with('success', 'Welcome back, ' . $user->first_name . '!');
+                // Redirect based on user role or to profile page
+                if ($user->role === 'admin') {
+                    return redirect()->route('dashboard')->with('success', 'Welcome back, ' . $user->first_name . '!');
+                }
+
+                return redirect()->route('profile')->with('success', 'Welcome back, ' . $user->first_name . '!');
+            }
+        } catch (\Exception $e) {
+            return back()->withErrors([
+                'email' => 'Authentication error: ' . $e->getMessage(),
+            ])->withInput($request->only('email'));
         }
 
         // Authentication failed
