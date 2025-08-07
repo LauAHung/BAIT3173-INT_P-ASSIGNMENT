@@ -8,6 +8,9 @@ class Journey extends Model
 {
     protected $table = 'Journeys'; // Correct table name
     protected $primaryKey = 'JourneyID';
+    public $incrementing = true;
+    protected $keyType = 'string';
+    public $timestamps = false;
     protected $fillable = [
         'TrainID',
         'FromLocation',

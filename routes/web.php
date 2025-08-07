@@ -62,11 +62,6 @@ Route::get('/seat_select', function () {
     return view('SelectSeatPage');
 })->name('selectseat');
 
-Route::get('/passenger_info', function () {
-    return view('PassengerInfoPage');
-})->name('passengerinfo');
-
-
 // Signup Page & Profile Page
 Route::get('/signup', [SignupController::class, 'showForm'])
 ->name('signup');
@@ -114,6 +109,9 @@ Route::prefix('admin')->group(function () {
 // Booking Module
 Route::get('/train-selection', [TrainSelectionController::class, 'index'])->name('train.selection');
 Route::get('/passengerinfo', [TrainSelectionController::class, 'showPassengerInfo'])->name('passengerinfo');
+Route::post('/passenger-info/store', [TrainSelectionController::class, 'storePassengerInfo'])->name('store.passengerinfo');
+Route::get('/selectseat', [TrainSelectionController::class, 'showSelectSeat'])->name('selectseat');
+
 Route::get('/booking', [BookingController::class, 'index'])->name('booking');
 Route::get('/booking_detail/{bookingId}', [BookingDetailController::class, 'show'])->name('bookingdetail');
 

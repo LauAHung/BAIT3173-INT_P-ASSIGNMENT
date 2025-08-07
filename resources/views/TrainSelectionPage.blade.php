@@ -20,7 +20,8 @@
         <form class="search-form" action="{{ route('train.selection') }}" method="GET" id="searchForm">
             <div class="form-group">
                 <label>Depart Location</label>
-                <input type="text" name="fromlocation" placeholder="Where from?" value="{{ request()->input('fromlocation') }}">
+                <input type="text" name="fromlocation" placeholder="Where from?"
+                    value="{{ request()->input('fromlocation') }}">
             </div>
 
             <div class="swap-btn-container">
@@ -31,14 +32,16 @@
 
             <div class="form-group">
                 <label>To Location</label>
-                <input type="text" name="tolocation" placeholder="Where to?" value="{{ request()->input('tolocation') }}">
+                <input type="text" name="tolocation" placeholder="Where to?"
+                    value="{{ request()->input('tolocation') }}">
             </div>
 
             <div class="form-group">
                 <label>Departure Date</label>
                 <div class="date-input-container">
                     <i class="fas fa-calendar-alt date-icon"></i>
-                    <input type="text" id="depart-date" name="journeydate" placeholder="Select date" readonly value="{{ request()->input('journeydate') }}">
+                    <input type="text" id="depart-date" name="journeydate" placeholder="Select date" readonly
+                        value="{{ request()->input('journeydate') }}">
                 </div>
             </div>
 
@@ -46,7 +49,8 @@
                 <label>Return Date</label>
                 <div class="date-input-container">
                     <i class="fas fa-calendar-alt date-icon"></i>
-                    <input type="text" id="return-date" name="returndate" placeholder="Select date" readonly disabled value="{{ request()->input('returndate') }}">
+                    <input type="text" id="return-date" name="returndate" placeholder="Select date" readonly disabled
+                        value="{{ request()->input('returndate') }}">
                 </div>
             </div>
 
@@ -54,8 +58,10 @@
                 <label>Passengers</label>
                 <select name="passengers">
                     <option value="1" {{ request()->input('passengers') == '1' ? 'selected' : '' }}>1 Passenger</option>
-                    <option value="2" {{ request()->input('passengers') == '2' ? 'selected' : '' }}>2 Passengers</option>
-                    <option value="3" {{ request()->input('passengers') == '3' ? 'selected' : '' }}>3 Passengers</option>
+                    <option value="2" {{ request()->input('passengers') == '2' ? 'selected' : '' }}>2 Passengers
+                    </option>
+                    <option value="3" {{ request()->input('passengers') == '3' ? 'selected' : '' }}>3 Passengers
+                    </option>
                 </select>
             </div>
             <button type="submit" class="search-btn">Search</button>
@@ -79,15 +85,18 @@
                 <div class="filter-section">
                     <h4>Train Type</h4>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="train_type[]" value="ETS" id="direct" {{ in_array('ETS', request()->input('train_type', [])) ? 'checked' : '' }}>
+                        <input type="checkbox" name="train_type[]" value="ETS" id="direct"
+                            {{ in_array('ETS', request()->input('train_type', [])) ? 'checked' : '' }}>
                         <label for="direct">ETS</label>
                     </div>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="train_type[]" value="Komuter" id="oneStop" {{ in_array('Komuter', request()->input('train_type', [])) ? 'checked' : '' }}>
+                        <input type="checkbox" name="train_type[]" value="Komuter" id="oneStop"
+                            {{ in_array('Komuter', request()->input('train_type', [])) ? 'checked' : '' }}>
                         <label for="oneStop">KTM Komuter</label>
                     </div>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="train_type[]" value="Intercity" id="twoStops" {{ in_array('Intercity', request()->input('train_type', [])) ? 'checked' : '' }}>
+                        <input type="checkbox" name="train_type[]" value="Intercity" id="twoStops"
+                            {{ in_array('Intercity', request()->input('train_type', [])) ? 'checked' : '' }}>
                         <label for="twoStops">KTM Intercity</label>
                     </div>
                 </div>
@@ -95,19 +104,23 @@
                 <div class="filter-section">
                     <h4>Departure Time</h4>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="departure_time[]" value="early" id="early" {{ in_array('early', request()->input('departure_time', [])) ? 'checked' : '' }}>
+                        <input type="checkbox" name="departure_time[]" value="early" id="early"
+                            {{ in_array('early', request()->input('departure_time', [])) ? 'checked' : '' }}>
                         <label for="early">Early Train (00:00 - 06:00)</label>
                     </div>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="departure_time[]" value="morning" id="morning" {{ in_array('morning', request()->input('departure_time', [])) ? 'checked' : '' }}>
+                        <input type="checkbox" name="departure_time[]" value="morning" id="morning"
+                            {{ in_array('morning', request()->input('departure_time', [])) ? 'checked' : '' }}>
                         <label for="morning">Morning Train (06:00 - 12:00)</label>
                     </div>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="departure_time[]" value="afternoon" id="afternoon" {{ in_array('afternoon', request()->input('departure_time', [])) ? 'checked' : '' }}>
+                        <input type="checkbox" name="departure_time[]" value="afternoon" id="afternoon"
+                            {{ in_array('afternoon', request()->input('departure_time', [])) ? 'checked' : '' }}>
                         <label for="afternoon">Afternoon Train (12:00 - 18:00)</label>
                     </div>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="departure_time[]" value="night" id="night" {{ in_array('night', request()->input('departure_time', [])) ? 'checked' : '' }}>
+                        <input type="checkbox" name="departure_time[]" value="night" id="night"
+                            {{ in_array('night', request()->input('departure_time', [])) ? 'checked' : '' }}>
                         <label for="night">Night Train (18:00 - 00:00)</label>
                     </div>
                 </div>
@@ -143,7 +156,8 @@
                     <div><b>{{ date('h:i A', strtotime($journey->DepartureTime)) }}</b> &mdash;
                         <b>{{ date('h:i A', strtotime($journey->ArrivalTime)) }}</b>
                     </div>
-                    <div class="train-desc">({{ $journey->FromLocation ?? 'Unknown' }} to {{ $journey->ToLocation ?? 'Unknown' }})</div>
+                    <div class="train-desc">({{ $journey->FromLocation ?? 'Unknown' }} to
+                        {{ $journey->ToLocation ?? 'Unknown' }})</div>
                 </div>
                 <div class="train-col train-capacity">
                     {{ $journey->SeatAvailable }}
@@ -151,8 +165,10 @@
                 </div>
                 <div class="train-col train-action">
                     <span class="train-price">RM{{ $journey->Price }}</span>
-                    <a href="{{ route('passengerinfo', ['passengers' => request()->input('passengers', 1)]) }}"><button
-                            class="btn-select">Select</button></a>
+                    <a
+                        href="{{ route('passengerinfo', ['passengers' => request()->input('passengers', 1), 'journey_id' => $journey->JourneyID]) }}">
+                        <button class="btn-select">Select</button>
+                    </a>
                 </div>
             </div>
             @endforeach

@@ -17,59 +17,46 @@
             </div>
             <div class="passenger-container">
                 <div class="passenger-info-details">
+                    @foreach ($passengers as $index => $passenger)
                     <div class="passenger-info">
                         <div class="passenger-item">
-                            <span class="passenger-label">Passenger 1</span>
-                            <span class="passenger-subtext">KL SENTRAL KUALA LUMPUR > IPOH, A-1AC (MYR 24.00)</span>
+                            <span class="passenger-label">Passenger {{ $index + 1 }}</span>
+                            <span class="passenger-subtext">{{ $journey['from_location'] }} > {{ $journey['to_location'] }}, (MYR {{ $journey['price'] }})</span>
                         </div>
                         <div class="details-item">
                             <span class="details-label">Ticket type</span>
-                            <span class="details-value">DEWASA/ADULT</span>
+                            <span class="details-value">{{ $passenger['ticket_type'] }}</span>
                             <span class="details-label">MyKad no. / passport</span>
-                            <span class="details-value">************</span>
+                            <span class="details-value">{{ $passenger['mykad'] ?? $passenger['passport'] ?? 'N/A' }}</span>
                             <span class="details-label">Contact no.</span>
-                            <span class="details-value">************</span>
+                            <span class="details-value">{{ $passenger['contact_no'] }}</span>
                         </div>
                     </div>
-                    <div class="passenger-info">
-                        <div class="passenger-item">
-                            <span class="passenger-label">Passenger 2</span>
-                            <span class="passenger-subtext">KL SENTRAL KUALA LUMPUR > IPOH, B-2BD (MYR 24.00)</span>
-                        </div>
-                        <div class="details-item">
-                            <span class="details-label">Ticket type</span>
-                            <span class="details-value">DEWASA/CHILD</span>
-                            <span class="details-label">MyKad no. / passport</span>
-                            <span class="details-value">************</span>
-                            <span class="details-label">Contact no.</span>
-                            <span class="details-value">************</span>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
-    </div>
     </div>
     <div class="ticket-details-box">
         <div class="trip-info">
             <h2>Price Details</h2>
             <div class="trip-details">
                 <div class="trip-details-col">
-                    <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service-type">
+                    <img src="{{ asset('images/logo/' . ($journey['train_service'] == 'ETS' ? 'ets_logo.png' : ($journey['train_service'] == 'Komuter' ? 'komuter_logo.png' : 'intercity_logo.png'))) }}" alt="service-type">
                     <div class="depart-part">
                         <span class="label">DEPART</span>
-                        <div>T-011</div>
-                        <div>Sun, Jan 05 (07:00 PM - 08:05 PM)</div>
+                        <div>{{ $journey['train_no'] }}</div>
+                        <div>{{ date('D, M d (h:i A', strtotime($journey['departure_time'])) }} - {{ date('h:i A', strtotime($journey['arrival_time'])) }})</div>
                     </div>
                 </div>
                 <div class="trip-price-info">
                     <div class="price-info">
-                        <div>Total ticket (2)</div>
-                        <div>RM 48.00</div>
+                        <div>Total ticket ({{ $passengersCount }})</div>
+                        <div>RM {{ $journey['price'] * $passengersCount }}</div>
                     </div>
                     <div class="total-price-info">
                         <a>Trip Total</a>
-                        <a>RM 48.00</a>
+                        <a>RM {{ $journey['price'] * $passengersCount }}</a>
                     </div>
                 </div>
             </div>

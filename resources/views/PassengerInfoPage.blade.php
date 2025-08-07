@@ -8,7 +8,8 @@
 
 @section('content')
 <section>
-    <form action="#" data-selectseat-url="{{ route('selectseat') }}">
+    <form action="{{ route('store.passengerinfo') }}" method="POST" data-selectseat-url="{{ route('selectseat') }}">
+        @csrf
         <div class="passenger-main-layout">
             <!-- 左侧：乘客信息 -->
             <div class="passenger-info-panel">
@@ -126,6 +127,6 @@ function togglePassenger(pid) {
     }
 }
 </script>
-<script src="{{ asset('js/PassengerInfoPage.js') }}" defer></script>
+
 
 @endsection
