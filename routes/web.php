@@ -98,6 +98,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/api/dashboard/stats', [App\Http\Controllers\AdminController::class, 'getDashboardStats']);
     Route::get('/api/users', [App\Http\Controllers\AdminController::class, 'getUsers']);
     Route::put('/api/users/{id}/status', [App\Http\Controllers\AdminController::class, 'updateUserStatus']);
+    Route::delete('/api/users/{id}', [App\Http\Controllers\AdminController::class, 'deleteUser']);
     Route::get('/api/trains', [App\Http\Controllers\AdminController::class, 'getTrains']);
     Route::post('/api/trains', [App\Http\Controllers\AdminController::class, 'addTrain']);
     Route::put('/api/trains/{id}', [App\Http\Controllers\AdminController::class, 'updateTrain']);

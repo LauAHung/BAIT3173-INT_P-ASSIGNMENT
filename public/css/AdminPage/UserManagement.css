@@ -1,80 +1,270 @@
+/* User Management Styles */
 .user-management-container {
-    padding: 40px;
-    width: 100%;
-    margin-top: 30px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .page-title {
-    font-size: 2.2rem;
-    color: #fff;
+    color: #333;
     margin-bottom: 30px;
-    text-shadow: 0 0 10px #6d54b5;
+    font-size: 24px;
+    font-weight: bold;
 }
 
+/* Filters Section */
+.user-table-filters {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.user-table-filters input[type="text"] {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+.user-table-filters select {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background: white;
+    min-width: 150px;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Table Styles */
 .user-table-section {
-    background: #2c2638;
-    border-radius: 15px;
-    box-shadow: 0 2px 12px rgba(109,84,181,0.10);
-    padding: 24px;
-    color: #fff;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
 }
 
 .user-table-section table {
     width: 100%;
     border-collapse: collapse;
-    color: #fff;
-}
-
-.user-table-section th, .user-table-section td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #453f53;
-    text-align: left;
 }
 
 .user-table-section th {
-    background: #3a7bd5;
-    color: #fff;
-}
-
-select {
-    background: #453f53;
-    color: #fff;
-    border-radius: 6px;
-    border: none;
-    padding: 6px 12px;
-    font-size: 1rem;
-}
-
-.btn-primary {
-    background: linear-gradient(90deg, #3a7bd5 60%, #00d2ff 100%);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 20px;
-    font-size: 1rem;
+    background: #f8f9fa;
+    padding: 15px;
+    text-align: left;
     font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(109,84,181,0.18);
-    transition: background 0.2s;
+    color: #333;
+    border-bottom: 2px solid #dee2e6;
 }
 
-.btn-primary:hover {
-    background: linear-gradient(90deg, #00d2ff 60%, #3a7bd5 100%);
+.user-table-section td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
 }
 
-.user-table-filters {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 18px;
-    align-items: center;
+.user-table-section tr:hover {
+    background: #f8f9fa;
 }
 
-.user-table-filters input,
-.user-table-filters select {
-    background: #453f53;
-    color: #fff;
-    border-radius: 6px;
+/* Status Select */
+.status-select {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    background: white;
+}
+
+/* Badge Styles */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Pagination */
+.pagination-container {
+    padding: 20px;
+    text-align: center;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.pagination-container .pagination {
+    display: inline-flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pagination-container .pagination li {
+    margin: 0 2px;
+}
+
+.pagination-container .pagination li a,
+.pagination-container .pagination li span {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    text-decoration: none;
+    color: #007bff;
+    background: white;
+    border-radius: 4px;
+    display: block;
+}
+
+.pagination-container .pagination li span {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-container .pagination li a:hover {
+    background: #e9ecef;
+}
+
+/* No Users Message */
+.no-users-message {
+    padding: 40px;
+    text-align: center;
+    color: #6c757d;
+}
+
+/* Message Container */
+.message-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+}
+
+.message-content {
+    padding: 15px 20px;
+    border-radius: 4px;
+    color: white;
+    font-weight: 500;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.message-success {
+    background: #28a745;
+}
+
+.message-error {
+    background: #dc3545;
+}
+
+.close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
     border: none;
-    padding: 8px 14px;
-    font-size: 1rem;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .user-table-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .user-table-filters input[type="text"],
+    .user-table-filters select {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .user-table-section {
+        overflow-x: auto;
+    }
+    
+    .user-table-section table {
+        min-width: 600px;
+    }
+    
+    .user-table-section th,
+    .user-table-section td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
 }

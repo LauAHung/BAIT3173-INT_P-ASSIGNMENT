@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(UserService::class, function ($app) {
-            return new UserService();
+            return new UserService($app->make(\App\Factories\UserFactoryManager::class));
         });
 
         $this->app->singleton(TrainService::class, function ($app) {

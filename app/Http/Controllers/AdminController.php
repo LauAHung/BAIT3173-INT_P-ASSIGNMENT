@@ -31,9 +31,24 @@ class AdminController extends Controller
     {
         $page = $request->get('page', 1);
         $search = $request->get('search');
+        $status = $request->get('status');
+        $role = $request->get('role');
         
-        $users = AdminFacade::getUsers($page, 10, $search);
-        return view('admin.users', compact('users'));
+        $userService = app(\App\Services\UserService::class);
+        $result = $userService->getUsers($page, 10, $search);
+        
+        // Check if the result is successful
+        if (!$result['success']) {
+            // If failed, create empty result
+            $users = [
+                'success' => false,
+                'data' => collect([])->paginate(10)
+            ];
+        } else {
+            $users = $result;
+        }
+        
+        return view('AdminPage.UserManagement', compact('users'));
     }
 
     /**
@@ -101,8 +116,11 @@ class AdminController extends Controller
     {
         $page = $request->get('page', 1);
         $search = $request->get('search');
+        $status = $request->get('status');
+        $role = $request->get('role');
         
-        $users = AdminFacade::getUsers($page, 10, $search);
+        $userService = app(\App\Services\UserService::class);
+        $users = $userService->getUsers($page, 10, $search);
         return response()->json($users);
     }
 
@@ -116,7 +134,18 @@ class AdminController extends Controller
             'status' => 'required|string|in:active,inactive,suspended,pending_verification'
         ]);
 
-        $result = AdminFacade::updateUserStatus($request->user_id, $request->status);
+        $userService = app(\App\Services\UserService::class);
+        $result = $userService->updateUserStatus($request->user_id, $request->status);
+        return response()->json($result);
+    }
+
+    /**
+     * Delete user via API
+     */
+    public function deleteUser($userId): JsonResponse
+    {
+        $userService = app(\App\Services\UserService::class);
+        $result = $userService->deleteUser($userId);
         return response()->json($result);
     }
 
