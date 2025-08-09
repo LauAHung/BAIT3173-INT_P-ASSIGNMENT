@@ -199,4 +199,34 @@ flatpickr("#depart-date", {
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Pass the session success value to JavaScript
+    const successMessage = "{{ session('success') }}";
+
+    // Normal JavaScript if statement
+    if (successMessage) {
+        console.log('Success message detected:', successMessage); // Debug log
+        Swal.fire({
+            title: 'Success!',
+            text: successMessage,
+            icon: 'success',
+            timer: 3000, // Auto-close after 3 seconds
+            showConfirmButton: false,
+            toast: true,
+            width: 800, // Increase width to 400px (default is auto)
+            padding: '15px 20px', // Increase padding for larger content area
+            customClass: {
+                popup: 'custom-larger-toast' // Custom class for additional styling
+            }
+        }).then(() => {
+            console.log('Toast displayed'); // Debug log
+        });
+    } else {
+        console.log('No success message found'); // Debug log
+    }
+});
+</script>
+
 @endsection

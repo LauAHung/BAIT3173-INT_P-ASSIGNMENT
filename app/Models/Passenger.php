@@ -13,11 +13,16 @@ class Passenger extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'PassengerID', 'Name', 'Gender', 'ICno', 'Passportno', 'PassportExpiryDate', 'TicketType', 'Created_at',
+        'PassengerID', 'BookingID','Name', 'Gender', 'ICno', 'Passportno', 'PassportExpiryDate', 'TicketType', 'Created_at',
     ];
 
     protected $casts = [
         'PassportExpiryDate' => 'datetime',
         'Created_at' => 'datetime',
     ];
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'PassengerID', 'PassengerID');
+    }
 }

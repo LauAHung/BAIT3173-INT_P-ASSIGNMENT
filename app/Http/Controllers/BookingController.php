@@ -12,18 +12,26 @@ class BookingController extends Controller
     {
         // Fetch bookings with related journey and train data
         $ongoingBookings = Booking::with(['journey', 'journey.train'])
-        ->where('Status', 'Booked')
+        ->whereIn('Status', ['Booked', 'Pending'])
         ->get()
         ->map(function ($booking) {
             $booking->Journey->DepartureTime = \Carbon\Carbon::parse($booking->Journey->DepartureTime)->format('Y-m-d');
+            $booking->showViewQR = $booking->Status === 'Booked';
+            $booking->showRefund = $booking->Status === 'Booked';
+            $booking->showProceedPayment = $booking->Status === 'Pending';
+            $booking->showCancel = $booking->Status === 'Pending';
             return $booking;
         });
 
+        Log::info('Ongoing Bookings:', ['bookings' => $ongoingBookings->toArray()]);
+
         $pastBookings = Booking::with(['journey', 'journey.train'])
-        ->where('Status', 'Completed')
+        ->whereIn('Status', ['Completed','Cancelled'])
         ->get()
         ->map(function ($booking) {
             $booking->Journey->DepartureTime = \Carbon\Carbon::parse($booking->Journey->DepartureTime)->format('Y-m-d');
+            $booking->showViewQR = $booking->Status === 'Completed';
+            $booking->showRateTrip = $booking->Status === 'Completed';
             return $booking;
         });
 

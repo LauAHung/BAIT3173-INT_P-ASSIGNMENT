@@ -110,9 +110,14 @@ Route::prefix('admin')->group(function () {
 Route::get('/train-selection', [TrainSelectionController::class, 'index'])->name('train.selection');
 Route::get('/passengerinfo', [TrainSelectionController::class, 'showPassengerInfo'])->name('passengerinfo');
 Route::post('/passenger-info/store', [TrainSelectionController::class, 'storePassengerInfo'])->name('store.passengerinfo');
-Route::get('/selectseat', [TrainSelectionController::class, 'showSelectSeat'])->name('selectseat');
+Route::get('/selectseat/', [TrainSelectionController::class, 'showSelectSeat'])->name('selectseat');
+Route::post('/booking/store', [TrainSelectionController::class, 'storeBooking'])->name('booking.store');
 
 Route::get('/booking', [BookingController::class, 'index'])->name('booking');
+Route::get('/booking/refund', [BookingController::class, 'refund'])->name('refund');
+Route::get('/booking/payment', [BookingController::class, 'refund'])->name('proceedPayment');
+Route::get('/booking/cancel', [BookingController::class, 'refund'])->name('cancel');
+Route::get('/booking/rate', [BookingController::class, 'refund'])->name('rateTrip');
 Route::get('/booking_detail/{bookingId}', [BookingDetailController::class, 'show'])->name('bookingdetail');
 
 Route::get('/booking_detail', function () {

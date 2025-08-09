@@ -8,6 +8,14 @@
 
 @section('content')
 <section>
+    <!-- Display general error messages (e.g., duplicate IC/passport) -->
+    @if ($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                alert('{{ $errors->first() }}');
+            });
+        </script>
+    @endif
     <form action="{{ route('store.passengerinfo') }}" method="POST" data-selectseat-url="{{ route('selectseat') }}">
         @csrf
         <div class="passenger-main-layout">
@@ -83,7 +91,7 @@
 
                     <div class="btn-container">
                         <a href="{{ route('TrainSelectionPage') }}"><button type="button" class="btn-submit">BACK</button></a>
-                        <a href="{{ route('selectseat') }}"><button type="submit" class="btn-submit">NEXT</button></a>
+                        <button type="submit" id="submit-btn" class="btn-submit">NEXT</button>
                     </div>
                 </div>
             </div>
@@ -127,6 +135,5 @@ function togglePassenger(pid) {
     }
 }
 </script>
-
 
 @endsection
