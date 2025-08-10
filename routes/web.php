@@ -16,10 +16,10 @@ Route::get('/', function () {
 
 Route::get('/signup', function () {
     return view('SignUpPage');
-})->name('signup');
+})->middleware('guest')->name('signup');
 
 // Login routes
-Route::get('/signin', [LoginController::class, 'showLoginForm'])->name('signin');
+Route::get('/signin', [LoginController::class, 'showLoginForm'])->middleware('guest')->name('signin');
 Route::post('/login', [LoginController::class, 'handleLogin'])->name('login.handle');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
@@ -64,7 +64,7 @@ Route::get('/seat_select', function () {
 
 // Signup Page & Profile Page
 Route::get('/signup', [SignupController::class, 'showForm'])
-->name('signup');
+->middleware('guest')->name('signup');
 
 Route::post('/signup', [SignupController::class, 'handleSignup'])
 ->name('signup.handle');

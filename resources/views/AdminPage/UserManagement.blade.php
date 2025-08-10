@@ -96,7 +96,7 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoadd', function() {
     // Add event listeners for save buttons
     document.querySelectorAll('.save-btn').forEach(button => {
         button.addEventListener('click', function() {

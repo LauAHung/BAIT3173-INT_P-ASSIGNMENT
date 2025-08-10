@@ -57,7 +57,7 @@ class FacebookAuthController extends Controller
 
             Auth::login($user);
 
-            return redirect()->route('profile')->with('success', 'Facebook login successful');
+            return redirect()->route('HomePage')->with('success', 'Facebook login successful');
         } catch (\Exception $e) {
             return redirect()->route('signin')->with('error', 'Facebook authentication failed: ' . $e->getMessage());
         }

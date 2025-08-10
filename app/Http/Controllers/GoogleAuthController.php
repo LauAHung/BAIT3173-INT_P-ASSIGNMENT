@@ -59,7 +59,7 @@ class GoogleAuthController extends Controller
 
             Auth::login($user);
 
-            return redirect()->route('profile')->with('success', 'Google login successful');
+            return redirect()->route('HomePage')->with('success', 'Google login successful');
         } catch (\Exception $e) {
             return redirect()->route('signin')->with('error', 'Google authentication failed: ' . $e->getMessage());
         }

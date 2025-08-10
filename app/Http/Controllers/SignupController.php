@@ -54,11 +54,8 @@ class SignupController extends Controller
             // Send email verification using UserRegistrationService
             $this->userRegistrationService->sendVerificationEmail($user);
 
-            // Log the user in
-            Auth::login($user);
-
-            // Redirect to the login page or dashboard
-            return redirect()->route('signin')->with('success', 'Registration successful! Please check your email to verify your account.');
+            // Redirect to the login page (don't auto-login)
+            return redirect()->route('signin')->with('success', 'Registration successful! Please check your email to verify your account and then login.');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Registration failed: ' . $e->getMessage()]);
         }

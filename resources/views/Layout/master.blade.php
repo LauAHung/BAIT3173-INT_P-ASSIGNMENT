@@ -26,7 +26,11 @@
         <nav>
             <ul>
                 <li><a href="{{ route('booking') }}">Booking</a></li>
-                <li><a href="{{ route('signup') }}">Account</a></li>
+                @auth
+                    <li><a href="{{ route('profile') }}">Account</a></li>
+                @else
+                    <li><a href="#" onclick="showLoginRequiredModal()">Account</a></li>
+                @endauth
             </ul>
         </nav>
         <div class="nav-animate"></div>
@@ -96,5 +100,8 @@
         </div>
     </footer>
     <script src="{{ asset('js/master.js') }}" defer></script>
+    
+    <!-- Include Login Required Modal Component -->
+    @include('components.login_required_modal')
 </body>
 </html>

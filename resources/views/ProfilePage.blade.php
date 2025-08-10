@@ -30,18 +30,23 @@
         <button class="create-btn small" onclick="alert('Phone number functionality coming soon!')">Add</button>
       </div>
     </div>
-    <div class="card-row">
-      <div class="card-item">
-        <span class="label">Password</span>
-        @if($user->needsPasswordSetup())
-          <div class="value">No password set (Google login)</div>
+    @if($user->hasSocialLogin())
+      <div class="card-row">
+        <div class="card-item">
+          <span class="label">Password</span>
+          <div class="value">No password set ({{ ucfirst($user->social_provider) }} login)</div>
           <button class="create-btn small" onclick="showSetPasswordForm()">Set Password</button>
-        @else
+        </div>
+      </div>
+    @else
+      <div class="card-row">
+        <div class="card-item">
+          <span class="label">Password</span>
           <div class="value">Set a password to protect your account</div>
           <button class="create-btn small" onclick="showChangePasswordForm()">Change</button>
-        @endif
+        </div>
       </div>
-    </div>
+    @endif
   </div>
 
   <div class="card">
@@ -88,7 +93,7 @@
       <span class="close" onclick="hideSetPasswordForm()">&times;</span>
       <h2>Set Password</h2>
       <div class="alert alert-info">
-        <strong>Note:</strong> You logged in with Google. Setting a password will allow you to log in with email and password in the future.
+        <strong>Note:</strong> You logged in with {{ ucfirst($user->social_provider) }}. Setting a password will allow you to log in with email and password in the future.
       </div>
       <form action="{{ route('profile.change-password.post') }}" method="POST">
         @csrf
@@ -167,7 +172,7 @@
         @else
         <div class="form-group">
           <div class="alert alert-info">
-            <strong>Note:</strong> Since you logged in with Google, no password confirmation is required.
+            <strong>Note:</strong> Since you logged in with {{ ucfirst($user->social_provider) }}, no password confirmation is required.
           </div>
         </div>
         @endif
