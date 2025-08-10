@@ -228,6 +228,7 @@ section {
 }
 
 .side-card {
+  margin-top: 70px;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 2px 8px rgba(80,60,120,0.08);
