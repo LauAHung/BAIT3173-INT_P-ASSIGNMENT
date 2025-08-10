@@ -219,16 +219,17 @@ section {
 }
 
 .passenger-side-info {
+    margin-top: 100px;
     flex: 1 1 320px;
     min-width: 320px;
     max-width: 400px;
     display: flex;
     flex-direction: column;
     gap: 18px;
+    margin-bottom: 50px;
 }
 
 .side-card {
-  margin-top: 70px;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 2px 8px rgba(80,60,120,0.08);
@@ -244,7 +245,7 @@ section {
 }
 
 .side-price {
-  color: #1a357e;
+  color: #2b1e53;
   font-size: 2em;
   font-weight: bold;
   margin-bottom: 8px;
@@ -273,9 +274,9 @@ section {
   width: 100%;
   padding: 12px 0;
   border-radius: 24px;
-  border: 2px solid #1a357e;
+  border: 2px solid #2b1e53;
   background: #fff;
-  color: #1a357e;
+  color: #2b1e53;
   font-weight: bold;
   font-size: 1.1em;
   margin-bottom: 10px;
@@ -283,15 +284,15 @@ section {
   transition: background 0.2s, color 0.2s;
 }
 .side-btn.main {
-  background: #1a357e;
+  background: #2b1e53;
   color: #fff;
   border: none;
 }
 .side-btn:hover {
   background: #e6eaff;
-  color: #1a357e;
+  color: #2b1e53;
 }
 .side-btn.main:hover {
-  background: #2546a6;
+  background: #483582;
   color: #fff;
 }

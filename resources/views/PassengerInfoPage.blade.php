@@ -19,7 +19,6 @@
     <form action="{{ route('store.passengerinfo') }}" method="POST" data-selectseat-url="{{ route('selectseat') }}">
         @csrf
         <div class="passenger-main-layout">
-            <!-- 左侧：乘客信息 -->
             <div class="passenger-info-panel">
                 <div class="heading">
                     <h2>Passenger Details</h2>
@@ -95,7 +94,6 @@
                     </div>
                 </div>
             </div>
-            <!-- 右侧：资讯卡片 -->
             <div class="passenger-side-info">
                 <div class="side-card">
                     <div class="side-title">Total price:</div>
@@ -115,8 +113,8 @@
                     </div>
                 </div>
                 <div class="side-card">
-                    <button class="side-btn main">Select Services</button>
-                    <button class="side-btn">Skip to Payment</button>
+                    <button class="side-btn main">Select Seat</button>
+                    <button class="side-btn">Back</button>
                 </div>
             </div>
         </div>
@@ -128,10 +126,10 @@ function togglePassenger(pid) {
     const btn = document.getElementById('toggle-' + pid);
     if (info.style.display === 'none') {
         info.style.display = '';
-        btn.textContent = '收起';
+        btn.textContent = '^';
     } else {
         info.style.display = 'none';
-        btn.textContent = '展开';
+        btn.textContent = 'V';
     }
 }
 </script>
