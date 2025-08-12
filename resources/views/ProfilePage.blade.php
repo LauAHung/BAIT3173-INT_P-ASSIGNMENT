@@ -31,19 +31,29 @@
       </div>
     </div>
     @if($user->hasSocialLogin())
-      <div class="card-row">
-        <div class="card-item">
-          <span class="label">Password</span>
-          <div class="value">No password set ({{ ucfirst($user->social_provider) }} login)</div>
-          <button class="create-btn small" onclick="showSetPasswordForm()">Set Password</button>
-        </div>
-      </div>
+             <div class="card-row">
+         <div class="card-item">
+           <span class="label">Password</span>
+           <div class="value">No password set ({{ ucfirst($user->social_provider) }} login)</div>
+           <button class="create-btn small" onclick="showSetPasswordForm()">Set Password</button>
+         </div>
+         <div class="card-item">
+           <span class="label">TravelFree Wallet</span>
+           <div class="value wallet-value">RM{{ number_format($user->wallet_balance ?? 0, 2) }}</div>
+           <button class="create-btn small" onclick="showTopupModal()">Top Up</button>
+         </div>
+       </div>
     @else
       <div class="card-row">
         <div class="card-item">
           <span class="label">Password</span>
           <div class="value">Set a password to protect your account</div>
           <button class="create-btn small" onclick="showChangePasswordForm()">Change</button>
+        </div>
+        <div class="card-item">
+          <span class="label">TravelFree Wallet</span>
+          <div class="value wallet-value">RM{{ number_format($user->wallet_balance ?? 0, 2) }}</div>
+          <button class="create-btn small" onclick="showTopupModal()">Top Up</button>
         </div>
       </div>
     @endif
@@ -181,6 +191,26 @@
     </div>
   </div>
 
+  <!-- Topup Wallet Modal -->
+  <div id="topupModal" style="display: none;" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="hideTopupModal()">&times;</span>
+      <h2>Top Up TravelFree Wallet</h2>
+      <div class="alert alert-info">
+        <strong>Current Balance:</strong> RM{{ number_format($user->wallet_balance ?? 0, 2) }}
+      </div>
+      <form action="{{ route('wallet.topup') }}" method="POST">
+        @csrf
+        <div class="form-group">
+          <label>Amount (RM)</label>
+          <input type="number" name="amount" min="1" max="10000" step="0.01" placeholder="Enter amount" required>
+          <small class="form-text">Minimum: RM1.00, Maximum: RM10,000.00</small>
+        </div>
+        <button type="submit" class="create-btn">Proceed to Payment</button>
+      </form>
+    </div>
+  </div>
+
   <form action="{{ route('logout') }}" method="POST" style="display: inline;">
     @csrf
     <button type="submit" class="logout-btn">Log Out</button>
@@ -188,28 +218,83 @@
 </div>
 
 <script>
+// Simple modal functions - define them globally
 function showChangePasswordForm() {
-    document.getElementById('changePasswordModal').style.display = 'block';
+    console.log('showChangePasswordForm called');
+    const modal = document.getElementById('changePasswordModal');
+    if (modal) {
+        modal.style.display = 'block';
+        console.log('Change password modal displayed');
+        console.log('Modal element:', modal);
+        console.log('Modal content:', modal.querySelector('.modal-content'));
+    } else {
+        console.log('Change password modal not found');
+    }
 }
 
 function hideChangePasswordForm() {
-    document.getElementById('changePasswordModal').style.display = 'none';
+    const modal = document.getElementById('changePasswordModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 function showSetPasswordForm() {
-    document.getElementById('setPasswordModal').style.display = 'block';
+    console.log('showSetPasswordForm called');
+    const modal = document.getElementById('setPasswordModal');
+    if (modal) {
+        modal.style.display = 'block';
+        console.log('Set password modal displayed');
+    } else {
+        console.log('Set password modal not found');
+    }
 }
 
 function hideSetPasswordForm() {
-    document.getElementById('setPasswordModal').style.display = 'none';
+    const modal = document.getElementById('setPasswordModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 function showEmailUpdateForm() {
-    document.getElementById('updateEmailModal').style.display = 'block';
+    console.log('showEmailUpdateForm called');
+    const modal = document.getElementById('updateEmailModal');
+    if (modal) {
+        modal.style.display = 'block';
+        console.log('Email update modal displayed');
+        console.log('Modal element:', modal);
+        console.log('Modal content:', modal.querySelector('.modal-content'));
+    } else {
+        console.log('Email update modal not found');
+    }
 }
 
 function hideEmailUpdateForm() {
-    document.getElementById('updateEmailModal').style.display = 'none';
+    const modal = document.getElementById('updateEmailModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function showTopupModal() {
+    console.log('showTopupModal called');
+    const modal = document.getElementById('topupModal');
+    if (modal) {
+        modal.style.display = 'block';
+        console.log('Topup modal displayed');
+        console.log('Modal element:', modal);
+        console.log('Modal content:', modal.querySelector('.modal-content'));
+    } else {
+        console.log('Topup modal not found');
+    }
+}
+
+function hideTopupModal() {
+    const modal = document.getElementById('topupModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // Close modals when clicking outside
@@ -217,6 +302,7 @@ window.onclick = function(event) {
     var passwordModal = document.getElementById('changePasswordModal');
     var setPasswordModal = document.getElementById('setPasswordModal');
     var emailModal = document.getElementById('updateEmailModal');
+    var topupModal = document.getElementById('topupModal');
     
     if (event.target == passwordModal) {
         passwordModal.style.display = 'none';
@@ -226,6 +312,9 @@ window.onclick = function(event) {
     }
     if (event.target == emailModal) {
         emailModal.style.display = 'none';
+    }
+    if (event.target == topupModal) {
+        topupModal.style.display = 'none';
     }
 }
 
@@ -246,22 +335,37 @@ window.onclick = function(event) {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 99999;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
 }
 
 .modal-content {
     background-color: white;
-    margin: 15% auto;
-    padding: 20px;
+    margin: 10% auto;
+    padding: 30px;
     border-radius: 10px;
-    width: 80%;
+    width: 90%;
     max-width: 500px;
     position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transform: translateY(-20px);
+    animation: modalSlideIn 0.3s ease-out forwards;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .close {
@@ -340,6 +444,20 @@ window.onclick = function(event) {
     background-color: #fff3cd;
     border: 1px solid #ffeaa7;
     color: #856404;
+}
+
+.form-text {
+    color: #6c757d;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Wallet specific styles - only for wallet balance */
+.card-item .wallet-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #28a745;
 }
 </style>
 @endsection

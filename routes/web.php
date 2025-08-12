@@ -9,6 +9,7 @@ use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TrainSelectionController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingDetailController;
+use App\Http\Controllers\WalletController;
 
 Route::get('/', function () {
     return view('HomePage');
@@ -195,3 +196,7 @@ Route::post('/payment', [PaymentController::class, 'processPayment']);
 Route::get('/stripe', [StripeController::class, 'index'])->name('stripe.index');
 Route::post('/stripe/checkout', [StripeController::class, 'checkout'])->name('checkout');
 Route::get('/stripe/success', [StripeController::class, 'success'])->name('success');
+
+// Wallet routes
+Route::post('/wallet/topup', [WalletController::class, 'topup'])->name('wallet.topup');
+Route::get('/wallet/success', [WalletController::class, 'success'])->name('wallet.success');

@@ -30,7 +30,6 @@
     form.addEventListener('submit', function(event) {
     event.preventDefault();
 
-    // ✅ 确保 CSRF token 还在
     if (!form.querySelector('input[name="_token"]')) {
         alert('CSRF token missing!');
         return;
@@ -40,14 +39,12 @@
         if (result.error) {
             alert(result.error.message);
         } else {
-            // ✅ 添加 Stripe Token 到表单
             var hiddenInput = document.createElement('input');
             hiddenInput.setAttribute('type', 'hidden');
             hiddenInput.setAttribute('name', 'stripeToken');
             hiddenInput.setAttribute('value', result.token.id);
             form.appendChild(hiddenInput);
 
-            // ✅ 提交表单
             form.submit();
         }
     });

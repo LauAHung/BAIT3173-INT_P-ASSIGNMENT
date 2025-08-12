@@ -31,7 +31,8 @@ class User extends Authenticatable
         'account_status',
         'last_login_at',
         'password_reset_token',
-        'password_reset_expires_at'
+        'password_reset_expires_at',
+        'wallet_balance'
     ];
 
     protected $hidden = [
