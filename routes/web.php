@@ -8,7 +8,6 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TrainSelectionController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\BookingDetailController;
 use App\Http\Controllers\WalletController;
 
 Route::get('/', function () {
@@ -116,10 +115,10 @@ Route::post('/booking/store', [TrainSelectionController::class, 'storeBooking'])
 
 Route::get('/booking', [BookingController::class, 'index'])->name('booking');
 Route::get('/booking/refund', [BookingController::class, 'refund'])->name('refund');
-Route::get('/booking/payment', [BookingController::class, 'refund'])->name('proceedPayment');
-Route::get('/booking/cancel', [BookingController::class, 'refund'])->name('cancel');
-Route::get('/booking/rate', [BookingController::class, 'refund'])->name('rateTrip');
-Route::get('/booking_detail/{bookingId}', [BookingDetailController::class, 'show'])->name('bookingdetail');
+Route::get('/booking/payment', [BookingController::class, 'payment'])->name('proceedPayment');
+Route::get('/booking/cancel/{bookingId}', [BookingController::class, 'cancel'])->name('cancel');
+Route::get('/booking/rate', [BookingController::class, 'rate'])->name('rateTrip');
+Route::get('/booking_detail/{bookingId}', [BookingController::class, 'show'])->name('bookingdetail');
 
 Route::get('/booking_detail', function () {
     return view('BookingDetailPage');

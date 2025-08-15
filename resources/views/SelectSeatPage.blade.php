@@ -13,7 +13,8 @@
         <div class="passenger-info-container">
             <div class="passenger-head-info">
                 <h2>Passenger Details</h2>
-                <a href="{{ route('passengerinfo', ['passengers' => request()->input('passengers', 1), 'journey_id' => $journey['id']]) }}" class="change-journey">Change Journey</a>
+                <a href="{{ route('passengerinfo', ['passengers' => request()->input('passengers', 1), 'journey_id' => $journey['id']]) }}"
+                    class="change-journey">Change Journey</a>
             </div>
             <div class="passenger-container">
                 <div class="passenger-info-details">
@@ -28,10 +29,21 @@
                             <span class="details-label">Ticket type</span>
                             <span class="details-value">{{ $passenger['ticket_type'] }}</span>
                             <span class="details-label">MyKad no. / passport</span>
-                            <span
-                                class="details-value">{{ $passenger['mykad'] ?? $passenger['passport'] ?? 'N/A' }}</span>
+                            <span class="details-value">
+                                @if (!empty($passenger['mykad']) || !empty($passenger['passport']))
+                                {{ str_repeat('*', max(0, strlen($passenger['mykad'] ?? $passenger['passport']) - 4)) . substr($passenger['mykad'] ?? $passenger['passport'], -4) }}
+                                @else
+                                N/A
+                                @endif
+                            </span>
                             <span class="details-label">Contact no.</span>
-                            <span class="details-value">{{ $passenger['contact_no'] }}</span>
+                            <span class="details-value">
+                                @if (!empty($passenger['contact_no']))
+                                {{ str_repeat('*', max(0, strlen($passenger['contact_no']) - 4)) . substr($passenger['contact_no'], -4) }}
+                                @else
+                                N/A
+                                @endif
+                            </span>
                         </div>
                     </div>
                     @endforeach
@@ -161,12 +173,12 @@
     <div class="error-message" style="color: red; margin: 10px 0;">
         {{ session('error') }}
     </div>
-@endif
-@if (session('success'))
+    @endif
+    @if (session('success'))
     <div class="success-message" style="color: green; margin: 10px 0;">
         {{ session('success') }}
     </div>
-@endif
+    @endif
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -199,7 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (checkbox.checked) {
                 if (selectedSeats.length >= passengersCount) {
                     checkbox.checked = false;
-                    alert('You cannot select more seats than the number of passengers < ' + passengersCount + ' >.');
+                    alert('You cannot select more seats than the number of passengers < ' +
+                        passengersCount + ' >.');
                 } else {
                     selectedSeats.push(checkbox.id);
                 }
@@ -240,7 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const csrf = document.createElement('input');
                 csrf.type = 'hidden';
                 csrf.name = '_token';
-                csrf.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+                csrf.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute(
+                    'content') || '{{ csrf_token() }}';
                 form.appendChild(csrf);
 
                 selectedSeats.forEach(seat => {

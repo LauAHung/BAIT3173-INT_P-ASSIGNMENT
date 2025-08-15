@@ -25,6 +25,22 @@
                 </ul>
             </div>
         @endif
+        <!-- Include SweetAlert2 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- JavaScript to trigger SweetAlert2 -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                @if (session('info'))
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Information',
+                        text: "{{ session('info') }}",
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#3085d6'
+                    });
+                @endif
+            });
+        </script>
 
         <form method="POST" action="{{ route('login.handle') }}">
             @csrf

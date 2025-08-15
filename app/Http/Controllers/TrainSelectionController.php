@@ -9,6 +9,7 @@ use App\Models\Ticket;
 use App\Models\Seat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TrainSelectionController extends Controller
@@ -98,6 +99,9 @@ class TrainSelectionController extends Controller
 
     public function showPassengerInfo(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect()->route('signin')->with('info', 'Please login first before make a booking.');
+        }
         // Get the journey ID from the request (e.g., passed as a query parameter or route parameter)
         $journeyId = $request->input('journey_id'); // Assume journey_id is passed in the URL or form
         $passengers = $request->input('passengers', 1); // Default to 1 if not set
@@ -266,14 +270,17 @@ class TrainSelectionController extends Controller
         try {
             DB::beginTransaction();
 
+            $totalPrice = $passengersCount * ($journey['price'] ?? Journey::find($journey['id'])->Price);
+
             $booking = Booking::create([
                 'BookingID' => 'BK' . str_pad(mt_rand(5, 99999), 5, '0', STR_PAD_LEFT),
-                'UserID' => null,
+                'UserID' => (string) Auth::id(),
                 'TrainID' => $journey['train_id'] ?? Journey::find($journey['id'])->TrainID,
                 'JourneyID' => $journey['id'],
                 'BookingType' => 'OneWay',
                 'PaymentType' => null,
                 'TicketNo' => $passengersCount,
+                'Price' => $totalPrice,
                 'Status' => 'Pending',
                 'Created_at' => now()->format('d-m-Y'),
             ]);

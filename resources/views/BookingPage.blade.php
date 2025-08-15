@@ -80,9 +80,7 @@
                                     </a>
                                 @endif
                                 @if ($booking->showCancel)
-                                    <a href="{{ route('cancel', ['bookingId' => $booking->BookingID]) }}">
-                                        <button type="button" class="btn-cancel">Cancel</button>
-                                    </a>
+                                    <button type="button" class="btn-cancel" onclick="confirmCancel('{{ $booking->BookingID }}')">Cancel</button>
                                 @endif
                             </div>
                         </div>
@@ -161,6 +159,7 @@
         </div>
     </div>
 </section>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('js/BookingPage.js') }}" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -177,6 +176,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function confirmCancel(bookingId) {
+    console.log('Confirming cancel for Booking ID:', bookingId); // Debug log
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to cancel this booking? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+        customClass: {
+            popup: 'custom-swal-popup'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log('Cancellation confirmed for Booking ID:', bookingId); // Debug log
+            // Create a form for POST request to handle CSRF
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.action = '{{ route("cancel", ":bookingId") }}'.replace(':bookingId', bookingId);
+            form.style.display = 'none';
+
+            // Add CSRF token
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_token';
+            csrf.value = '{{ csrf_token() }}';
+            form.appendChild(csrf);
+
+            document.body.appendChild(form);
+            console.log('Submitting form to:', form.action); // Debug log
+            try {
+                form.submit();
+            } catch (e) {
+                console.error('Form submission failed:', e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to submit cancellation request. Please try again.',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        }
+    });
+}
 </script>
 
 @endsection
