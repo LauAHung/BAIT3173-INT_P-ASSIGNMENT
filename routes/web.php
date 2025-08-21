@@ -142,6 +142,14 @@ Route::get('/selectrating', function () {
     return view('SelectRatingPage');
 })->name('selectrating');
 
+Route::get('/ratingsection', function () {
+    return view('RatingSectionPage');
+})->name('ratingsection');
+
+Route::get('/viewfeedback', function () {
+    return view('ViewFeedbackPage');
+})->name('viewfeedback');
+
 Route::get('/payment', function () {
     return view('PaymentPage');
 })->name('payment');
