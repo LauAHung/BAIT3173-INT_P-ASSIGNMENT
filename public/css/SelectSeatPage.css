@@ -368,16 +368,19 @@ ol {
   }
   input[type=checkbox]:disabled {
     + label {
-      background: #dddddd;
-      text-indent: -9999px;
-      overflow: hidden;
-      &:after {
-        content: "X";
-        text-indent: 0;
-        position: absolute;
-        top: 4px;
-        left: 50%;
-        transform: translate(-50%, 0%);
+      background: #F42536;
+      &.disabled {
+        background: #dddddd;
+        text-indent: -9999px;
+        overflow: hidden;
+        &:after {
+          content: "X";
+          text-indent: 0;
+          position: absolute;
+          top: 4px;
+          left: 50%;
+          transform: translate(-50%, 0%);
+        }
       }
       &:hover {
         box-shadow: none;
@@ -555,4 +558,25 @@ ol {
         justify-content: center;
     }
 
+}
+
+/* --- Confirm message UI --- */
+.custom-swal-popup {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.swal2-confirm, .swal2-cancel {
+    border-radius: 5px;
+    padding: 8px 16px;
+}
+
+.swal2-confirm {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.swal2-cancel {
+    background-color: #dc3545;
+    border-color: #dc3545;
 }

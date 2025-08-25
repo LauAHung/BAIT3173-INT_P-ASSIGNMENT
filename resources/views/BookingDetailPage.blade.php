@@ -3,12 +3,11 @@
 @section('title', 'TrainBookingDetails - TravelFree')
 
 @push('styles')
-<link href="css/BookingDetailPage.css" rel="stylesheet">
+<link href="{{ asset('css/BookingDetailPage.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
 
-<body>
     <section>
         <div class="booking-detail">
             <div class="booking-detail-container">
@@ -19,44 +18,51 @@
                     <div class="booking-item">
                         <div class="booking-container">
                             <div class="booking-info">
-                                <img src="{{ asset('images/logo/ets_logo.png') }}" alt="service_type">
+                                <img src="{{ asset('images/logo/' . ($booking->Journey->Train->TrainService ?? 'default_logo.png') . '_logo.png') }}"
+                                    alt="service_type">
                             </div>
 
                             <div class="booking-info">
-                                <label class="booking-label">Ticket ID: </label>
-                                <span class="booking-value">11524</span>
+                                <label class="booking-label">Booking ID: </label>
+                                <span class="booking-value">{{ $booking->BookingID ?? 'Unknown' }}</span>
                             </div>
 
                             <div class="booking-info">
                                 <label class="booking-label">Route: </label>
-                                <span class="booking-value">KL Sentral to Ipoh</span>
+                                <span class="booking-value">{{ $booking->Journey->FromLocation ?? 'Unknown' }} to
+                                    {{ $booking->Journey->ToLocation ?? 'Unknown' }}</span>
                             </div>
 
                             <div class="booking-info">
                                 <label class="booking-label">Departure: </label>
-                                <span class="booking-value">7:00 PM - 8:05 PM</span>
+                                <span
+                                    class="booking-value">{{ date('g:i A', strtotime($booking->Journey->DepartureTime ?? 'Unknown')) }}
+                                    - {{ date('g:i A', strtotime($booking->Journey->ArrivalTime ?? 'Unknown')) }}</span>
                             </div>
 
                             <div class="booking-info">
                                 <label class="booking-label">Date: </label>
-                                <span class="booking-value">22 July 2025</span>
+                                <span
+                                    class="booking-value">{{ \Carbon\Carbon::parse($booking->Journey->DepartureTime ?? '')->format('d F Y') }}</span>
                             </div>
 
                             <div class="booking-info">
                                 <label class="booking-label">Status: </label>
-                                <span class="booking-value">Booked</span>
+                                <span class="booking-value">{{ $booking->Status ?? 'Unknown' }}</span>
                             </div>
                         </div>
-
                     </div>
                 </div>
-
             </div>
 
             <div class="ticket-heading">
-            <h2>Your Tickets: </h2>
+                <h2>Your Tickets: </h2>
             </div>
             <div class="qr-ticket-container">
+                @php
+                    $tickets = $tickets ?? collect();
+                @endphp
+                @forelse ($tickets as $ticket)
                 <div class="ticket-container">
                     <div class="ticket">
                         <div class="hqr">
@@ -68,337 +74,38 @@
                         </div>
                     </div>
                     <div class="details">
-                        <div class="info">
-                            Full name
-                        </div>
-                        <div class="data name">
-                            Jimmy
-                        </div>
-                        <div class="info">
-                            Ticket type
-                        </div>
-                        <div class="data">
-                            Dewasa/Adult
-                        </div>
-                        <div class="info">
-                            Journey ID
-                        </div>
-                        <div class="data">
-                            J152
-                        </div>
-                        <div class="info">
-                            Seat No.
-                        </div>
-                        <div class="data">
-                            13A
-                        </div>
+                        <div class="info">Full name</div>
+                        <div class="data name">{{ $ticket->Passenger->Name ?? 'Unknown' }}</div>
+                        <div class="info">Ticket type</div>
+                        <div class="data">{{ $ticket->Passenger->TicketType ?? 'Unknown' }}</div>
+                        <div class="info">Ticket ID</div>
+                        <div class="data">{{ $ticket->TicketID ?? 'Unknown'}}</div>
+                        <div class="info">Journey ID</div>
+                        <div class="data">{{ $ticket->JourneyID ?? 'Unknown'}}</div>
+                        <div class="info">Seat No.</div>
+                        <div class="data">{{ $ticket->Seat->SeatNo ?? 'Not assigned' }}</div>
                         <div class="masinfo">
                             <div class="left">
-                                <div class="info">
-                                    date
-                                </div>
+                                <div class="info">date</div>
                                 <div class="data nesp">
-                                    MON. APR 09 2025
+                                    {{ \Carbon\Carbon::parse($ticket->Journey->DepartureTime)->format('D. M d Y') }}
                                 </div>
                             </div>
                             <div class="right">
-                                <div class="info">
-                                    time
-                                </div>
-                                <div class="data nesp">
-                                    7:00 PM - 8:05 PM
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>             
-
-                
-
-
-                <div class="ticket-container">
-                    <div class="ticket">
-                        <div class="hqr">
-                            <div class="column left-one"></div>
-                            <div class="column center">
-                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
-                            </div>
-                            <div class="column right-one"></div>
-                        </div>
-                    </div>
-                    <div class="details">
-                        <div class="info">
-                            Full name
-                        </div>
-                        <div class="data name">
-                            Jimmy
-                        </div>
-                        <div class="info">
-                            Ticket type
-                        </div>
-                        <div class="data">
-                            Dewasa/Adult
-                        </div>
-                        <div class="info">
-                            Journey ID
-                        </div>
-                        <div class="data">
-                            J152
-                        </div>
-                        <div class="info">
-                            Seat No.
-                        </div>
-                        <div class="data">
-                            13A
-                        </div>
-                        <div class="masinfo">
-                            <div class="left">
-                                <div class="info">
-                                    date
-                                </div>
-                                <div class="data nesp">
-                                    MON. APR 09 2025
-                                </div>
-                            </div>
-                            <div class="right">
-                                <div class="info">
-                                    time
-                                </div>
-                                <div class="data nesp">
-                                    7:00 PM - 8:05 PM
-                                </div>
+                                <div class="info">time</div>
+                                <div class="data nesp">{{ date('g:i A', strtotime($ticket->Journey->DepartureTime)) }} -
+                                    {{ date('g:i A', strtotime($ticket->Journey->ArrivalTime)) }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
-
+                @empty
                 <div class="ticket-container">
-                    <div class="ticket">
-                        <div class="hqr">
-                            <div class="column left-one"></div>
-                            <div class="column center">
-                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
-                            </div>
-                            <div class="column right-one"></div>
-                        </div>
-                    </div>
-                    <div class="details">
-                        <div class="info">
-                            Full name
-                        </div>
-                        <div class="data name">
-                            Jimmy
-                        </div>
-                        <div class="info">
-                            Ticket type
-                        </div>
-                        <div class="data">
-                            Dewasa/Adult
-                        </div>
-                        <div class="info">
-                            Journey ID
-                        </div>
-                        <div class="data">
-                            J152
-                        </div>
-                        <div class="info">
-                            Seat No.
-                        </div>
-                        <div class="data">
-                            13A
-                        </div>
-                        <div class="masinfo">
-                            <div class="left">
-                                <div class="info">
-                                    date
-                                </div>
-                                <div class="data nesp">
-                                    MON. APR 09 2025
-                                </div>
-                            </div>
-                            <div class="right">
-                                <div class="info">
-                                    time
-                                </div>
-                                <div class="data nesp">
-                                    7:00 PM - 8:05 PM
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <p>No tickets found for this booking.</p>
                 </div>
-                <div class="ticket-container">
-                    <div class="ticket">
-                        <div class="hqr">
-                            <div class="column left-one"></div>
-                            <div class="column center">
-                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
-                            </div>
-                            <div class="column right-one"></div>
-                        </div>
-                    </div>
-                    <div class="details">
-                        <div class="info">
-                            Full name
-                        </div>
-                        <div class="data name">
-                            Jimmy
-                        </div>
-                        <div class="info">
-                            Ticket type
-                        </div>
-                        <div class="data">
-                            Dewasa/Adult
-                        </div>
-                        <div class="info">
-                            Journey ID
-                        </div>
-                        <div class="data">
-                            J152
-                        </div>
-                        <div class="info">
-                            Seat No.
-                        </div>
-                        <div class="data">
-                            13A
-                        </div>
-                        <div class="masinfo">
-                            <div class="left">
-                                <div class="info">
-                                    date
-                                </div>
-                                <div class="data nesp">
-                                    MON. APR 09 2025
-                                </div>
-                            </div>
-                            <div class="right">
-                                <div class="info">
-                                    time
-                                </div>
-                                <div class="data nesp">
-                                    7:00 PM - 8:05 PM
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ticket-container">
-                    <div class="ticket">
-                        <div class="hqr">
-                            <div class="column left-one"></div>
-                            <div class="column center">
-                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
-                            </div>
-                            <div class="column right-one"></div>
-                        </div>
-                    </div>
-                    <div class="details">
-                        <div class="info">
-                            Full name
-                        </div>
-                        <div class="data name">
-                            Jimmy
-                        </div>
-                        <div class="info">
-                            Ticket type
-                        </div>
-                        <div class="data">
-                            Dewasa/Adult
-                        </div>
-                        <div class="info">
-                            Journey ID
-                        </div>
-                        <div class="data">
-                            J152
-                        </div>
-                        <div class="info">
-                            Seat No.
-                        </div>
-                        <div class="data">
-                            13A
-                        </div>
-                        <div class="masinfo">
-                            <div class="left">
-                                <div class="info">
-                                    date
-                                </div>
-                                <div class="data nesp">
-                                    MON. APR 09 2025
-                                </div>
-                            </div>
-                            <div class="right">
-                                <div class="info">
-                                    time
-                                </div>
-                                <div class="data nesp">
-                                    7:00 PM - 8:05 PM
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ticket-container">
-                    <div class="ticket">
-                        <div class="hqr">
-                            <div class="column left-one"></div>
-                            <div class="column center">
-                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
-                            </div>
-                            <div class="column right-one"></div>
-                        </div>
-                    </div>
-                    <div class="details">
-                        <div class="info">
-                            Full name
-                        </div>
-                        <div class="data name">
-                            Jimmy
-                        </div>
-                        <div class="info">
-                            Ticket type
-                        </div>
-                        <div class="data">
-                            Dewasa/Adult
-                        </div>
-                        <div class="info">
-                            Journey ID
-                        </div>
-                        <div class="data">
-                            J152
-                        </div>
-                        <div class="info">
-                            Seat No.
-                        </div>
-                        <div class="data">
-                            13A
-                        </div>
-                        <div class="masinfo">
-                            <div class="left">
-                                <div class="info">
-                                    date
-                                </div>
-                                <div class="data nesp">
-                                    MON. APR 09 2025
-                                </div>
-                            </div>
-                            <div class="right">
-                                <div class="info">
-                                    time
-                                </div>
-                                <div class="data nesp">
-                                    7:00 PM - 8:05 PM
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                @endforelse
             </div>
-
         </div>
-
     </section>
 
     <!-- Modal -->
@@ -436,7 +143,5 @@
         }
     }
     </script>
-
-</body>
 
 @endsection

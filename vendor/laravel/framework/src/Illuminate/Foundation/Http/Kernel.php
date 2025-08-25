@@ -70,7 +70,9 @@ class Kernel implements KernelContract
      *
      * @deprecated
      */
-    protected $routeMiddleware = [];
+    protected $routeMiddleware = [
+        'booking.step' => \App\Http\Middleware\BookingStepMiddleware::class,
+    ];
 
     /**
      * The application's middleware aliases.

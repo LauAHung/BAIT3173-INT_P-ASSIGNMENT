@@ -593,6 +593,11 @@ body {
             0 0 100px #6d54b5;
   }
 
+ .result p {
+    margin-top: 20px;
+    margin-left: 10px;
+  }
+
   /* === Responsiveness === */
 @media (max-width: 768px) {
     body {
@@ -744,4 +749,28 @@ body {
         padding: 10px; /* Reduce padding */
         font-size: 14px; /* Smaller font */
     }
+}
+
+/* --- Success Message --- */
+.custom-larger-toast {
+    font-size: 24px !important; /* Increase font size for better readability */
+    min-height: 200px !important; /* Increase minimum height */
+    line-height: 1.5; /* Improve text spacing */
+}
+
+.swal2-toast .swal2-title {
+    font-size: 28px !important; /* Larger title */
+}
+
+.swal2-toast .swal2-html-container {
+    font-size: 18px !important; /* Larger text */
+}
+
+.swal2-toast {
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.swal2-success-circular-line {
+    border-color: #28a745; /* Green success color */
 }

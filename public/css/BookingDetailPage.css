@@ -39,7 +39,11 @@ section {
 }
 
 .booking-info {
-    padding: 5px;
+    padding: 8px;
+}
+
+.booking-info img{
+  margin-bottom: 15px;
 }
 
 .booking-label {
@@ -53,7 +57,7 @@ section {
 }
 
 .ticket-heading {
-  margin: 30px 0 20px 60px
+  margin: 20px 0 20px 60px
 }
 
 .qr-ticket-container {
@@ -72,6 +76,7 @@ section {
 
 .ticket-container {
   max-width: 245px;
+  min-width: 210px;
   overflow: hidden;
   box-shadow: 0 0 10px rgb(202, 202, 204);
   border-radius: 2px;
@@ -114,6 +119,7 @@ section {
 .hqr{
   display: table;
   width: 100%;
+  min-width: 210px;
   table-layout: fixed;
   margin: 0px auto;
 }
@@ -132,6 +138,7 @@ section {
 {
     display: table-cell;
     padding: 37px 0px;
+    min-width: 70px;
 }
 
 .center{
