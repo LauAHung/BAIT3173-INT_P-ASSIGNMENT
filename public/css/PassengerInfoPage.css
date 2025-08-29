@@ -157,6 +157,9 @@
 
 /* === Media Query for Responsiveness === */
 @media (max-width: 768px) {
+    section{
+        min-width: 768px;
+    }
     .heading {
         margin-top: 80px;
         padding: 5px 15px;
@@ -295,4 +298,57 @@ section {
 .side-btn.main:hover {
   background: #483582;
   color: #fff;
+}
+
+/* error message validation */
+.error {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: none;
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.error.show {
+    display: block;
+}
+
+.info-item {
+    margin-bottom: 15px;
+}
+
+/* Toggle button styles */
+.toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    font-size: 0.8em;
+    font-weight: 600;
+    color: white;
+    background-color: #5c10b3;
+    border-radius: 20px; /* Rounded corners */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.toggle-btn::before {
+    content: '\f078'; /* Font Awesome chevron-down */
+    font-family: 'Font Awesome 5 Free';
+    margin-right: 6px;
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+}
+.toggle-btn:hover {
+    background-color: #7933e9; /* Light blue on hover */
+}
+
+.error-indicator {
+    color: red;
+    font-size: 32px;
+    margin-left: 10px;
+    display: none;
+}
+.error-indicator.show {
+    display: inline;
 }

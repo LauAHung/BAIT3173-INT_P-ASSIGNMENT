@@ -13,7 +13,7 @@ class Passenger extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'PassengerID', 'BookingID','Name', 'Gender', 'ICno', 'Passportno', 'PassportExpiryDate', 'TicketType', 'Created_at',
+        'PassengerID', 'BookingID','Name', 'Gender', 'ICno', 'Passportno', 'PassportExpiryDate', 'Contactno', 'TicketType', 'Created_at',
     ];
 
     protected $casts = [

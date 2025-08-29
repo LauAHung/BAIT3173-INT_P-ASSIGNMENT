@@ -23,7 +23,7 @@
                         <div class="passenger-item">
                             <span class="passenger-label">Passenger {{ $index + 1 }}</span>
                             <span class="passenger-subtext">{{ $journey['from_location'] }} >
-                                {{ $journey['to_location'] }}, (MYR {{ $journey['price'] }})</span>
+                                {{ $journey['to_location'] }} (MYR {{ $journey['price'] }})</span>
                         </div>
                         <div class="details-item">
                             <span class="details-label">Ticket type</span>

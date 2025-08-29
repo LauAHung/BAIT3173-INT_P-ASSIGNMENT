@@ -125,19 +125,26 @@ class TrainSelectionController extends Controller
             'passengers_count' => $passengers,
         ]);
 
-        return view('PassengerInfoPage', compact('passengers'));
+        return view('PassengerInfoPage', compact('passengers','journey'));
     }
 
     public function storePassengerInfo(Request $request)
     {
         $validated = $request->validate([
-            'passenger.*.name' => 'required|string|max:255',
-            'passenger.*.contact_no' => 'required|string|max:20',
+            'passenger.*.name' => ['required', 'regex:/^[a-zA-Z\s\'-]{2,}$/', 'max:255'],
+            'passenger.*.contact_no' => ['required', 'regex:/^01[0-9]-[0-9]{7,8}$/', 'max:20'],
             'passenger.*.gender' => 'required|in:male,female',
             'passenger.*.ticket_type' => 'required|in:Dewasa/Adult,Kanak-kanak/Child,OKU',
-            'passenger.*.mykad' => 'nullable|string|max:20',
-            'passenger.*.passport' => 'nullable|string|max:20',
-            'passenger.*.passport_expiry' => 'nullable|date',
+            'passenger.*.mykad' => ['nullable', 'regex:/^\d{12}$/', 'max:20', 'required_without:passenger.*.passport'],
+            'passenger.*.passport' => ['nullable', 'regex:/^[a-zA-Z0-9]{6,12}$/', 'max:20', 'required_without:passenger.*.mykad'],
+            'passenger.*.passport_expiry' => ['nullable', 'date'],
+        ], [
+            'passenger.*.name.regex' => 'Invalid name provided',
+            'passenger.*.mykad.regex' => 'Invalid MyKad format: Must be exactly 12 digits.',
+            'passenger.*.passport.regex' => 'Invalid Passport format: Must be 6-12 alphanumeric characters.',
+            'passenger.*.contact_no.regex' => 'Invalid contact number format: Use format 01x-xxxxxxxx.',
+            'passenger.*.mykad.required_without' => 'Either MyKad or Passport number is required.',
+            'passenger.*.passport.required_without' => 'Either MyKad or Passport number is required.',
         ]);
 
         $passengers = $request->input('passenger', []);
@@ -252,20 +259,10 @@ class TrainSelectionController extends Controller
         $passengers = array_values($passengers);
         Log::info('Passengers array after reindex:', [$passengers]);
 
-        if (!$journey || !$passengers || count($selectedSeats) !== $passengersCount) {
-            return redirect()->route('selectseat', ['journey_id' => $journey['id'] ?? 0, 'passengers' => $passengersCount])
-                ->with('error', 'Invalid booking data or incorrect number of seats selected.');
-        }
-
         $availableSeats = Seat::where('JourneyID', $journey['id'])
             ->whereIn('SeatNo', $selectedSeats)
             ->where('is_available', 'Y')
             ->count();
-
-        if ($availableSeats !== $passengersCount) {
-            return redirect()->route('selectseat', ['journey_id' => $journey['id'] ?? 0, 'passengers' => $passengersCount])
-                ->with('error', 'Some selected seats are no longer available.');
-        }
 
         try {
             DB::beginTransaction();
@@ -294,6 +291,7 @@ class TrainSelectionController extends Controller
                     'ICno' => $passenger['mykad'] ?? null,
                     'Passportno' => $passenger['passport'] ?? null,
                     'PassportExpiryDate' => $passenger['passport_expiry'] ?? null,
+                    'Contactno' => $passenger['contact_no'],
                     'TicketType' => $passenger['ticket_type'],
                     'Created_at' => now()->format('d-m-Y'),
                 ];

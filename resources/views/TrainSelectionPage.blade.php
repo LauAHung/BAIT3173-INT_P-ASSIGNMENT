@@ -151,7 +151,7 @@
                     <img src="{{ asset('images/logo/' . $logoFile) }}" class="train-logo" alt="Train Logo">
                     {{ $journey->Train->TrainNo ?? 'Unknown' }}
                 </div>
-                <div class="train-col train-type">{{ $journey->Train->TrainService ?? 'Unknown' }}</div>
+                <div class="train-col train-date">{{ $journey->DepartureTime ? date('d F Y', strtotime($journey->DepartureTime)) : 'Unknown' }}</div>
                 <div class="train-col train-time">
                     <div><b>{{ date('h:i A', strtotime($journey->DepartureTime)) }}</b> &mdash;
                         <b>{{ date('h:i A', strtotime($journey->ArrivalTime)) }}</b>
@@ -227,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('No success message found'); // Debug log
     }
 });
+
 </script>
 
 @endsection
