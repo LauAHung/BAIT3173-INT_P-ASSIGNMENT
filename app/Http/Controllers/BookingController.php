@@ -22,17 +22,22 @@ class BookingController extends Controller
         $userId = (string) Auth::id();
 
         // Fetch bookings with related journey and train data for the authenticated user
-        $ongoingBookings = Booking::with(['journey', 'journey.train'])
-            ->where('UserID', $userId)
-            ->whereIn('Status', ['Booked', 'Pending'])
-            ->get()
-            ->map(function ($booking) {
-                $booking->Journey->DepartureTime = \Carbon\Carbon::parse($booking->Journey->DepartureTime)->format('Y-m-d');
-                $booking->showViewQR = $booking->Status === 'Booked';
-                $booking->showRefund = $booking->Status === 'Booked';
-                $booking->showProceedPayment = $booking->Status === 'Pending';
-                $booking->showCancel = $booking->Status === 'Pending';
-                return $booking;
+      $ongoingBookings = Booking::with(['journey', 'journey.train'])
+    ->where('UserID', (string) Auth::id())
+    ->whereIn('Status', ['Booked', 'Pending']) // ignore Paid status
+    ->get()
+    ->map(function ($booking) {
+        $booking->Journey->DepartureTime = \Carbon\Carbon::parse($booking->Journey->DepartureTime)->format('Y-m-d');
+
+        // Buttons logic
+        $booking->showProceedPayment = $booking->Status === 'Pending' && !$booking->PaymentType;
+        $booking->showCancel = $booking->Status === 'Pending' && !$booking->PaymentType;
+
+        // Show QR and Refund based on payment type
+        $booking->showViewQR = $booking->PaymentType === 'Wallet';
+        $booking->showRefund = $booking->PaymentType === 'Wallet';
+
+        return $booking;
             });
 
         Log::info('Ongoing Bookings:', ['bookings' => $ongoingBookings->toArray()]);

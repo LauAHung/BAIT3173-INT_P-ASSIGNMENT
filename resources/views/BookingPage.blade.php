@@ -75,10 +75,11 @@
                                     </a>
                                 @endif
                                 @if ($booking->showProceedPayment)
-                                    <a href="{{ route('proceedPayment', ['bookingId' => $booking->BookingID]) }}">
-                                        <button type="button" class="btn-payment">Proceed Payment</button>
-                                    </a>
-                                @endif
+    <a href="{{ route('proceedPayment', ['bookingId' => $booking->BookingID]) }}">
+        <button type="button" class="btn-payment">Proceed Payment</button>
+    </a>
+@endif
+
                                 @if ($booking->showCancel)
                                     <button type="button" class="btn-cancel" onclick="confirmCancel('{{ $booking->BookingID }}')">Cancel</button>
                                 @endif
