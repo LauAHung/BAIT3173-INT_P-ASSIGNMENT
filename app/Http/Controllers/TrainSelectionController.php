@@ -16,9 +16,9 @@ class TrainSelectionController extends Controller
 {
     public function index(Request $request)
     {
+        // Initialize the base query
         $query = Journey::query()->with('train')
             ->orderBy('DepartureTime', 'asc');
-        $journeys = $query->get();
 
         // Track if any meaningful filters (excluding passengers) are applied
         $hasSearchFilters = false;
@@ -73,7 +73,6 @@ class TrainSelectionController extends Controller
                                 $q->orWhereRaw('TIME(DepartureTime) BETWEEN ? AND ?', ['18:00:00', '23:59:59']);
                                 break;
                         }
-                    } else {
                     }
                 }
             });
@@ -81,17 +80,18 @@ class TrainSelectionController extends Controller
         }
 
         // Always apply passengers filter (default to 1 if not provided)
-        $passengers = $request->filled('passengers') ? $request->input('passengers') : 1;
+        $passengers = $request->filled('passengers') ? (int) $request->input('passengers') : 1;
         $query->where('SeatAvailable', '>=', $passengers);
 
-        // Default: Fetch the first 3 scheduled journeys if no other filters are applied
+        // Default: Fetch the first 5 scheduled journeys if no filters are applied
         if (!$hasSearchFilters) {
             $query->where('Status', 'Scheduled')->take(5);
         }
 
+        // Execute the query
         $journeys = $query->get();
 
-        // Get the success message from the session and pass it to the view
+        // Get the success message from the session
         $successMessage = session('success');
 
         return view('TrainSelectionPage', compact('journeys', 'successMessage'));
@@ -267,7 +267,18 @@ class TrainSelectionController extends Controller
         try {
             DB::beginTransaction();
 
-            $totalPrice = $passengersCount * ($journey['price'] ?? Journey::find($journey['id'])->Price);
+            // Calculate total price based on ticket types
+            $basePrice = $journey['price'] ?? Journey::find($journey['id'])->Price;
+            $totalPrice = 0;
+            foreach ($passengers as $passenger) {
+                $ticketPrice = $basePrice;
+                if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                    $ticketPrice *= 0.9; // 10% discount
+                } elseif ($passenger['ticket_type'] === 'OKU') {
+                    $ticketPrice *= 0.7; // 30% discount
+                }
+                $totalPrice += $ticketPrice;
+            }
 
             $booking = Booking::create([
                 'BookingID' => 'BK' . str_pad(mt_rand(5, 99999), 5, '0', STR_PAD_LEFT),
@@ -304,6 +315,14 @@ class TrainSelectionController extends Controller
                 $seatNo = $selectedSeats[$index];
                 $seat = Seat::where('JourneyID', $journey['id'])->where('SeatNo', $seatNo)->first();
 
+                // Calculate individual ticket price
+                $ticketPrice = $basePrice;
+                if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                    $ticketPrice *= 0.9;
+                } elseif ($passenger['ticket_type'] === 'OKU') {
+                    $ticketPrice *= 0.7;
+                }
+
                 Ticket::create([
                     'TicketID' => 'TK' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT),
                     'BookingID' => $booking->BookingID,
@@ -311,6 +330,7 @@ class TrainSelectionController extends Controller
                     'SeatID' => $seat->SeatID,
                     'PassengerID' => $passengerModel->PassengerID,
                     'Status' => 'Pending',
+                    'Price' => $ticketPrice, // Store individual ticket price
                     'Created_at' => now()->format('d-m-Y'),
                 ]);
 

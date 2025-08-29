@@ -18,6 +18,7 @@
 
     <div class="ticket-search-container">
         <form class="search-form" action="{{ route('train.selection') }}" method="GET" id="searchForm">
+            <!-- Search Inputs -->
             <div class="form-group">
                 <label>Depart Location</label>
                 <input type="text" name="fromlocation" placeholder="Where from?"
@@ -58,12 +59,19 @@
                 <label>Passengers</label>
                 <select name="passengers">
                     <option value="1" {{ request()->input('passengers') == '1' ? 'selected' : '' }}>1 Passenger</option>
-                    <option value="2" {{ request()->input('passengers') == '2' ? 'selected' : '' }}>2 Passengers
-                    </option>
-                    <option value="3" {{ request()->input('passengers') == '3' ? 'selected' : '' }}>3 Passengers
-                    </option>
+                    <option value="2" {{ request()->input('passengers') == '2' ? 'selected' : '' }}>2 Passengers</option>
+                    <option value="3" {{ request()->input('passengers') == '3' ? 'selected' : '' }}>3 Passengers</option>
                 </select>
             </div>
+
+            <!-- Hidden Filter Inputs to Persist Filter State -->
+            @foreach (request()->input('train_type', []) as $trainType)
+                <input type="hidden" name="train_type[]" value="{{ $trainType }}">
+            @endforeach
+            @foreach (request()->input('departure_time', []) as $departureTime)
+                <input type="hidden" name="departure_time[]" value="{{ $departureTime }}">
+            @endforeach
+
             <button type="submit" class="search-btn">Search</button>
         </form>
     </div>
@@ -75,7 +83,7 @@
             <h2>Filters</h2>
             <br />
             <form action="{{ route('train.selection') }}" method="GET" id="filterForm">
-                <!-- Hidden inputs to preserve search parameters -->
+                <!-- Hidden Search Inputs to Persist Search State -->
                 <input type="hidden" name="fromlocation" value="{{ request()->input('fromlocation') }}">
                 <input type="hidden" name="tolocation" value="{{ request()->input('tolocation') }}">
                 <input type="hidden" name="journeydate" value="{{ request()->input('journeydate') }}">
@@ -85,19 +93,19 @@
                 <div class="filter-section">
                     <h4>Train Type</h4>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="train_type[]" value="ETS" id="direct"
+                        <input type="checkbox" name="train_type[]" value="ETS" id="ets"
                             {{ in_array('ETS', request()->input('train_type', [])) ? 'checked' : '' }}>
-                        <label for="direct">ETS</label>
+                        <label for="ets">ETS</label>
                     </div>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="train_type[]" value="Komuter" id="oneStop"
+                        <input type="checkbox" name="train_type[]" value="Komuter" id="komuter"
                             {{ in_array('Komuter', request()->input('train_type', [])) ? 'checked' : '' }}>
-                        <label for="oneStop">KTM Komuter</label>
+                        <label for="komuter">KTM Komuter</label>
                     </div>
                     <div class="checkbox-row">
-                        <input type="checkbox" name="train_type[]" value="Intercity" id="twoStops"
+                        <input type="checkbox" name="train_type[]" value="Intercity" id="intercity"
                             {{ in_array('Intercity', request()->input('train_type', [])) ? 'checked' : '' }}>
-                        <label for="twoStops">KTM Intercity</label>
+                        <label for="intercity">KTM Intercity</label>
                     </div>
                 </div>
 
@@ -124,10 +132,11 @@
                         <label for="night">Night Train (18:00 - 00:00)</label>
                     </div>
                 </div>
-                <button type="submit" class="filter-submit-button">Filter</button>
+                <button type="submit" class="filter-submit-button">Apply Filters</button>
             </form>
         </div>
 
+        <!-- Rest of the train selection display remains unchanged -->
         <div class="train-select">
             <div class="train-select-header">
                 <div class="header-cell">Departing Train</div>
@@ -181,6 +190,7 @@
     </div>
 </section>
 
+<!-- Rest of the scripts remain unchanged -->
 <script src="{{ asset('js/HomePage.js') }}" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
@@ -202,32 +212,27 @@ flatpickr("#depart-date", {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Pass the session success value to JavaScript
     const successMessage = "{{ session('success') }}";
-
-    // Normal JavaScript if statement
     if (successMessage) {
-        console.log('Success message detected:', successMessage); // Debug log
+        console.log('Success message detected:', successMessage);
         Swal.fire({
             title: 'Success!',
             text: successMessage,
             icon: 'success',
-            timer: 3000, // Auto-close after 3 seconds
+            timer: 3000,
             showConfirmButton: false,
             toast: true,
-            width: 800, // Increase width to 400px (default is auto)
-            padding: '15px 20px', // Increase padding for larger content area
+            width: 800,
+            padding: '15px 20px',
             customClass: {
-                popup: 'custom-larger-toast' // Custom class for additional styling
+                popup: 'custom-larger-toast'
             }
         }).then(() => {
-            console.log('Toast displayed'); // Debug log
+            console.log('Toast displayed');
         });
     } else {
-        console.log('No success message found'); // Debug log
+        console.log('No success message found');
     }
 });
-
 </script>
-
 @endsection

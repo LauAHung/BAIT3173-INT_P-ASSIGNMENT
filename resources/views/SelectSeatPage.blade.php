@@ -18,12 +18,30 @@
             </div>
             <div class="passenger-container">
                 <div class="passenger-info-details">
+                    @php
+                        $totalPrice = 0;
+                    @endphp
                     @foreach ($passengers as $index => $passenger)
+                    @php
+                        $ticketPrice = $journey['price'];
+                        if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                            $ticketPrice *= 0.9; // 10% discount
+                        } elseif ($passenger['ticket_type'] === 'OKU') {
+                            $ticketPrice *= 0.7; // 30% discount
+                        }
+                        $totalPrice += $ticketPrice;
+                    @endphp
                     <div class="passenger-info">
                         <div class="passenger-item">
-                            <span class="passenger-label">Passenger {{ $index + 1 }}</span>
+                            <span class="passenger-label">Passenger {{ $index }}</span>
                             <span class="passenger-subtext">{{ $journey['from_location'] }} >
-                                {{ $journey['to_location'] }} (MYR {{ $journey['price'] }})</span>
+                                {{ $journey['to_location'] }} (MYR {{ number_format($ticketPrice, 2) }}) 
+                                @if ($passenger['ticket_type'] === 'Kanak-kanak/Child')
+                                    (10% Child Discount)
+                                @elseif ($passenger['ticket_type'] === 'OKU')
+                                    (30% OKU Discount)
+                                @endif
+                            </span>
                         </div>
                         <div class="details-item">
                             <span class="details-label">Ticket type</span>
@@ -66,13 +84,26 @@
                     </div>
                 </div>
                 <div class="trip-price-info">
+                    @foreach ($passengers as $index => $passenger)
+                    @php
+                        $ticketPrice = $journey['price'];
+                        $discountText = '';
+                        if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                            $ticketPrice *= 0.9;
+                            $discountText = '(10% Child Discount)';
+                        } elseif ($passenger['ticket_type'] === 'OKU') {
+                            $ticketPrice *= 0.7;
+                            $discountText = '(30% OKU Discount)';
+                        }
+                    @endphp
                     <div class="price-info">
-                        <div>Total ticket ({{ $passengersCount }})</div>
-                        <div>RM {{ $journey['price'] * $passengersCount }}</div>
+                        <div>Ticket ({{ $index }})</div>
+                        <div>RM {{ number_format($ticketPrice, 2) }}</div>
                     </div>
+                    @endforeach
                     <div class="total-price-info">
                         <a>Trip Total</a>
-                        <a>RM {{ $journey['price'] * $passengersCount }}</a>
+                        <a>RM {{ number_format($totalPrice, 2) }}</a>
                     </div>
                 </div>
             </div>
