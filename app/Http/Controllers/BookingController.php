@@ -33,9 +33,8 @@ class BookingController extends Controller
         $booking->showProceedPayment = $booking->Status === 'Pending' && !$booking->PaymentType;
         $booking->showCancel = $booking->Status === 'Pending' && !$booking->PaymentType;
 
-        // Show QR and Refund based on payment type
-        $booking->showViewQR = $booking->PaymentType === 'Wallet';
-        $booking->showRefund = $booking->PaymentType === 'Wallet';
+        $booking->showViewQR = $booking->Status === 'Booked';
+        $booking->showRefund = $booking->Status === 'Booked';
 
         return $booking;
             });

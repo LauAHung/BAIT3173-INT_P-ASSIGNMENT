@@ -83,7 +83,7 @@
                         <div class="info">Journey ID</div>
                         <div class="data">{{ $ticket->JourneyID ?? 'Unknown'}}</div>
                         <div class="info">Seat No.</div>
-                        <div class="data">{{ $ticket->Seat->SeatNo ?? 'Not assigned' }}</div>
+                        <div class="data">{{ $ticket->Seat->SeatNo ?? '-' }}</div>
                         <div class="masinfo">
                             <div class="left">
                                 <div class="info">date</div>

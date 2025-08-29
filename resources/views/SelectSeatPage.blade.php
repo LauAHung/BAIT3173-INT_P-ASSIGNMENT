@@ -44,6 +44,8 @@
                             </span>
                         </div>
                         <div class="details-item">
+                            <span class="details-label">Name</span>
+                            <span class="details-value">{{ $passenger['name'] }}</span>
                             <span class="details-label">Ticket type</span>
                             <span class="details-value">{{ $passenger['ticket_type'] }}</span>
                             <span class="details-label">MyKad no. / passport</span>
@@ -80,7 +82,7 @@
                         <span class="label">DEPART</span>
                         <div>{{ $journey['train_no'] }}</div>
                         <div>{{ date('D, M d (h:i A', strtotime($journey['departure_time'])) }} -
-                            {{ date('h:i A', strtotime($journey['arrival_time'])) }})</div>
+                            {{ date('h:i A)', strtotime($journey['arrival_time'])) }}</div>
                     </div>
                 </div>
                 <div class="trip-price-info">
@@ -112,6 +114,7 @@
     </div>
 </section>
 
+@if ($journey['train_service'] === 'ETS')
 <section class="select-seat-section">
     <div class="seat-info-box">
         <div class="seat-info">
@@ -147,15 +150,15 @@
             @php
             $seats = \App\Models\Seat::where('JourneyID', $journey['id'])->get()->keyBy('SeatNo');
             $coaches = [
-            'coach1' => range(1, 13),
-            'coach2' => range(14, 26),
-            'coach3' => range(27, 39),
-            'coach4' => range(40, 52),
+                'coach1' => range(1, 13),
+                'coach2' => range(14, 26),
+                'coach3' => range(27, 39),
+                'coach4' => range(40, 52),
             ];
             @endphp
 
             @foreach ($coaches as $coachId => $rows)
-            <div id="{{ $coachId }}" @if($coachId=='coach1' ) style="display: block" @else style="display: none" @endif>
+            <div id="{{ $coachId }}" @if($coachId=='coach1') style="display: block" @else style="display: none" @endif>
                 <div class="train">
                     <div class="exit front train-body">
                         <div>Toilet</div>
@@ -211,14 +214,17 @@
     </div>
     @endif
 </section>
+@endif
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const coachSelect = document.getElementById('coach-select');
-    const coaches = ['coach1', 'coach2', 'coach3', 'coach4'];
     const passengersCount = parseInt('{{ $passengersCount ?? 1 }}');
     let selectedSeats = [];
+
+    @if ($journey['train_service'] === 'ETS')
+    const coachSelect = document.getElementById('coach-select');
+    const coaches = ['coach1', 'coach2', 'coach3', 'coach4'];
 
     coaches.forEach(coach => {
         const coachElement = document.getElementById(coach);
@@ -252,16 +258,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+    @endif
 
     window.submitBooking = function() {
-        const passengersCount = parseInt('{{ $passengersCount ?? 1 }}');
+        @if ($journey['train_service'] === 'ETS')
         // Use the globally tracked selectedSeats instead of recollecting
         if (selectedSeats.length !== passengersCount) {
             alert('Please select exactly ' + passengersCount + ' seat(s).');
             return;
         }
-
         console.log('Selected seats before submission:', selectedSeats);
+        @endif
 
         // Use SweetAlert2 for a better UI confirmation
         Swal.fire({
@@ -288,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'content') || '{{ csrf_token() }}';
                 form.appendChild(csrf);
 
+                @if ($journey['train_service'] === 'ETS')
                 selectedSeats.forEach(seat => {
                     const input = document.createElement('input');
                     input.type = 'hidden';
@@ -295,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.value = seat;
                     form.appendChild(input);
                 });
+                @endif
 
                 document.body.appendChild(form);
                 try {
