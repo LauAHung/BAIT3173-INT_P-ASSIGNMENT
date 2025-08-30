@@ -63,23 +63,25 @@ public function processPayment(Request $request)
         return redirect()->route('booking')->with('error', 'Booking not found.');
     }
 
-    // Ensure numeric comparison
     $bookingPrice = floatval($booking->Price);
     $userBalance = floatval($user->wallet_balance);
 
+    // If insufficient balance, return view WITH ALL required data
     if ($userBalance < $bookingPrice) {
-        return redirect()->route('booking')->with('error', 'Insufficient wallet balance.');
+        return view('PaymentPage', [
+            'user' => $user,
+            'booking' => $booking,
+            'insufficientBalance' => true  // <-- the alert flag
+        ]);
     }
 
     DB::beginTransaction();
     try {
-        // Deduct wallet balance
-        $user->wallet_balance = $userBalance - $bookingPrice;
+        $user->wallet_balance -= $bookingPrice;
         $user->save();
 
-        // Update booking: mark as paid via Wallet
         $booking->PaymentType = 'Wallet';
-        $booking->Status = 'Booked';  // <- THIS LINE is important
+        $booking->Status = 'Booked';
         $booking->save();
 
         DB::commit();
@@ -90,5 +92,6 @@ public function processPayment(Request $request)
         return redirect()->route('booking')->with('error', 'Payment failed: ' . $e->getMessage());
     }
 }
+
 
 }
