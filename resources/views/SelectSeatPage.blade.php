@@ -13,25 +13,57 @@
         <div class="passenger-info-container">
             <div class="passenger-head-info">
                 <h2>Passenger Details</h2>
-                <a href="{{ route('passengerinfo', ['passengers' => request()->input('passengers', 1), 'journey_id' => $journey['id']]) }}" class="change-journey">Change Journey</a>
+                <a href="{{ route('passengerinfo', ['passengers' => request()->input('passengers', 1), 'journey_id' => $journey['id']]) }}"
+                    class="change-journey">Change Journey</a>
             </div>
             <div class="passenger-container">
                 <div class="passenger-info-details">
+                    @php
+                        $totalPrice = 0;
+                    @endphp
                     @foreach ($passengers as $index => $passenger)
+                    @php
+                        $ticketPrice = $journey['price'];
+                        if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                            $ticketPrice *= 0.9; // 10% discount
+                        } elseif ($passenger['ticket_type'] === 'OKU') {
+                            $ticketPrice *= 0.7; // 30% discount
+                        }
+                        $totalPrice += $ticketPrice;
+                    @endphp
                     <div class="passenger-info">
                         <div class="passenger-item">
-                            <span class="passenger-label">Passenger {{ $index + 1 }}</span>
+                            <span class="passenger-label">Passenger {{ $index }}</span>
                             <span class="passenger-subtext">{{ $journey['from_location'] }} >
-                                {{ $journey['to_location'] }}, (MYR {{ $journey['price'] }})</span>
+                                {{ $journey['to_location'] }} (MYR {{ number_format($ticketPrice, 2) }}) 
+                                @if ($passenger['ticket_type'] === 'Kanak-kanak/Child')
+                                    (10% Child Discount)
+                                @elseif ($passenger['ticket_type'] === 'OKU')
+                                    (30% OKU Discount)
+                                @endif
+                            </span>
                         </div>
                         <div class="details-item">
+                            <span class="details-label">Name</span>
+                            <span class="details-value">{{ $passenger['name'] }}</span>
                             <span class="details-label">Ticket type</span>
                             <span class="details-value">{{ $passenger['ticket_type'] }}</span>
                             <span class="details-label">MyKad no. / passport</span>
-                            <span
-                                class="details-value">{{ $passenger['mykad'] ?? $passenger['passport'] ?? 'N/A' }}</span>
+                            <span class="details-value">
+                                @if (!empty($passenger['mykad']) || !empty($passenger['passport']))
+                                {{ str_repeat('*', max(0, strlen($passenger['mykad'] ?? $passenger['passport']) - 4)) . substr($passenger['mykad'] ?? $passenger['passport'], -4) }}
+                                @else
+                                N/A
+                                @endif
+                            </span>
                             <span class="details-label">Contact no.</span>
-                            <span class="details-value">{{ $passenger['contact_no'] }}</span>
+                            <span class="details-value">
+                                @if (!empty($passenger['contact_no']))
+                                {{ str_repeat('*', max(0, strlen($passenger['contact_no']) - 4)) . substr($passenger['contact_no'], -4) }}
+                                @else
+                                N/A
+                                @endif
+                            </span>
                         </div>
                     </div>
                     @endforeach
@@ -50,17 +82,30 @@
                         <span class="label">DEPART</span>
                         <div>{{ $journey['train_no'] }}</div>
                         <div>{{ date('D, M d (h:i A', strtotime($journey['departure_time'])) }} -
-                            {{ date('h:i A', strtotime($journey['arrival_time'])) }})</div>
+                            {{ date('h:i A)', strtotime($journey['arrival_time'])) }}</div>
                     </div>
                 </div>
                 <div class="trip-price-info">
+                    @foreach ($passengers as $index => $passenger)
+                    @php
+                        $ticketPrice = $journey['price'];
+                        $discountText = '';
+                        if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                            $ticketPrice *= 0.9;
+                            $discountText = '(10% Child Discount)';
+                        } elseif ($passenger['ticket_type'] === 'OKU') {
+                            $ticketPrice *= 0.7;
+                            $discountText = '(30% OKU Discount)';
+                        }
+                    @endphp
                     <div class="price-info">
-                        <div>Total ticket ({{ $passengersCount }})</div>
-                        <div>RM {{ $journey['price'] * $passengersCount }}</div>
+                        <div>Ticket ({{ $index }})</div>
+                        <div>RM {{ number_format($ticketPrice, 2) }}</div>
                     </div>
+                    @endforeach
                     <div class="total-price-info">
                         <a>Trip Total</a>
-                        <a>RM {{ $journey['price'] * $passengersCount }}</a>
+                        <a>RM {{ number_format($totalPrice, 2) }}</a>
                     </div>
                 </div>
             </div>
@@ -69,6 +114,7 @@
     </div>
 </section>
 
+@if ($journey['train_service'] === 'ETS')
 <section class="select-seat-section">
     <div class="seat-info-box">
         <div class="seat-info">
@@ -104,15 +150,15 @@
             @php
             $seats = \App\Models\Seat::where('JourneyID', $journey['id'])->get()->keyBy('SeatNo');
             $coaches = [
-            'coach1' => range(1, 13),
-            'coach2' => range(14, 26),
-            'coach3' => range(27, 39),
-            'coach4' => range(40, 52),
+                'coach1' => range(1, 13),
+                'coach2' => range(14, 26),
+                'coach3' => range(27, 39),
+                'coach4' => range(40, 52),
             ];
             @endphp
 
             @foreach ($coaches as $coachId => $rows)
-            <div id="{{ $coachId }}" @if($coachId=='coach1' ) style="display: block" @else style="display: none" @endif>
+            <div id="{{ $coachId }}" @if($coachId=='coach1') style="display: block" @else style="display: none" @endif>
                 <div class="train">
                     <div class="exit front train-body">
                         <div>Toilet</div>
@@ -161,21 +207,24 @@
     <div class="error-message" style="color: red; margin: 10px 0;">
         {{ session('error') }}
     </div>
-@endif
-@if (session('success'))
+    @endif
+    @if (session('success'))
     <div class="success-message" style="color: green; margin: 10px 0;">
         {{ session('success') }}
     </div>
-@endif
+    @endif
 </section>
+@endif
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const coachSelect = document.getElementById('coach-select');
-    const coaches = ['coach1', 'coach2', 'coach3', 'coach4'];
     const passengersCount = parseInt('{{ $passengersCount ?? 1 }}');
     let selectedSeats = [];
+
+    @if ($journey['train_service'] === 'ETS')
+    const coachSelect = document.getElementById('coach-select');
+    const coaches = ['coach1', 'coach2', 'coach3', 'coach4'];
 
     coaches.forEach(coach => {
         const coachElement = document.getElementById(coach);
@@ -199,7 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (checkbox.checked) {
                 if (selectedSeats.length >= passengersCount) {
                     checkbox.checked = false;
-                    alert('You cannot select more seats than the number of passengers < ' + passengersCount + ' >.');
+                    alert('You cannot select more seats than the number of passengers < ' +
+                        passengersCount + ' >.');
                 } else {
                     selectedSeats.push(checkbox.id);
                 }
@@ -208,16 +258,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+    @endif
 
     window.submitBooking = function() {
-        const passengersCount = parseInt('{{ $passengersCount ?? 1 }}');
+        @if ($journey['train_service'] === 'ETS')
         // Use the globally tracked selectedSeats instead of recollecting
         if (selectedSeats.length !== passengersCount) {
             alert('Please select exactly ' + passengersCount + ' seat(s).');
             return;
         }
-
         console.log('Selected seats before submission:', selectedSeats);
+        @endif
 
         // Use SweetAlert2 for a better UI confirmation
         Swal.fire({
@@ -240,9 +291,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const csrf = document.createElement('input');
                 csrf.type = 'hidden';
                 csrf.name = '_token';
-                csrf.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+                csrf.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute(
+                    'content') || '{{ csrf_token() }}';
                 form.appendChild(csrf);
 
+                @if ($journey['train_service'] === 'ETS')
                 selectedSeats.forEach(seat => {
                     const input = document.createElement('input');
                     input.type = 'hidden';
@@ -250,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.value = seat;
                     form.appendChild(input);
                 });
+                @endif
 
                 document.body.appendChild(form);
                 try {

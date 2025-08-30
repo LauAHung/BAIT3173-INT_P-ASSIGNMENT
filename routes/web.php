@@ -8,7 +8,6 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TrainSelectionController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\BookingDetailController;
 use App\Http\Controllers\WalletController;
 
 Route::get('/', function () {
@@ -116,10 +115,10 @@ Route::post('/booking/store', [TrainSelectionController::class, 'storeBooking'])
 
 Route::get('/booking', [BookingController::class, 'index'])->name('booking');
 Route::get('/booking/refund', [BookingController::class, 'refund'])->name('refund');
-Route::get('/booking/payment', [BookingController::class, 'refund'])->name('proceedPayment');
-Route::get('/booking/cancel', [BookingController::class, 'refund'])->name('cancel');
-Route::get('/booking/rate', [BookingController::class, 'refund'])->name('rateTrip');
-Route::get('/booking_detail/{bookingId}', [BookingDetailController::class, 'show'])->name('bookingdetail');
+Route::get('/booking/payment', [BookingController::class, 'payment'])->name('proceedPayment');
+Route::get('/booking/cancel/{bookingId}', [BookingController::class, 'cancel'])->name('cancel');
+Route::get('/booking/rate', [BookingController::class, 'rate'])->name('rateTrip');
+Route::get('/booking_detail/{bookingId}', [BookingController::class, 'show'])->name('bookingdetail');
 
 Route::get('/booking_detail', function () {
     return view('BookingDetailPage');
@@ -142,6 +141,14 @@ Route::get('/feedback', function () {
 Route::get('/selectrating', function () {
     return view('SelectRatingPage');
 })->name('selectrating');
+
+Route::get('/ratingsection', function () {
+    return view('RatingSectionPage');
+})->name('ratingsection');
+
+Route::get('/viewfeedback', function () {
+    return view('ViewFeedbackPage');
+})->name('viewfeedback');
 
 Route::get('/payment', function () {
     return view('PaymentPage');
@@ -200,3 +207,12 @@ Route::get('/stripe/success', [StripeController::class, 'success'])->name('succe
 // Wallet routes
 Route::post('/wallet/topup', [WalletController::class, 'topup'])->name('wallet.topup');
 Route::get('/wallet/success', [WalletController::class, 'success'])->name('wallet.success');
+
+
+// -------- STRIPE TOP-UP --------
+Route::get('/payment', [PaymentController::class, 'showPaymentForm'])->name('payment.stripe');
+Route::post('/payment', [PaymentController::class, 'processPayment'])->name('payment.stripe.process');
+
+// -------- BOOKING PAYMENT --------
+Route::get('/payment/{bookingId}', [PaymentController::class, 'showPaymentPage'])->name('proceedPayment');
+Route::post('/payment/{bookingId}/complete', [PaymentController::class, 'completePayment'])->name('payment.complete');

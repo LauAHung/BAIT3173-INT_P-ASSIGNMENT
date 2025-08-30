@@ -13,7 +13,7 @@ class Booking extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'BookingID', 'UserID', 'TrainID', 'JourneyID', 'BookingType', 'PaymentType', 'TicketNo', 'Status', 'Created_at',
+        'BookingID', 'UserID', 'TrainID', 'JourneyID', 'BookingType', 'PaymentType', 'TicketNo','Price', 'Status', 'Created_at',
     ];
 
     protected $casts = [

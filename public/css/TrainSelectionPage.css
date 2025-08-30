@@ -415,7 +415,7 @@ body {
 
 .train-card {
     display: grid;
-    grid-template-columns: 180px 90px 2.2fr 80px minmax(100px, 120px) 1fr;
+    grid-template-columns: 140px 150px 2.2fr 80px minmax(100px, 120px) 1fr;
     align-items: center;
     background: #fff;
     border-radius: 12px;
@@ -433,7 +433,7 @@ body {
     display: flex;
 }
 .train-name { min-width: 100px; font-weight: 600; }
-.train-type { min-width: 80px; color: #a259c4; font-weight: 500; }
+.train-date { min-width: 80px; color: #a259c4; font-weight: 500;}
 .train-time { min-width: 180px; }
 .train-time > div:first-child { font-weight: 500; }
 .train-desc {

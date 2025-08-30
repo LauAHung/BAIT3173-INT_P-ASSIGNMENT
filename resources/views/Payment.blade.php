@@ -1,55 +1,67 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Stripe Payment</title>
-    <script src="https://js.stripe.com/v3/"></script>
-</head>
-<body>
-@if(session('success'))
-    <p style="color:green">{{ session('success') }}</p>
-@endif
-@if(session('error'))
-    <p style="color:red">{{ session('error') }}</p>
-@endif
+<?php
+namespace App\Http\Controllers;
 
-<form action="/payment" method="POST" id="payment-form">
-    @csrf
-    <input type="number" name="amount" placeholder="Amount" required>
-    <div id="card-element"></div>
-    <button type="submit">Pay</button>
-</form>
+use Illuminate\Http\Request;
+use App\Models\Booking;
+use Stripe\Stripe;
+use Stripe\Charge;
 
-<script>
-    var STRIPE_KEY = "{{ config('services.stripe.key') }}";
-    var stripe = Stripe(STRIPE_KEY);
-    var elements = stripe.elements();
-    var card = elements.create('card');
-    card.mount('#card-element');
-
-    var form = document.getElementById('payment-form');
-    form.addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    if (!form.querySelector('input[name="_token"]')) {
-        alert('CSRF token missing!');
-        return;
+class PaymentController extends Controller
+{
+    // ----------------- STRIPE PAYMENT -----------------
+    public function showPaymentForm()
+    {
+        return view('payment');
     }
 
-    stripe.createToken(card).then(function(result) {
-        if (result.error) {
-            alert(result.error.message);
-        } else {
-            var hiddenInput = document.createElement('input');
-            hiddenInput.setAttribute('type', 'hidden');
-            hiddenInput.setAttribute('name', 'stripeToken');
-            hiddenInput.setAttribute('value', result.token.id);
-            form.appendChild(hiddenInput);
+    public function processPayment(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0.5',
+            'stripeToken' => 'required'
+        ]);
 
-            form.submit();
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            $charge = Charge::create([
+                'amount' => $request->amount * 100,
+                'currency' => 'myr',
+                'source' => $request->stripeToken,
+                'description' => 'Test Payment',
+            ]);
+
+            return back()->with('success', 'Payment successful!');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-    });
-});
+    }
 
-</script>
-</body>
-</html>
+    // ----------------- BOOKING PAYMENT -----------------
+    public function showPaymentPage($bookingId)
+    {
+        $booking = Booking::find($bookingId);
+
+        if (!$booking) {
+            return redirect()->route('booking')->with('error', 'Booking not found.');
+        }
+
+        return view('PaymentPage', compact('booking'));
+    }
+
+    public function completePayment(Request $request, $bookingId)
+    {
+        $booking = Booking::find($bookingId);
+
+        if (!$booking) {
+            return redirect()->route('booking')->with('error', 'Booking not found.');
+        }
+
+        // you can validate form input if you have fields
+        $booking->Status = 'Paid';
+        $booking->save();
+
+        return redirect()->route('bookingdetail', ['bookingId' => $bookingId])
+            ->with('success', 'Payment completed successfully!');
+    }
+}

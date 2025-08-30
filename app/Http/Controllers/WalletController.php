@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
+use App\Models\User;
 
 class WalletController extends Controller
 {
@@ -15,22 +16,24 @@ class WalletController extends Controller
         $this->middleware('auth');
     }
 
+    // Show wallet balance page
     public function showWallet()
     {
         $user = Auth::user();
         return view('wallet', compact('user'));
     }
 
+    // Initiate Stripe top-up
     public function topup(Request $request)
     {
         $request->validate([
             'amount' => 'required|numeric|min:1|max:10000'
         ]);
 
-        $amount = $request->amount;
-        $amountInCents = (int)($amount * 100); // Convert to cents for Stripe
+        $amount = floatval($request->amount); // ensure numeric
+        $amountInCents = (int)($amount * 100); // Stripe expects cents as int
 
-        \Stripe\Stripe::setApiKey(config('stripe.sk'));
+        Stripe::setApiKey(config('stripe.sk'));
 
         $session = Session::create([
             'line_items' => [
@@ -57,42 +60,37 @@ class WalletController extends Controller
         return redirect()->away($session->url);
     }
 
+    // Handle successful Stripe payment
     public function success(Request $request)
     {
         $sessionId = $request->get('session_id');
-        $amount = $request->get('amount');
 
-        if (!$sessionId || !$amount) {
+        if (!$sessionId) {
             return redirect()->route('profile')->with('error', 'Invalid payment session.');
         }
 
         try {
-            $session = \Stripe\Checkout\Session::retrieve($sessionId);
-            
+            Stripe::setApiKey(config('stripe.sk'));
+            $session = Session::retrieve($sessionId);
+
             if ($session->payment_status === 'paid') {
-                // Update user's wallet balance
-                $user = Auth::user();
-                $oldBalance = $user->wallet_balance;
-                $user->wallet_balance += (float)$amount;
-                $user->save();
+                $userId = $session->metadata['user_id']; // access as array
+                $amount = floatval($session->metadata['amount']); // cast to float
 
-                // Refresh the user data to ensure we have the latest balance
-                $user->refresh();
+                $user = User::find($userId);
+                if ($user) {
+                    $user->wallet_balance = floatval($user->wallet_balance) + $amount; // ensure float
+                    $user->save();
 
-                // Log the update for debugging
-                Log::info('Wallet topup successful', [
-                    'user_id' => $user->user_id,
-                    'old_balance' => $oldBalance,
-                    'topup_amount' => $amount,
-                    'new_balance' => $user->wallet_balance
-                ]);
-
-                return redirect()->route('profile')->with('success', 'Topup successful! RM' . number_format($amount, 2) . ' has been added to your wallet.');
+                    return redirect()->route('profile')->with('success', 'Topup successful! RM' . number_format($amount, 2) . ' added to your wallet.');
+                } else {
+                    return redirect()->route('profile')->with('error', 'User not found.');
+                }
             } else {
                 return redirect()->route('profile')->with('error', 'Payment was not completed.');
             }
         } catch (\Exception $e) {
-            return redirect()->route('profile')->with('error', 'Payment verification failed.');
+            return redirect()->route('profile')->with('error', 'Payment verification failed: ' . $e->getMessage());
         }
     }
 }

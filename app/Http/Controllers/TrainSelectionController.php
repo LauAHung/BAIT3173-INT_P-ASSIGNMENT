@@ -9,15 +9,16 @@ use App\Models\Ticket;
 use App\Models\Seat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TrainSelectionController extends Controller
 {
     public function index(Request $request)
     {
+        // Initialize the base query
         $query = Journey::query()->with('train')
             ->orderBy('DepartureTime', 'asc');
-        $journeys = $query->get();
 
         // Track if any meaningful filters (excluding passengers) are applied
         $hasSearchFilters = false;
@@ -72,7 +73,6 @@ class TrainSelectionController extends Controller
                                 $q->orWhereRaw('TIME(DepartureTime) BETWEEN ? AND ?', ['18:00:00', '23:59:59']);
                                 break;
                         }
-                    } else {
                     }
                 }
             });
@@ -80,17 +80,18 @@ class TrainSelectionController extends Controller
         }
 
         // Always apply passengers filter (default to 1 if not provided)
-        $passengers = $request->filled('passengers') ? $request->input('passengers') : 1;
+        $passengers = $request->filled('passengers') ? (int) $request->input('passengers') : 1;
         $query->where('SeatAvailable', '>=', $passengers);
 
-        // Default: Fetch the first 3 scheduled journeys if no other filters are applied
+        // Default: Fetch the first 5 scheduled journeys if no filters are applied
         if (!$hasSearchFilters) {
             $query->where('Status', 'Scheduled')->take(5);
         }
 
+        // Execute the query
         $journeys = $query->get();
 
-        // Get the success message from the session and pass it to the view
+        // Get the success message from the session
         $successMessage = session('success');
 
         return view('TrainSelectionPage', compact('journeys', 'successMessage'));
@@ -98,9 +99,12 @@ class TrainSelectionController extends Controller
 
     public function showPassengerInfo(Request $request)
     {
-        // Get the journey ID from the request (e.g., passed as a query parameter or route parameter)
-        $journeyId = $request->input('journey_id'); // Assume journey_id is passed in the URL or form
-        $passengers = $request->input('passengers', 1); // Default to 1 if not set
+        if (!Auth::check()) {
+            return redirect()->route('signin')->with('info', 'Please login first before make a booking.');
+        }
+        // Get the journey ID from the request
+        $journeyId = $request->input('journey_id');
+        $passengers = $request->input('passengers', 1);
 
         // Fetch the journey details
         $journey = Journey::with('train')->findOrFail($journeyId);
@@ -121,19 +125,26 @@ class TrainSelectionController extends Controller
             'passengers_count' => $passengers,
         ]);
 
-        return view('PassengerInfoPage', compact('passengers'));
+        return view('PassengerInfoPage', compact('passengers', 'journey'));
     }
 
     public function storePassengerInfo(Request $request)
     {
         $validated = $request->validate([
-            'passenger.*.name' => 'required|string|max:255',
-            'passenger.*.contact_no' => 'required|string|max:20',
+            'passenger.*.name' => ['required', 'regex:/^[a-zA-Z\s\'-]{2,}$/', 'max:255'],
+            'passenger.*.contact_no' => ['required', 'regex:/^01[0-9]-[0-9]{7,8}$/', 'max:20'],
             'passenger.*.gender' => 'required|in:male,female',
             'passenger.*.ticket_type' => 'required|in:Dewasa/Adult,Kanak-kanak/Child,OKU',
-            'passenger.*.mykad' => 'nullable|string|max:20',
-            'passenger.*.passport' => 'nullable|string|max:20',
-            'passenger.*.passport_expiry' => 'nullable|date',
+            'passenger.*.mykad' => ['nullable', 'regex:/^\d{12}$/', 'max:20', 'required_without:passenger.*.passport'],
+            'passenger.*.passport' => ['nullable', 'regex:/^[a-zA-Z0-9]{6,12}$/', 'max:20', 'required_without:passenger.*.mykad'],
+            'passenger.*.passport_expiry' => ['nullable', 'date'],
+        ], [
+            'passenger.*.name.regex' => 'Invalid name provided',
+            'passenger.*.mykad.regex' => 'Invalid MyKad format: Must be exactly 12 digits.',
+            'passenger.*.passport.regex' => 'Invalid Passport format: Must be 6-12 alphanumeric characters.',
+            'passenger.*.contact_no.regex' => 'Invalid contact number format: Use format 01x-xxxxxxxx.',
+            'passenger.*.mykad.required_without' => 'Either MyKad or Passport number is required.',
+            'passenger.*.passport.required_without' => 'Either MyKad or Passport number is required.',
         ]);
 
         $passengers = $request->input('passenger', []);
@@ -215,6 +226,7 @@ class TrainSelectionController extends Controller
             'journey_id' => $journeyId,
         ]);
     }
+
     public function showSelectSeat(Request $request)
     {
         // Retrieve journey and passenger info from session
@@ -232,48 +244,67 @@ class TrainSelectionController extends Controller
         $passengersCount = (int) session('passengers_count', 1);
         $selectedSeatsInput = $request->input('selected_seats', []);
 
-        Log::info('Raw selected_seats input:', [$selectedSeatsInput]);
-        $selectedSeats = array_reduce($selectedSeatsInput, function ($carry, $item) {
-            return array_merge($carry, is_array($item) ? $item : [$item]);
-        }, []);
+        // Only process seats if the service is ETS
+        $selectedSeats = [];
+        if ($journey['train_service'] === 'ETS') {
+            $selectedSeats = array_reduce($selectedSeatsInput, function ($carry, $item) {
+                return array_merge($carry, is_array($item) ? $item : [$item]);
+            }, []);
 
-        Log::info('Flattened selected_seats:', [$selectedSeats]);
-        Log::info('Count of selectedSeats:', [count($selectedSeats)]);
-        Log::info('PassengersCount:', [$passengersCount]);
-        Log::info('Journey exists:', [$journey ? 'yes' : 'no']);
-        Log::info('Passengers exists:', [$passengers ? 'yes' : 'no']);
+            Log::info('Flattened selected_seats:', [$selectedSeats]);
+            Log::info('Count of selectedSeats:', [count($selectedSeats)]);
+            Log::info('PassengersCount:', [$passengersCount]);
+            Log::info('Journey exists:', [$journey ? 'yes' : 'no']);
+            Log::info('Passengers exists:', [$passengers ? 'yes' : 'no']);
+
+            // Validate seat count for ETS
+            if (count($selectedSeats) !== $passengersCount) {
+                return redirect()->route('selectseat', ['journey_id' => $journey['id'], 'passengers' => $passengersCount])
+                    ->with('error', 'Please select exactly ' . $passengersCount . ' seat(s) for ETS service.');
+            }
+
+            // Verify seat availability for ETS
+            $availableSeats = Seat::where('JourneyID', $journey['id'])
+                ->whereIn('SeatNo', $selectedSeats)
+                ->where('is_available', 'Y')
+                ->count();
+
+            if ($availableSeats !== $passengersCount) {
+                return redirect()->route('selectseat', ['journey_id' => $journey['id'], 'passengers' => $passengersCount])
+                    ->with('error', 'One or more selected seats are no longer available.');
+            }
+        }
 
         // Re-index the passengers array to start from 0
         Log::info('Passengers array before reindex:', [$passengers]);
         $passengers = array_values($passengers);
         Log::info('Passengers array after reindex:', [$passengers]);
 
-        if (!$journey || !$passengers || count($selectedSeats) !== $passengersCount) {
-            return redirect()->route('selectseat', ['journey_id' => $journey['id'] ?? 0, 'passengers' => $passengersCount])
-                ->with('error', 'Invalid booking data or incorrect number of seats selected.');
-        }
-
-        $availableSeats = Seat::where('JourneyID', $journey['id'])
-            ->whereIn('SeatNo', $selectedSeats)
-            ->where('is_available', 'Y')
-            ->count();
-
-        if ($availableSeats !== $passengersCount) {
-            return redirect()->route('selectseat', ['journey_id' => $journey['id'] ?? 0, 'passengers' => $passengersCount])
-                ->with('error', 'Some selected seats are no longer available.');
-        }
-
         try {
             DB::beginTransaction();
 
+            // Calculate total price based on ticket types
+            $basePrice = $journey['price'] ?? Journey::find($journey['id'])->Price;
+            $totalPrice = 0;
+            foreach ($passengers as $passenger) {
+                $ticketPrice = $basePrice;
+                if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                    $ticketPrice *= 0.9; // 10% discount
+                } elseif ($passenger['ticket_type'] === 'OKU') {
+                    $ticketPrice *= 0.7; // 30% discount
+                }
+                $totalPrice += $ticketPrice;
+            }
+
             $booking = Booking::create([
                 'BookingID' => 'BK' . str_pad(mt_rand(5, 99999), 5, '0', STR_PAD_LEFT),
-                'UserID' => null,
+                'UserID' => (string) Auth::id(),
                 'TrainID' => $journey['train_id'] ?? Journey::find($journey['id'])->TrainID,
                 'JourneyID' => $journey['id'],
                 'BookingType' => 'OneWay',
                 'PaymentType' => null,
                 'TicketNo' => $passengersCount,
+                'Price' => $totalPrice,
                 'Status' => 'Pending',
                 'Created_at' => now()->format('d-m-Y'),
             ]);
@@ -287,29 +318,43 @@ class TrainSelectionController extends Controller
                     'ICno' => $passenger['mykad'] ?? null,
                     'Passportno' => $passenger['passport'] ?? null,
                     'PassportExpiryDate' => $passenger['passport_expiry'] ?? null,
+                    'Contactno' => $passenger['contact_no'],
                     'TicketType' => $passenger['ticket_type'],
                     'Created_at' => now()->format('d-m-Y'),
                 ];
-                Log::info('Passenger data before create:', [$passengerData]);  // Debug log
+                Log::info('Passenger data before create:', [$passengerData]);
                 $passengerModel = Passenger::create($passengerData);
 
-                if (!isset($selectedSeats[$index])) {
-                    throw new \Exception("Seat index $index not found in selectedSeats: " . json_encode($selectedSeats));
+                // Calculate individual ticket price
+                $ticketPrice = $basePrice;
+                if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                    $ticketPrice *= 0.9;
+                } elseif ($passenger['ticket_type'] === 'OKU') {
+                    $ticketPrice *= 0.7;
                 }
-                $seatNo = $selectedSeats[$index];
-                $seat = Seat::where('JourneyID', $journey['id'])->where('SeatNo', $seatNo)->first();
+
+                // Set SeatID to null for non-ETS services
+                $seatId = null;
+                if ($journey['train_service'] === 'ETS') {
+                    if (!isset($selectedSeats[$index])) {
+                        throw new \Exception("Seat index $index not found in selectedSeats: " . json_encode($selectedSeats));
+                    }
+                    $seatNo = $selectedSeats[$index];
+                    $seat = Seat::where('JourneyID', $journey['id'])->where('SeatNo', $seatNo)->first();
+                    $seatId = $seat->SeatID;
+                    $seat->update(['is_available' => 'N']);
+                }
 
                 Ticket::create([
                     'TicketID' => 'TK' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT),
                     'BookingID' => $booking->BookingID,
                     'JourneyID' => $journey['id'],
-                    'SeatID' => $seat->SeatID,
+                    'SeatID' => $seatId, // Null for non-ETS services
                     'PassengerID' => $passengerModel->PassengerID,
                     'Status' => 'Pending',
+                    'Price' => $ticketPrice,
                     'Created_at' => now()->format('d-m-Y'),
                 ]);
-
-                $seat->update(['is_available' => 'N']);
             }
 
             $journeyModel = Journey::find($journey['id']);
@@ -317,14 +362,16 @@ class TrainSelectionController extends Controller
 
             DB::commit();
 
-            session()->forget(['selected_journey','passenger_info', 'passengers_count']);
+            session()->forget(['selected_journey', 'passenger_info', 'passengers_count']);
 
             return redirect()->route('train.selection')->with('success', 'Booking created successfully. Proceed to payment.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Booking creation failed: ' . $e->getMessage() . ' | Full trace: ' . $e->getTraceAsString());
-            return redirect()->route('selectseat', ['journey_id' => $journey['id'] ?? 0, 'passengers' => $passengersCount])
-                ->with('error', 'Failed to create booking: ' . $e->getMessage());
+            return redirect()->route('selectseat', [
+                'journey_id' => $journey['id'] ?? 0,
+                'passengers' => $passengersCount,
+            ])->with('error', 'Failed to create booking: ' . $e->getMessage());
         }
     }
 }

@@ -41,12 +41,22 @@ body {
     width: 50%; /* Sets equal width for both divs */
 }
 
+.preface p{
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.7), transparent);
+    padding: 10px 20px;
+    color: #333;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
 .first-section .preface{
     width:50%;
     border-radius: 10px;
     align-self: left;
     margin-left:0;
-    margin-top:70px;
     height:90%;
     justify-content: center;
     display: flex;
@@ -89,8 +99,8 @@ body {
     background: linear-gradient(
         to right,
         rgba(255, 255, 255, 1) 0%, /* White with 50% opacity on left */
-        rgba(255, 255, 255, 0) 20%, /* Fully transparent near left */
-        rgba(255, 255, 255, 0) 80%, /* Fully transparent near right */
+        rgba(255, 255, 255, 0) 10%, /* Fully transparent near left */
+        rgba(255, 255, 255, 0) 90%, /* Fully transparent near right */
         rgba(255, 255, 255, 1) 100% /* White with 50% opacity on right */
     );
     z-index: 1; /* Places gradient above the background image */
@@ -309,7 +319,7 @@ body {
     transform: scale(0.99);   
     overflow-x: hidden;
     overflow-y:hidden;
-    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2);
 }
 
 .card-icon {

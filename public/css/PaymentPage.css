@@ -1,0 +1,122 @@
+/* === Payment Page Container === */
+.payment-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: 80px auto;
+    font-family: 'Mona Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    max-width: 1200px;
+    gap: 30px;
+}
+
+/* === Left side: Payment methods === */
+.payment-card {
+    flex: 3;
+    background-color: #fdfdff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+}
+
+.payment-header {
+    font-weight: bold;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: #4a3a7a;
+}
+
+/* Payment method boxes in a row */
+.payment-methods {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* Each box */
+.payment-methods label {
+    flex: 1;
+    max-width: 220px;
+    padding: 20px;
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    color: #4a3a7a;
+    position: relative;
+}
+
+/* Hover lift effect */
+.payment-methods label:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 16px rgba(74, 58, 122, 0.3);
+}
+
+/* Hide default radio */
+.payment-methods input[type="radio"] {
+    display: none;
+}
+
+/* Selected (purple glow) */
+.payment-methods input[type="radio"]:checked + label {
+    border: 2px solid #7a42f4;
+    box-shadow: 0 0 12px rgba(122, 66, 244, 0.6);
+    background: linear-gradient(to bottom, #f9f6ff, #ffffff);
+}
+
+/* === Dynamic Forms === */
+.payment-form {
+    margin-top: 20px;
+    padding: 20px;
+    border: 2px solid #e1d5f8;
+    border-radius: 10px;
+    background: #fff;
+}
+.hidden {
+    display: none;
+}
+
+/* Confirm button */
+.confirm-button {
+    background: linear-gradient(to right, #6d54b5, #8f5ad4);
+    border: none;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    align-self: flex-end;
+}
+.confirm-button:hover {
+    background: linear-gradient(to right, #4e2a84, #7a42f4);
+}
+
+/* === Right side: Ticket Summary === */
+.ticket-summary {
+    flex: 1.2;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid #e1d5f8;
+    box-shadow: 0 4px 12px rgba(74, 58, 122, 0.15);
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+.ticket-summary h4 {
+    color: #4a3a7a;
+    margin-bottom: 12px;
+    font-size: 1.2em;
+}
+.ticket-summary p {
+    margin: 6px 0;
+    font-size: 0.95em;
+    color: #333;
+}
