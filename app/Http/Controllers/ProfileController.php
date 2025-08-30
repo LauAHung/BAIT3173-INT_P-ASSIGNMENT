@@ -32,6 +32,12 @@ class ProfileController extends Controller
     public function show()
     {
         $user = Auth::user();
+        
+        // If there's a success message, refresh the user data to get the latest wallet balance
+        if (session('success') && str_contains(session('success'), 'Topup successful')) {
+            $user->refresh();
+        }
+        
         return view('ProfilePage', compact('user'));
     }
 

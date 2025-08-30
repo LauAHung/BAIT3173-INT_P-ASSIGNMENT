@@ -321,6 +321,10 @@ window.onclick = function(event) {
 // Show success messages if any
 @if(session('success'))
     alert('{{ session('success') }}');
+    // Refresh the page to show updated wallet balance
+    setTimeout(function() {
+        window.location.reload();
+    }, 1000);
 @endif
 
 // Show error messages if any
@@ -328,6 +332,27 @@ window.onclick = function(event) {
     @foreach($errors->all() as $error)
         alert('Error: {{ $error }}');
     @endforeach
+@endif
+
+// Function to update wallet balance display
+function updateWalletBalance(newBalance) {
+    const walletElements = document.querySelectorAll('.wallet-value');
+    walletElements.forEach(element => {
+        element.textContent = 'RM' + parseFloat(newBalance).toFixed(2);
+    });
+}
+
+// Check if we need to update wallet balance after topup
+@if(session('success') && str_contains(session('success', ''), 'Topup successful'))
+    // Extract amount from success message and update display
+    const successMessage = '{{ session('success') }}';
+    const amountMatch = successMessage.match(/RM([\d,]+\.\d{2})/);
+    if (amountMatch) {
+        const topupAmount = parseFloat(amountMatch[1].replace(',', ''));
+        const currentBalance = {{ $user->wallet_balance ?? 0 }};
+        const newBalance = currentBalance + topupAmount;
+        updateWalletBalance(newBalance);
+    }
 @endif
 </script>
 

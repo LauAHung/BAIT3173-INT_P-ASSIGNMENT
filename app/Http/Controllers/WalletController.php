@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 
@@ -71,8 +72,20 @@ class WalletController extends Controller
             if ($session->payment_status === 'paid') {
                 // Update user's wallet balance
                 $user = Auth::user();
+                $oldBalance = $user->wallet_balance;
                 $user->wallet_balance += (float)$amount;
                 $user->save();
+
+                // Refresh the user data to ensure we have the latest balance
+                $user->refresh();
+
+                // Log the update for debugging
+                Log::info('Wallet topup successful', [
+                    'user_id' => $user->user_id,
+                    'old_balance' => $oldBalance,
+                    'topup_amount' => $amount,
+                    'new_balance' => $user->wallet_balance
+                ]);
 
                 return redirect()->route('profile')->with('success', 'Topup successful! RM' . number_format($amount, 2) . ' has been added to your wallet.');
             } else {
