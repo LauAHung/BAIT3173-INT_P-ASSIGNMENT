@@ -91,9 +91,7 @@ Route::prefix('admin')->group(function () {
     
     // API endpoints for AJAX
     Route::get('/api/dashboard/stats', [App\Http\Controllers\AdminController::class, 'getDashboardStats']);
-    Route::get('/api/users', [App\Http\Controllers\AdminController::class, 'getUsers']);
-    Route::put('/api/users/{id}/status', [App\Http\Controllers\AdminController::class, 'updateUserStatus']);
-    Route::delete('/api/users/{id}', [App\Http\Controllers\AdminController::class, 'deleteUser']);
+    // Removed conflicting user management routes - using UserController instead
     Route::get('/api/trains', [App\Http\Controllers\AdminController::class, 'getTrains']);
     Route::post('/api/trains', [App\Http\Controllers\AdminController::class, 'addTrain']);
     Route::put('/api/trains/{id}', [App\Http\Controllers\AdminController::class, 'updateTrain']);
@@ -159,13 +157,28 @@ Route::get('dashboard', function () {
     return view('AdminPage/Dashboard');
 })->name('dashboard');
 
-Route::get('train-management', function () {
-    return view('AdminPage/TrainManagement');
-})->name('train-management');
+Route::get('train-management', [App\Http\Controllers\Admin\TrainManagementController::class, 'index'])->name('train-management');
+Route::get('test-train', function() {
+    try {
+        $stations = \App\Models\Station::all();
+        return response()->json(['success' => true, 'stations' => $stations]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'error' => $e->getMessage()]);
+    }
+});
+Route::post('admin/train-management/train', [App\Http\Controllers\Admin\TrainManagementController::class, 'storeTrain'])->name('train-management.train.store');
+Route::post('admin/train-management/station', [App\Http\Controllers\Admin\TrainManagementController::class, 'storeStation'])->name('train-management.station.store');
+Route::post('admin/train-management/journey', [App\Http\Controllers\Admin\TrainManagementController::class, 'storeJourney'])->name('train-management.journey.store');
 
-Route::get('user-management', function () {
-    return view('AdminPage/UserManagement');
-})->name('user-management');
+// Update routes
+Route::post('admin/train-management/train/update', [App\Http\Controllers\Admin\TrainManagementController::class, 'updateTrain'])->name('train-management.train.update');
+Route::post('admin/train-management/station/update', [App\Http\Controllers\Admin\TrainManagementController::class, 'updateStation'])->name('train-management.station.update');
+Route::post('admin/train-management/journey/update', [App\Http\Controllers\Admin\TrainManagementController::class, 'updateJourney'])->name('train-management.journey.update');
+
+Route::get('user-management', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('user-management');
+Route::put('admin/api/users/{userId}/status', [App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('admin.users.update-status');
+Route::delete('admin/api/users/{userId}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('admin.users.destroy');
+Route::get('admin/api/users/export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('admin.users.export');
 
 Route::get('news-email-publish', function () {
     return view('AdminPage/NewsEmailPublish');

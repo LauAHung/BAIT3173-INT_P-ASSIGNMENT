@@ -112,15 +112,224 @@
     width: 100%;
     border-collapse: collapse;
     color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    background: #2c2638;
 }
 
 .tab-content th, .tab-content td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #453f53;
+    padding: 12px 16px;
     text-align: left;
+    border-bottom: 1px solid #453f53;
 }
 
 .tab-content th {
     background: #3a7bd5;
     color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.tab-content tr {
+    transition: background 0.2s ease;
+}
+
+.tab-content tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-content tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.tab-content td {
+    font-size: 0.9rem;
+    color: #e8e8e8;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-block;
+    min-width: 60px;
+    text-align: center;
+}
+
+.status-active {
+    background: #4CAF50;
+    color: white;
+}
+
+.status-inactive {
+    background: #f44336;
+    color: white;
+}
+
+.status-scheduled {
+    background: #2196F3;
+    color: white;
+}
+
+.status-delayed {
+    background: #FF9800;
+    color: white;
+}
+
+.status-canceled {
+    background: #9C27B0;
+    color: white;
+}
+
+/* Price styling */
+.price-value {
+    font-weight: 600;
+    color: #4CAF50;
+}
+
+/* ID styling */
+.id-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #FFD700;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.85rem;
+}
+
+/* Time styling */
+.time-value {
+    font-family: 'Courier New', monospace;
+    color: #87CEEB;
+    font-size: 0.85rem;
+}
+
+/* Scrollbar styling */
+.tab-content {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.tab-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tab-content::-webkit-scrollbar-track {
+    background: #2c2638;
+}
+
+.tab-content::-webkit-scrollbar-thumb {
+    background: #3a7bd5;
+    border-radius: 3px;
+}
+
+/* Edit button styling */
+.btn-edit {
+    background: #FF9800;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-edit:hover {
+    background: #F57C00;
+}
+
+/* Modal styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background: #2c2638;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+}
+
+.close:hover {
+    color: #fff;
+}
+
+.modal-content h3 {
+    margin-bottom: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-content .form-group {
+    margin-bottom: 15px;
+}
+
+.modal-content .form-group label {
+    display: block;
+    font-size: 0.9rem;
+    color: #bbb;
+    margin-bottom: 5px;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: none;
+    background: #453f53;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.modal-content .btn-primary {
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.modal-content .btn-primary:hover {
+    background: #45a049;
 }
