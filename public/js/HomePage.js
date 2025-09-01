@@ -169,6 +169,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('scroll', onScroll);
     onScroll();
+
+    // Newsletter subscribe form handling
+    const newsletterForm = document.querySelector('.newsletter-form');
+    if (newsletterForm) {
+        // Inject toast container if not present
+        if (!document.getElementById('message-container')) {
+            const div = document.createElement('div');
+            div.id = 'message-container';
+            div.style.display = 'none';
+            div.className = 'message-container';
+            div.innerHTML = '<div id="message-content" class="message-content"><span id="message-text"></span><button onclick="(function(){document.getElementById(\'message-container\').style.display=\'none\';})()" class="close-btn">&times;</button></div>';
+            document.body.appendChild(div);
+        }
+
+        newsletterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const emailInput = newsletterForm.querySelector('.email-input');
+            const email = emailInput.value.trim();
+            if (!email) return;
+            fetch('/newsletter/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Subscribed successfully!', 'success');
+                    emailInput.value = '';
+                } else {
+                    showToast(data.message || 'Subscription failed.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('Subscription failed.', 'error');
+            });
+        });
+    }
 });
 
 function initializeSlider() {
@@ -231,6 +274,18 @@ function initializeSlider() {
             showSlider();
         })
     })
+}
+
+// Lightweight toast for homepage
+function showToast(message, type) {
+    const container = document.getElementById('message-container');
+    const messageText = document.getElementById('message-text');
+    const messageContent = document.getElementById('message-content');
+    if (!container || !messageText || !messageContent) return;
+    messageText.textContent = message;
+    messageContent.className = `message-content message-${type}`;
+    container.style.display = 'block';
+    setTimeout(() => { container.style.display = 'none'; }, 4000);
 }
 
 

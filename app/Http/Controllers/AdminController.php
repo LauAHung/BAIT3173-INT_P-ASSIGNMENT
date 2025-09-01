@@ -110,6 +110,84 @@ class AdminController extends Controller
     }
 
     /**
+     * Dashboard datasets: filters
+     */
+    public function getDashboardFilters(): JsonResponse
+    {
+        $states = \App\Models\Station::query()
+            ->whereNotNull('Location')
+            ->distinct()
+            ->pluck('Location')
+            ->values();
+        $stations = \App\Models\Station::query()
+            ->whereNotNull('StationName')
+            ->orderBy('StationName')
+            ->pluck('StationName')
+            ->values();
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'states' => $states,
+                'stations' => $stations,
+            ]
+        ]);
+    }
+
+    /**
+     * Trips per month (optionally filter by state/location and station)
+     */
+    public function getTripsPerMonth(\Illuminate\Http\Request $request): JsonResponse
+    {
+        $state = $request->get('state');
+        $station = $request->get('station');
+
+        $q = \App\Models\Booking::query()
+            ->join('Journeys', 'Bookings.JourneyID', '=', 'Journeys.JourneyID')
+            ->leftJoin('Stations as S', 'S.StationName', '=', 'Journeys.FromLocation')
+            ->when($station, function ($qq) use ($station) {
+                $qq->where('Journeys.FromLocation', $station);
+            })
+            ->when($state, function ($qq) use ($state) {
+                $qq->where('S.Location', $state);
+            })
+            ->selectRaw("strftime('%Y-%m', Bookings.Created_at) as ym, count(*) as total")
+            ->groupBy('ym')
+            ->orderBy('ym');
+
+        $rows = $q->get();
+        return response()->json([
+            'success' => true,
+            'data' => $rows,
+        ]);
+    }
+
+    /**
+     * Registered users growth per month
+     */
+    public function getUsersGrowth(): JsonResponse
+    {
+        $rows = \App\Models\User::query()
+            ->selectRaw("strftime('%Y-%m', created_at) as ym, count(*) as total")
+            ->groupBy('ym')
+            ->orderBy('ym')
+            ->get();
+        return response()->json(['success' => true, 'data' => $rows]);
+    }
+
+    /**
+     * Profit trends per month
+     */
+    public function getProfitTrends(): JsonResponse
+    {
+        $rows = \App\Models\Booking::query()
+            ->selectRaw("strftime('%Y-%m', Created_at) as ym, sum(Price) as total")
+            ->groupBy('ym')
+            ->orderBy('ym')
+            ->get();
+        return response()->json(['success' => true, 'data' => $rows]);
+    }
+
+    /**
      * Get users via API
      */
     public function getUsers(Request $request): JsonResponse

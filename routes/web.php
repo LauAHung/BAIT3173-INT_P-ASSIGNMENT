@@ -91,6 +91,10 @@ Route::prefix('admin')->group(function () {
     
     // API endpoints for AJAX
     Route::get('/api/dashboard/stats', [App\Http\Controllers\AdminController::class, 'getDashboardStats']);
+    Route::get('/api/dashboard/filters', [App\Http\Controllers\AdminController::class, 'getDashboardFilters']);
+    Route::get('/api/dashboard/trips', [App\Http\Controllers\AdminController::class, 'getTripsPerMonth']);
+    Route::get('/api/dashboard/users-growth', [App\Http\Controllers\AdminController::class, 'getUsersGrowth']);
+    Route::get('/api/dashboard/profit', [App\Http\Controllers\AdminController::class, 'getProfitTrends']);
     // Removed conflicting user management routes - using UserController instead
     Route::get('/api/trains', [App\Http\Controllers\AdminController::class, 'getTrains']);
     Route::post('/api/trains', [App\Http\Controllers\AdminController::class, 'addTrain']);
@@ -195,6 +199,11 @@ Route::get('scan_qr', function () {
 Route::get('log', function () {
     return view('AdminPage/Log');
 })->name('log');
+
+// Newsletter subscription
+Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::get('/admin/api/newsletter/subscribers', [App\Http\Controllers\NewsletterController::class, 'list'])->name('admin.newsletter.subscribers');
+Route::post('/admin/api/newsletter/unsubscribe', [App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('admin.newsletter.unsubscribe');
 
 Route::get('/concession_card',function(){
     return view('ConcessionCardPage');

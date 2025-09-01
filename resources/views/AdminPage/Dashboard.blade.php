@@ -71,18 +71,14 @@
     <div class="charts-section">
         <div class="chart-card">
             <h3>Total Trips Per Month</h3>
-            <select name="state" id="filterState">
-                <option value="">All States</option>
-                {{-- @foreach($states as $state)
-                <option value="{{ $state }}">{{ $state }}</option>
-                @endforeach
-            </select>
-            <select name="station" id="filterStation">
-                <option value="">All Stations</option>
-                @foreach($stations as $station)
-                <option value="{{ $station }}">{{ $station }}</option>
-                @endforeach
-            </select>--}}
+            <div style="display:flex; gap:12px; margin-bottom:12px;">
+                <select name="state" id="filterState">
+                    <option value="">All States</option>
+                </select>
+                <select name="station" id="filterStation">
+                    <option value="">All Stations</option>
+                </select>
+            </div>
             <canvas id="tripsChart"></canvas>
         </div>
 
@@ -96,4 +92,61 @@
             <canvas id="profitChart"></canvas>
         </div>
     </div>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async function () {
+    const stateSel = document.getElementById('filterState');
+    const stationSel = document.getElementById('filterStation');
+
+    // Load filters
+    try {
+        const f = await fetch('/admin/api/dashboard/filters');
+        const fjson = await f.json();
+        if (fjson.success) {
+            (fjson.data.states || []).forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; stateSel.appendChild(o); });
+            (fjson.data.stations || []).forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; stationSel.appendChild(o); });
+        }
+    } catch (e) { console.error(e); }
+
+    const tripsCtx = document.getElementById('tripsChart').getContext('2d');
+    const usersCtx = document.getElementById('usersChart').getContext('2d');
+    const profitCtx = document.getElementById('profitChart').getContext('2d');
+
+    const tripsChart = new Chart(tripsCtx, { type: 'bar', data: { labels: [], datasets: [{ label: 'Trips', data: [], backgroundColor: '#667eea' }] }, options: { responsive: true } });
+    const usersChart = new Chart(usersCtx, { type: 'line', data: { labels: [], datasets: [{ label: 'Users', data: [], borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.2)' }] }, options: { responsive: true } });
+    const profitChart = new Chart(profitCtx, { type: 'line', data: { labels: [], datasets: [{ label: 'Profit (RM)', data: [], borderColor: '#ffbe00', backgroundColor: 'rgba(255,190,0,0.2)' }] }, options: { responsive: true } });
+
+    async function loadTrips() {
+        const params = new URLSearchParams();
+        if (stateSel.value) params.append('state', stateSel.value);
+        if (stationSel.value) params.append('station', stationSel.value);
+        const r = await fetch('/admin/api/dashboard/trips?' + params.toString());
+        const j = await r.json();
+        if (j.success) {
+            const labels = j.data.map(x => x.ym);
+            const data = j.data.map(x => x.total);
+            tripsChart.data.labels = labels; tripsChart.data.datasets[0].data = data; tripsChart.update();
+        }
+    }
+
+    async function loadUsers() {
+        const r = await fetch('/admin/api/dashboard/users-growth');
+        const j = await r.json();
+        if (j.success) { usersChart.data.labels = j.data.map(x => x.ym); usersChart.data.datasets[0].data = j.data.map(x => x.total); usersChart.update(); }
+    }
+
+    async function loadProfit() {
+        const r = await fetch('/admin/api/dashboard/profit');
+        const j = await r.json();
+        if (j.success) { profitChart.data.labels = j.data.map(x => x.ym); profitChart.data.datasets[0].data = j.data.map(x => x.total); profitChart.update(); }
+    }
+
+    stateSel.addEventListener('change', loadTrips);
+    stationSel.addEventListener('change', loadTrips);
+
+    await Promise.all([loadTrips(), loadUsers(), loadProfit()]);
+});
+</script>
+@endpush
 @endsection

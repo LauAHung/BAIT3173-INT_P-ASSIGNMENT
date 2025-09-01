@@ -11,14 +11,14 @@
 <div class="news-email-container">
     <h2 class="page-title">News Email Publish</h2>
     <div class="email-send-card">
-        <form>
+        <form id="newsletterSendForm">
             <div class="form-group">
                 <label for="email-title">Title:</label>
                 <input type="text" id="email-title" name="email-title" required>
             </div>
             <div class="form-group">
                 <label>To:</label>
-                <span class="to-all">All Subscribers (<span id="subscriber-count">123</span>)</span>
+                <span class="to-all">All Subscribers (<span id="subscriber-count">0</span>)</span>
             </div>
             <div class="form-group">
                 <label for="email-content">Content:</label>
@@ -41,21 +41,7 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>user1@email.com</td>
-                    <td>2024-06-01</td>
-                    <td>
-                        <button class="btn-danger" onclick="unsubscribeEmail(this)">Unsubscribe</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>user2@email.com</td>
-                    <td>2024-06-02</td>
-                    <td>
-                        <button class="btn-danger" onclick="unsubscribeEmail(this)">Unsubscribe</button>
-                    </td>
-                </tr>
+            <tbody id="subscriber-tbody">
             </tbody>
         </table>
     </div>
@@ -66,15 +52,110 @@
 <script>
 function filterSubscribers() {
     const keyword = document.getElementById('search-email').value.toLowerCase();
-    document.querySelectorAll('.subscriber-section tbody tr').forEach(row => {
+    document.querySelectorAll('#subscriber-tbody tr').forEach(row => {
         const email = row.children[0].textContent.toLowerCase();
         row.style.display = email.includes(keyword) ? '' : 'none';
     });
 }
-function unsubscribeEmail(btn) {
-    btn.closest('tr').remove();
-    const countSpan = document.getElementById('subscriber-count');
-    countSpan.textContent = document.querySelectorAll('.subscriber-section tbody tr:visible').length;
+
+// Toast helpers (reuse admin styles loaded globally)
+function showMessage(message, type) {
+    let container = document.getElementById('message-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'message-container';
+        container.className = 'message-container';
+        container.style.display = 'none';
+        container.innerHTML = '<div id="message-content" class="message-content"><span id="message-text"></span><button onclick="closeMessage()" class="close-btn">&times;</button></div>';
+        document.body.appendChild(container);
+    }
+    const messageText = document.getElementById('message-text');
+    const messageContent = document.getElementById('message-content');
+    messageText.textContent = message;
+    messageContent.className = `message-content message-${type}`;
+    container.style.display = 'block';
+    setTimeout(() => { container.style.display = 'none'; }, 4000);
 }
+function closeMessage() {
+    const container = document.getElementById('message-container');
+    if (container) container.style.display = 'none';
+}
+
+async function loadSubscribers() {
+    try {
+        const res = await fetch('/admin/api/newsletter/subscribers', { headers: { 'Accept': 'application/json' }});
+        const data = await res.json();
+        const tbody = document.getElementById('subscriber-tbody');
+        tbody.innerHTML = '';
+        if (data.success && Array.isArray(data.data)) {
+            document.getElementById('subscriber-count').textContent = data.data.length;
+            data.data.forEach(sub => {
+                const tr = document.createElement('tr');
+                const dateStr = sub.subscribed_at ? new Date(sub.subscribed_at).toISOString().slice(0,16).replace('T',' ') : '';
+                tr.innerHTML = `<td>${sub.email}</td><td>${dateStr}</td><td><button class="btn-danger" data-email="${sub.email}">Unsubscribe</button></td>`;
+                tbody.appendChild(tr);
+            });
+            // bind unsubscribe buttons
+            tbody.querySelectorAll('button.btn-danger').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const email = this.getAttribute('data-email');
+                    try {
+                        const res = await fetch('/admin/api/newsletter/unsubscribe', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ email })
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            showMessage('Unsubscribed successfully', 'success');
+                            loadSubscribers();
+                        } else {
+                            showMessage(result.message || 'Failed to unsubscribe', 'error');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        showMessage('Failed to unsubscribe', 'error');
+                    }
+                });
+            });
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadSubscribers();
+    document.getElementById('newsletterSendForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const subject = document.getElementById('email-title').value.trim();
+        const content = document.getElementById('email-content').value.trim();
+        if (!subject || !content) return;
+        try {
+            const res = await fetch('/admin/api/newsletter/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ subject, content, recipients: 'newsletter_subscribers' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showMessage('Newsletter sent successfully.', 'success');
+            } else {
+                showMessage(data.message || 'Failed to send newsletter.', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showMessage('Failed to send newsletter.', 'error');
+        }
+    });
+});
 </script>
 @endpush
