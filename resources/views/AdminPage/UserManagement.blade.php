@@ -55,14 +55,14 @@
         <div class="stat-card">
             <div class="stat-header">
                 <div class="stat-icon primary">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-user-shield"></i>
                 </div>
                 <div class="stat-progress">
-                    <div class="stat-progress-bar primary" style="width: {{ $stats['total'] > 0 ? min(100, ($stats['pending'] / $stats['total']) * 100) : 0 }}%"></div>
+                    <div class="stat-progress-bar primary" style="width: {{ $stats['total'] > 0 ? min(100, ($stats['admin'] / $stats['total']) * 100) : 0 }}%"></div>
                 </div>
             </div>
-            <div class="stat-value">{{ $stats['pending'] }}</div>
-            <div class="stat-label">Pending Verification</div>
+            <div class="stat-value">{{ $stats['admin'] }}</div>
+            <div class="stat-label">Admins</div>
             <div class="stat-period">All Time</div>
         </div>
     </div>
@@ -85,10 +85,11 @@
                 <input type="text" id="search-username" placeholder="Search by name or email" value="{{ request('search') }}" class="filter-input">
                 <select id="filter-status" class="filter-select">
                     <option value="">All Status</option>
-                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    <option value="suspended" {{ request('status') == 'suspended' ? 'selected' : '' }}>Suspended</option>
-                    <option value="pending_verification" {{ request('status') == 'pending_verification' ? 'selected' : '' }}>Pending Verification</option>
+                    @isset($allowedStatuses)
+                        @foreach($allowedStatuses as $value => $label)
+                            <option value="{{ $value }}" {{ request('status') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    @endisset
                 </select>
                 <button class="btn btn-primary" onclick="filterUsers()">
                     <i class="fas fa-search"></i>
@@ -98,11 +99,6 @@
                     <i class="fas fa-undo"></i>
                     Reset
                 </button>
-                <button class="btn btn-warning" onclick="testFunction()">
-                    <i class="fas fa-bug"></i>
-                    Test JS
-                </button>
-
             </div>
         </div>
 
@@ -130,18 +126,16 @@
                             <td>{{ $user->email }}</td>
                             <td>
                                 <select class="status-select" data-user-id="{{ $user->user_id }}">
-                                    <option value="active" {{ $user->account_status == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="inactive" {{ $user->account_status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                    <option value="suspended" {{ $user->account_status == 'suspended' ? 'selected' : '' }}>Suspended</option>
-                                    <option value="pending_verification" {{ $user->account_status == 'pending_verification' ? 'selected' : '' }}>Pending Verification</option>
+                                    @isset($allowedStatuses)
+                                        @foreach($allowedStatuses as $value => $label)
+                                            <option value="{{ $value }}" {{ $user->account_status == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    @endisset
                                 </select>
                             </td>
                             <td>
-                                @if($user->email_verified_at)
-                                    <span class="status-badge delivered">Verified</span>
-                                @else
-                                    <span class="status-badge pending">Not Verified</span>
-                                @endif
+                                @php($badge = $user->getStatusBadge())
+                                <span class="{{ $badge['class'] }}">{{ $badge['text'] }}</span>
                             </td>
                             <td><span class="time-value">{{ $user->created_at ? $user->created_at->format('Y-m-d H:i') : 'N/A' }}</span></td>
                             <td><span class="time-value">{{ $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i') : 'Never' }}</span></td>
@@ -163,7 +157,7 @@
                 <!-- Pagination -->
                 @if($users->hasPages())
                     <div class="pagination-container">
-                        {{ $users->appends(request()->query())->links() }}
+                        {{ $users->appends(request()->query())->links('pagination::bootstrap-5') }}
                     </div>
                 @endif
             @else
@@ -191,17 +185,11 @@
 console.log('=== User Management Script Loaded ===');
 console.log('Testing console output...');
 
-// Simple test function
-function testFunction() {
-    console.log('Test function called!');
-    alert('Test function works!');
-}
+// test function removed
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== DOM Content Loaded ===');
-    alert('DOM is ready!');
-    
+
     // Test if we can find any buttons
     const allButtons = document.querySelectorAll('button');
     console.log('Total buttons found:', allButtons.length);

@@ -68,7 +68,12 @@ class LoginController extends Controller
                 // Log the user in
                 Auth::login($user, $request->boolean('remember'));
 
-                // Redirect to homepage after successful login
+                // Redirect based on role/status
+                if ($user->account_status === 'admin') {
+                    return redirect()->route('dashboard')->with('success', 'Welcome admin, ' . $user->first_name . '!');
+                }
+
+                // Default redirect to homepage after successful login
                 return redirect()->route('HomePage')->with('success', 'Welcome back, ' . $user->first_name . '!');
             }
         } catch (\Exception $e) {

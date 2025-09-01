@@ -75,6 +75,23 @@ class User extends Authenticatable
     }
 
     /**
+     * Get badge text and class for status/email verification
+     */
+    public function getStatusBadge(): array
+    {
+        if ($this->account_status === 'suspended') {
+            return ['text' => 'SUSPENDED', 'class' => 'status-badge suspended'];
+        }
+        if ($this->account_status === 'admin') {
+            return ['text' => 'ADMIN', 'class' => 'status-badge admin'];
+        }
+        if ($this->isVerified()) {
+            return ['text' => 'Verified', 'class' => 'status-badge delivered'];
+        }
+        return ['text' => 'Not Verified', 'class' => 'status-badge pending'];
+    }
+
+    /**
      * Check if user has social media login
      */
     public function hasSocialLogin(): bool

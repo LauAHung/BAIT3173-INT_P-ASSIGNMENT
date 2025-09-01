@@ -43,7 +43,15 @@ class UserController extends Controller
             // Get statistics
             $stats = $this->getUserStats();
 
-            return view('AdminPage.UserManagement', compact('users', 'stats'));
+            // Allowed statuses for filter and select
+            $allowedStatuses = [
+                'active' => 'Active',
+                'suspended' => 'Suspended',
+                'not_verified' => 'Not Verified',
+                'admin' => 'Admin',
+            ];
+
+            return view('AdminPage.UserManagement', compact('users', 'stats', 'allowedStatuses'));
         } catch (\Exception $e) {
             return view('AdminPage.UserManagement', [
                 'users' => collect([]),
@@ -60,7 +68,7 @@ class UserController extends Controller
     {
         try {
             $request->validate([
-                'status' => 'required|in:active,inactive,suspended,pending_verification'
+                'status' => 'required|in:active,suspended,not_verified,admin'
             ]);
 
             $user = User::find($userId);
@@ -187,20 +195,23 @@ class UserController extends Controller
             $totalUsers = User::count();
             $activeUsers = User::where('account_status', 'active')->count();
             $suspendedUsers = User::where('account_status', 'suspended')->count();
-            $pendingUsers = User::where('account_status', 'pending_verification')->count();
+            $notVerifiedUsers = User::where('account_status', 'not_verified')->count();
+            $adminUsers = User::where('account_status', 'admin')->count();
 
             return [
                 'total' => $totalUsers,
                 'active' => $activeUsers,
                 'suspended' => $suspendedUsers,
-                'pending' => $pendingUsers
+                'not_verified' => $notVerifiedUsers,
+                'admin' => $adminUsers
             ];
         } catch (\Exception $e) {
             return [
                 'total' => 0,
                 'active' => 0,
                 'suspended' => 0,
-                'pending' => 0
+                'not_verified' => 0,
+                'admin' => 0
             ];
         }
     }

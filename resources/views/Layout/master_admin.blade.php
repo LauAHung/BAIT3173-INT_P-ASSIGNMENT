@@ -101,6 +101,7 @@
     </div>
     
     <script src="{{ asset('js/AdminPage.js') }}" defer></script>
+    @stack('scripts')
 </body>
 
 </html>

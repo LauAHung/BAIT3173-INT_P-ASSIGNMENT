@@ -106,6 +106,41 @@
   max-width: 400px;
 }
 
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-badge.delivered {
+  background: rgba(76, 175, 80, 0.15);
+  color: #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.status-badge.pending {
+  background: rgba(255, 190, 0, 0.15);
+  color: #ffbe00;
+  border: 1px solid rgba(255, 190, 0, 0.4);
+}
+
+.status-badge.suspended {
+  background: rgba(255, 71, 87, 0.15);
+  color: #ff4757;
+  border: 1px solid rgba(255, 71, 87, 0.4);
+}
+
+.status-badge.admin {
+  background: rgba(118, 75, 162, 0.15);
+  color: #764ba2;
+  border: 1px solid rgba(118, 75, 162, 0.4);
+}
+
 .message-content {
   padding: 16px 20px;
   border-radius: 8px;
@@ -116,12 +151,12 @@
   animation: slideIn 0.3s ease;
 }
 
-.message-content.success {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+.message-content.message-success {
+  background: #00bcd4; /* solid teal */
   color: #ffffff;
 }
 
-.message-content.error {
+.message-content.message-error {
   background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
   color: #ffffff;
 }
@@ -186,6 +221,84 @@
 }
 
 .pagination-container .page-item.disabled .page-link {
+  background: #1f1f1f;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+/* Laravel default pagination structure support */
+.pagination {
+  display: flex;
+  list-style: none;
+  gap: 8px;
+  padding-left: 0;
+}
+
+.pagination .page-item .page-link {
+  padding: 8px 12px;
+  border: 1px solid #404040;
+  border-radius: 6px;
+  background: #1f1f1f;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.pagination .page-item.active .page-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
+
+.pagination .page-item.disabled .page-link {
+  background: #1f1f1f;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+/* Ensure nav wrapper from Laravel links() is centered and styled */
+nav[role="navigation"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+nav[role="navigation"] .pagination {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+/* Space out page items to avoid crowding */
+.pagination .page-item { 
+  margin: 0 4px; 
+}
+
+nav[role="navigation"] .pagination li {
+  list-style: none;
+}
+
+nav[role="navigation"] .pagination li > a,
+nav[role="navigation"] .pagination li > span {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #404040;
+  border-radius: 6px;
+  background: #1f1f1f;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+nav[role="navigation"] .pagination li.active > a,
+nav[role="navigation"] .pagination li.active > span {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
+
+nav[role="navigation"] .pagination li.disabled > a,
+nav[role="navigation"] .pagination li.disabled > span {
   background: #1f1f1f;
   color: #666666;
   cursor: not-allowed;

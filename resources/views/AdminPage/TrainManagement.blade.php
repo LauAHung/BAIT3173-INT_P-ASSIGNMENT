@@ -162,17 +162,17 @@
         </div>
         <div class="tab-content" id="tab-train">
             <table>
-                                 <thead>
-                     <tr>
-                         <th>Train ID</th>
+                <thead>
+                    <tr>
+                        <th>Train ID</th>
                          <th>Train No</th>
                          <th>Service</th>
                          <th>Seat Count</th>
                          <th>Status</th>
-                         <th>Station</th>
+                        <th>Station</th>
                          <th>Actions</th>
-                     </tr>
-                 </thead>
+                    </tr>
+                </thead>
                                  <tbody id="trainTableBody">
                      @foreach($trains as $train)
                      <tr>
@@ -191,22 +191,22 @@
                                  <i class="fas fa-edit"></i> Edit
                              </button>
                          </td>
-                     </tr>
+                    </tr>
                      @endforeach
-                 </tbody>
+                </tbody>
             </table>
         </div>
         <div class="tab-content" id="tab-station" style="display:none;">
             <table>
-                                 <thead>
-                     <tr>
-                         <th>Station ID</th>
+                <thead>
+                    <tr>
+                        <th>Station ID</th>
                          <th>Station Name</th>
                          <th>Location</th>
                          <th>Status</th>
                          <th>Actions</th>
-                     </tr>
-                 </thead>
+                    </tr>
+                </thead>
                                  <tbody id="stationTableBody">
                      @foreach($stations as $station)
                      <tr>
@@ -223,16 +223,16 @@
                                  <i class="fas fa-edit"></i> Edit
                              </button>
                          </td>
-                     </tr>
+                    </tr>
                      @endforeach
-                 </tbody>
+                </tbody>
             </table>
         </div>
         <div class="tab-content" id="tab-journey" style="display:none;">
             <table>
-                                 <thead>
-                     <tr>
-                         <th>Journey ID</th>
+                <thead>
+                    <tr>
+                        <th>Journey ID</th>
                          <th>Train</th>
                          <th>From</th>
                          <th>To</th>
@@ -240,10 +240,10 @@
                          <th>Arrival</th>
                          <th>Seats</th>
                          <th>Price</th>
-                         <th>Status</th>
+                        <th>Status</th>
                          <th>Actions</th>
-                     </tr>
-                 </thead>
+                    </tr>
+                </thead>
                                  <tbody id="journeyTableBody">
                      @foreach($journeys as $journey)
                      <tr>
@@ -269,9 +269,9 @@
                                  <i class="fas fa-edit"></i> Edit
                              </button>
                          </td>
-                     </tr>
+                    </tr>
                      @endforeach
-                 </tbody>
+                </tbody>
             </table>
         </div>
     </div>
@@ -418,6 +418,14 @@
     </div>
 </div>
 
+<!-- Success/Error Messages -->
+<div id="message-container" style="display: none;" class="message-container">
+    <div id="message-content" class="message-content">
+        <span id="message-text"></span>
+        <button onclick="closeMessage()" class="close-btn">&times;</button>
+    </div>
+</div>
+
 <script>
 function showTab(tab) {
     document.getElementById('tab-train').style.display = (tab === 'train') ? 'block' : 'none';
@@ -425,6 +433,25 @@ function showTab(tab) {
     document.getElementById('tab-journey').style.display = (tab === 'journey') ? 'block' : 'none';
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelector('.tab-btn[onclick*="' + tab + '"]').classList.add('active');
+}
+
+// Unified message helpers
+function showMessage(message, type) {
+    const container = document.getElementById('message-container');
+    const messageText = document.getElementById('message-text');
+    const messageContent = document.getElementById('message-content');
+
+    messageText.textContent = message;
+    messageContent.className = `message-content message-${type}`;
+    container.style.display = 'block';
+
+    setTimeout(() => {
+        container.style.display = 'none';
+    }, 5000);
+}
+
+function closeMessage() {
+    document.getElementById('message-container').style.display = 'none';
 }
 
 // Train form submission
@@ -443,7 +470,8 @@ document.getElementById('trainForm').addEventListener('submit', function(e) {
         method: 'POST',
         body: formData,
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
         }
     })
     .then(response => {
@@ -459,15 +487,15 @@ document.getElementById('trainForm').addEventListener('submit', function(e) {
     .then(data => {
         console.log('Success response:', data);
         if (data.success) {
-            alert(data.message);
-            location.reload();
+            showMessage(data.message || 'Saved successfully.', 'success');
+            setTimeout(() => location.reload(), 1000);
         } else {
-            alert('Error: ' + data.message);
+            showMessage('Error: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while saving the train. Please check the console for details.');
+        showMessage('An error occurred while saving the train. Please check the console for details.', 'error');
     });
 });
 
@@ -481,7 +509,8 @@ document.getElementById('stationForm').addEventListener('submit', function(e) {
         method: 'POST',
         body: formData,
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
         }
     })
     .then(response => {
@@ -492,15 +521,15 @@ document.getElementById('stationForm').addEventListener('submit', function(e) {
     })
     .then(data => {
         if (data.success) {
-            alert(data.message);
-            location.reload();
+            showMessage(data.message || 'Saved successfully.', 'success');
+            setTimeout(() => location.reload(), 1000);
         } else {
-            alert('Error: ' + data.message);
+            showMessage('Error: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while saving the station. Please check the console for details.');
+        showMessage('An error occurred while saving the station. Please check the console for details.', 'error');
     });
 });
 
@@ -512,7 +541,7 @@ document.getElementById('journeyForm').addEventListener('submit', function(e) {
     const toLocation = document.getElementById('to_location').value;
     
     if (fromLocation === toLocation) {
-        alert('From Station and To Station cannot be the same!');
+        showMessage('From Station and To Station cannot be the same!', 'error');
         return;
     }
     
@@ -522,7 +551,8 @@ document.getElementById('journeyForm').addEventListener('submit', function(e) {
         method: 'POST',
         body: formData,
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
         }
     })
     .then(response => {
@@ -533,15 +563,15 @@ document.getElementById('journeyForm').addEventListener('submit', function(e) {
     })
     .then(data => {
         if (data.success) {
-            alert(data.message);
-            location.reload();
+            showMessage(data.message || 'Saved successfully.', 'success');
+            setTimeout(() => location.reload(), 1000);
         } else {
-            alert('Error: ' + data.message);
+            showMessage('Error: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while saving the journey. Please check the console for details.');
+        showMessage('An error occurred while saving the journey. Please check the console for details.', 'error');
     });
 });
 
@@ -637,21 +667,22 @@ document.getElementById('editTrainForm').addEventListener('submit', function(e) 
         method: 'POST',
         body: formData,
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
-            location.reload();
+            showMessage(data.message || 'Updated successfully.', 'success');
+            setTimeout(() => location.reload(), 1000);
         } else {
-            alert('Error: ' + data.message);
+            showMessage('Error: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while updating the train.');
+        showMessage('An error occurred while updating the train.', 'error');
     });
 });
 
@@ -664,21 +695,22 @@ document.getElementById('editStationForm').addEventListener('submit', function(e
         method: 'POST',
         body: formData,
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
-            location.reload();
+            showMessage(data.message || 'Updated successfully.', 'success');
+            setTimeout(() => location.reload(), 1000);
         } else {
-            alert('Error: ' + data.message);
+            showMessage('Error: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while updating the station.');
+        showMessage('An error occurred while updating the station.', 'error');
     });
 });
 
@@ -689,7 +721,7 @@ document.getElementById('editJourneyForm').addEventListener('submit', function(e
     const toLocation = document.getElementById('edit_to_location').value;
     
     if (fromLocation === toLocation) {
-        alert('From Station and To Station cannot be the same!');
+        showMessage('From Station and To Station cannot be the same!', 'error');
         return;
     }
     
@@ -699,21 +731,22 @@ document.getElementById('editJourneyForm').addEventListener('submit', function(e
         method: 'POST',
         body: formData,
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
-            location.reload();
+            showMessage(data.message || 'Updated successfully.', 'success');
+            setTimeout(() => location.reload(), 1000);
         } else {
-            alert('Error: ' + data.message);
+            showMessage('Error: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while updating the journey.');
+        showMessage('An error occurred while updating the journey.', 'error');
     });
 });
 </script>
