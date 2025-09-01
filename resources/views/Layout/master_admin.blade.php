@@ -74,23 +74,7 @@
                 <div class="header-left">
                     <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
                 </div>
-                <div class="header-right">
-                    <div class="header-controls">
-                        <button class="theme-toggle-btn" title="Toggle Theme">
-                            <i class="fas fa-sun"></i>
-                        </button>
-                        <button class="notification-btn" title="Notifications">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge">3</span>
-                        </button>
-                        <div class="user-profile">
-                            <span class="user-greeting">Hey, Admin</span>
-                            <div class="user-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
             </header>
 
             <!-- Page Content -->
