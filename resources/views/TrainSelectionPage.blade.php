@@ -136,7 +136,7 @@
             </form>
         </div>
 
-        <!-- Rest of the train selection display remains unchanged -->
+        <!-- Train selection display with conditional seat availability -->
         <div class="train-select">
             <div class="train-select-header">
                 <div class="header-cell">Departing Train</div>
@@ -169,8 +169,12 @@
                         {{ $journey->ToLocation ?? 'Unknown' }})</div>
                 </div>
                 <div class="train-col train-capacity">
-                    {{ $journey->SeatAvailable }}
-                    <div class="capacity-desc">(seat left)</div>
+                    @if ($trainService == 'ETS')
+                        {{ $journey->SeatAvailable }}
+                        <div class="capacity-desc">(seat left)</div>
+                    @else
+                        <span>N/A</span>
+                    @endif
                 </div>
                 <div class="train-col train-action">
                     <span class="train-price">RM{{ $journey->Price }}</span>
