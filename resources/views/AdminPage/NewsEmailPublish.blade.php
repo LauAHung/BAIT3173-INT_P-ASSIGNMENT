@@ -24,26 +24,28 @@
                 <label for="email-content">Content:</label>
                 <textarea id="email-content" name="email-content" rows="5" required></textarea>
             </div>
-            <button type="submit" class="btn-primary">Send Email</button>
+            <button type="submit" class="btn btn-primary">Send Email</button>
         </form>
     </div>
 
     <div class="subscriber-section">
         <div class="subscriber-filters">
             <input type="text" id="search-email" placeholder="Search by email">
-            <button class="btn-primary" onclick="filterSubscribers()">Search</button>
+            <button class="btn btn-primary" onclick="filterSubscribers()">Search</button>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Subscribed At</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="subscriber-tbody">
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Subscribed At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="subscriber-tbody">
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 @endsection

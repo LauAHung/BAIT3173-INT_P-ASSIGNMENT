@@ -57,8 +57,8 @@ class LoginController extends Controller
                 // Update last login timestamp
                 $this->userRegistrationService->handleUserLogin($user);
                 
-                // Check if user is active
-                if ($user->account_status !== 'active') {
+                // Check if user is allowed (active or admin)
+                if (!in_array($user->account_status, ['active', 'admin'])) {
                     Auth::logout();
                     return back()->withErrors([
                         'email' => 'Your account is not active. Please check your email for verification.',

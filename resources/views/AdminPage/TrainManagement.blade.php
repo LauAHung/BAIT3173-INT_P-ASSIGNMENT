@@ -55,7 +55,7 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit" class="btn-primary">Save Train</button>
+                <button type="submit" class="btn btn-primary">Save Train</button>
             </form>
         </div>
 
@@ -84,7 +84,7 @@
                         <option value="0">Inactive</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-primary">Save Station</button>
+                <button type="submit" class="btn btn-primary">Save Station</button>
             </form>
         </div>
 
@@ -149,7 +149,7 @@
                         <option value="Canceled">Canceled</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-primary">Save Journey</button>
+                <button type="submit" class="btn btn-primary">Save Journey</button>
             </form>
         </div>
     </div>
@@ -161,7 +161,8 @@
             <button class="tab-btn" onclick="showTab('journey')">Journey</button>
         </div>
         <div class="tab-content" id="tab-train">
-            <table>
+            <div class="table-container">
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Train ID</th>
@@ -195,9 +196,11 @@
                      @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
         <div class="tab-content" id="tab-station" style="display:none;">
-            <table>
+            <div class="table-container">
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Station ID</th>
@@ -227,9 +230,11 @@
                      @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
         <div class="tab-content" id="tab-journey" style="display:none;">
-            <table>
+            <div class="table-container">
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Journey ID</th>
@@ -273,6 +278,7 @@
                      @endforeach
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 </div>
@@ -319,7 +325,7 @@
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="btn-primary">Update Train</button>
+            <button type="submit" class="btn btn-primary">Update Train</button>
         </form>
     </div>
 </div>
@@ -348,7 +354,7 @@
                     <option value="0">Inactive</option>
                 </select>
             </div>
-            <button type="submit" class="btn-primary">Update Station</button>
+            <button type="submit" class="btn btn-primary">Update Station</button>
         </form>
     </div>
 </div>
@@ -413,7 +419,7 @@
                     <option value="Canceled">Canceled</option>
                 </select>
             </div>
-            <button type="submit" class="btn-primary">Update Journey</button>
+            <button type="submit" class="btn btn-primary">Update Journey</button>
         </form>
     </div>
 </div>
