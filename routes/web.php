@@ -107,6 +107,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::post('/api/refunds/process', [App\Http\Controllers\AdminController::class, 'processRefund']);
     Route::get('/api/export', [App\Http\Controllers\AdminController::class, 'exportData']);
     Route::get('/api/system/info', [App\Http\Controllers\AdminController::class, 'getSystemInfo']);
+    Route::get('/api/logs', [App\Http\Controllers\Admin\LogController::class, 'list']);
 });
 
 // Booking Module
@@ -206,9 +207,7 @@ Route::get('scan_qr', function () {
     return view('AdminPage/ScanQR');
 })->middleware('admin')->name('scan_qr');
 
-Route::get('log', function () {
-    return view('AdminPage/Log');
-})->middleware('admin')->name('log');
+Route::get('log', [App\Http\Controllers\Admin\LogController::class, 'index'])->middleware('admin')->name('log');
 
 // Newsletter subscription
 Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');

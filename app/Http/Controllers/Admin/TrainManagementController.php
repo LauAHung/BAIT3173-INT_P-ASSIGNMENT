@@ -43,6 +43,12 @@ class TrainManagementController extends Controller
             $train->Created_at = now();
             $train->save();
 
+            // Log action
+            app(\App\Services\AdminActivityLogger::class)->log('add_train', [
+                'train_id' => $train->TrainID,
+                'train_no' => $train->TrainNo,
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Train added successfully',
@@ -73,6 +79,11 @@ class TrainManagementController extends Controller
             $station->Is_active = $request->is_active;
             $station->Created_at = now();
             $station->save();
+
+            app(\App\Services\AdminActivityLogger::class)->log('add_station', [
+                'station_id' => $station->StationID,
+                'station_name' => $station->StationName,
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -114,6 +125,11 @@ class TrainManagementController extends Controller
             $journey->Status = $request->status;
             $journey->Created_at = now();
             $journey->save();
+
+            app(\App\Services\AdminActivityLogger::class)->log('add_journey', [
+                'journey_id' => $journey->JourneyID,
+                'train_id' => $journey->TrainID,
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -173,6 +189,10 @@ class TrainManagementController extends Controller
             $train->StationID = $request->station_id;
             $train->save();
 
+            app(\App\Services\AdminActivityLogger::class)->log('update_train', [
+                'train_id' => $train->TrainID,
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Train updated successfully',
@@ -208,6 +228,10 @@ class TrainManagementController extends Controller
             $station->Location = $request->location;
             $station->Is_active = $request->is_active;
             $station->save();
+
+            app(\App\Services\AdminActivityLogger::class)->log('update_station', [
+                'station_id' => $station->StationID,
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -254,6 +278,10 @@ class TrainManagementController extends Controller
             $journey->Price = $request->price;
             $journey->Status = $request->status;
             $journey->save();
+
+            app(\App\Services\AdminActivityLogger::class)->log('update_journey', [
+                'journey_id' => $journey->JourneyID,
+            ]);
 
             return response()->json([
                 'success' => true,

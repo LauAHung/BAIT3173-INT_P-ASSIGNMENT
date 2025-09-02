@@ -82,6 +82,11 @@ class UserController extends Controller
             $user->account_status = $request->status;
             $user->save();
 
+            app(\App\Services\AdminActivityLogger::class)->log('change_user_status', [
+                'target_user_id' => $user->user_id,
+                'new_status' => $user->account_status,
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'User status updated successfully',
@@ -112,6 +117,10 @@ class UserController extends Controller
             // Soft delete by setting status to deleted
             $user->account_status = 'deleted';
             $user->save();
+
+            app(\App\Services\AdminActivityLogger::class)->log('delete_user', [
+                'target_user_id' => $user->user_id,
+            ]);
 
             return response()->json([
                 'success' => true,

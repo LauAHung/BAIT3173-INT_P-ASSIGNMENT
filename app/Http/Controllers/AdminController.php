@@ -322,6 +322,12 @@ class AdminController extends Controller
         ]);
 
         $result = AdminFacade::sendNewsletter($request->all());
+        if (($result['success'] ?? false) === true) {
+            app(\App\Services\AdminActivityLogger::class)->log('send_newsletter', [
+                'subject' => $request->get('subject'),
+                'recipients' => $request->get('recipients'),
+            ]);
+        }
         return response()->json($result);
     }
 
