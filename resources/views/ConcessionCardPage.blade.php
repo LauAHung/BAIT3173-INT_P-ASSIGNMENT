@@ -15,20 +15,20 @@
 
 @section('content')
     <main>
+        <section  class = header_img>
+            <div>
+                <img src="../images/concession1.jpg" alt="Concession Card Header Image" style="width:100%; height:auto;">
+            </div>
+        </section>
         <section class="first-section">
             <div class="preface">
                 <h1>
                     Special Benefit
                 </h1><br><br><br>
                 <p>
-                    At Travel Free, we believe that travel should be accessible, affordable, and inclusive for everyone. 
-                    Our Concession Card system is designed to make train journeys more affordable for students, 
-                    senior citizens, persons with disabilities, and other eligible groups across the nation.
-                </p><br><br>
-                <p>
-                    This webpage is your gateway to apply for, renew, or manage your Travel Free Concession Card. 
-                    Whether you're commuting daily for school, work, or leisure, our aim is to provide a seamless ticketing 
-                    experience with special discounts and privileges for those who need it most.
+                    Exclusive benefits, thoughtful discounts – everyone can enjoy the freedom of travel. <br><br><br>
+                    Benefits designed for students, seniors, and special groups – making travel truly accessible, 
+                    affordable, and inclusive.
                 </p>
             </div>
             <div class="img_preface">
