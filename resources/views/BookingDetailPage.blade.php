@@ -67,7 +67,9 @@
                         <div class="hqr">
                             <div class="column left-one"></div>
                             <div class="column center">
-                                <div class="qrcode"><img src="{{ asset('images/testqr.png') }}" alt="QR"></div>
+                                <div class="qrcode">
+                                    <img src="https://quickchart.io/chart?cht=qr&chs=300x300&chl={{ $ticket->TicketID }}" alt="QR Code for Ticket {{ $ticket->TicketID }}">
+                                </div>
                             </div>
                             <div class="column right-one"></div>
                         </div>

@@ -8,6 +8,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TrainSelectionController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\BookingDetailController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Auth;
 
