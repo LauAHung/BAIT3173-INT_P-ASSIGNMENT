@@ -183,7 +183,7 @@ class TrainSelectionController extends Controller
                 ])->withInput();
             }
 
-            // Check for duplicate ICno or Passportno on the same journey
+            // Check for duplicate ICno or Passportno on the same journey for Booked or Pending bookings
             $icNo = $passenger['mykad'] ?? null;
             $passportNo = $passenger['passport'] ?? null;
 
@@ -197,7 +197,10 @@ class TrainSelectionController extends Controller
                     }
                 })
                 ->whereHas('tickets', function ($query) use ($journeyId) {
-                    $query->where('JourneyID', $journeyId);
+                    $query->where('JourneyID', $journeyId)
+                          ->whereHas('booking', function ($query) {
+                              $query->whereIn('Status', ['Booked', 'Pending']);
+                          });
                 })
                 ->first();
 
