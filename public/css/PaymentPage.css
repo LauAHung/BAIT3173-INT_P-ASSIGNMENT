@@ -32,8 +32,9 @@
     display: flex;
     justify-content: space-between;
     gap: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 20px; /* gives space before forms */
 }
+
 
 /* Each box */
 .payment-methods label {
@@ -70,16 +71,104 @@
 }
 
 /* === Dynamic Forms === */
-.payment-form {
-    margin-top: 20px;
-    padding: 20px;
-    border: 2px solid #e1d5f8;
-    border-radius: 10px;
-    background: #fff;
+/* Form title */
+.payment-form .form-title {
+    color: #4a3a7a;
+    margin-bottom: 15px;
+    font-weight: bold;
+    font-size: 1.1rem;
 }
+
+/* Group wrapper */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    flex: 1;
+}
+
+/* Labels */
+.form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+/* Inputs */
+.form-input {
+    padding: 10px 12px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+.form-input:focus {
+    border-color: #7a42f4;
+    box-shadow: 0 0 6px rgba(122,66,244,0.3);
+    outline: none;
+}
+
+/* Row for expiry + CVV */
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+.form-group.half {
+    flex: 1;
+}
+
 .hidden {
     display: none;
 }
+/*credir card validation*/
+.info-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.info-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #4a3a7a;
+}
+
+.info-value {
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+.info-value:focus {
+    border-color: #7a42f4;
+    box-shadow: 0 0 6px rgba(122, 66, 244, 0.3);
+    outline: none;
+}
+
+.error {
+    color: #e63946;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: none;
+}
+
+.error.show {
+    display: block;
+}
+
+.error-indicator {
+    display: none;
+    color: #e63946;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.error-indicator.show {
+    display: inline;
+}
+
 
 /* Confirm button */
 .confirm-button {
