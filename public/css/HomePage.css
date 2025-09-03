@@ -13,6 +13,7 @@ body {
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
+    min-width: 520px;
 }
 
 /* === Video Background === */
@@ -303,7 +304,7 @@ body {
 
 .search-btn {
   background-color: #6d54b5;
-  margin-top: 20px;
+  margin: 20px auto 0 auto;
   border: none;
   padding: 12px;
   width: 25%;
