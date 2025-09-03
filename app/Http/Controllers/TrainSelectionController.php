@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Journey;
-use App\Models\Booking;
+use App\Builder\BookingDirector;
+use App\Builder\ConcreteBookingBuilder;
 use App\Models\Passenger;
-use App\Models\Ticket;
-use App\Models\Seat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -244,124 +243,22 @@ class TrainSelectionController extends Controller
     {
         $journey = session('selected_journey');
         $passengers = session('passenger_info');
-        $passengersCount = (int) session('passengers_count', 1);
         $selectedSeatsInput = $request->input('selected_seats', []);
 
-        // Only process seats if the service is ETS
-        $selectedSeats = [];
-        if ($journey['train_service'] === 'ETS') {
-            $selectedSeats = array_reduce($selectedSeatsInput, function ($carry, $item) {
-                return array_merge($carry, is_array($item) ? $item : [$item]);
-            }, []);
-
-            Log::info('Flattened selected_seats:', [$selectedSeats]);
-            Log::info('Count of selectedSeats:', [count($selectedSeats)]);
-            Log::info('PassengersCount:', [$passengersCount]);
-            Log::info('Journey exists:', [$journey ? 'yes' : 'no']);
-            Log::info('Passengers exists:', [$passengers ? 'yes' : 'no']);
-
-            // Validate seat count for ETS
-            if (count($selectedSeats) !== $passengersCount) {
-                return redirect()->route('selectseat', ['journey_id' => $journey['id'], 'passengers' => $passengersCount])
-                    ->with('error', 'Please select exactly ' . $passengersCount . ' seat(s) for ETS service.');
-            }
-
-            // Verify seat availability for ETS
-            $availableSeats = Seat::where('JourneyID', $journey['id'])
-                ->whereIn('SeatNo', $selectedSeats)
-                ->where('is_available', 'Y')
-                ->count();
-
-            if ($availableSeats !== $passengersCount) {
-                return redirect()->route('selectseat', ['journey_id' => $journey['id'], 'passengers' => $passengersCount])
-                    ->with('error', 'One or more selected seats are no longer available.');
-            }
-        }
-
-        // Re-index the passengers array to start from 0
-        Log::info('Passengers array before reindex:', [$passengers]);
-        $passengers = array_values($passengers);
-        Log::info('Passengers array after reindex:', [$passengers]);
+        // Flatten seats (from your original code)
+        $selectedSeats = array_reduce($selectedSeatsInput, function ($carry, $item) {
+            return array_merge($carry, is_array($item) ? $item : [$item]);
+        }, []);
 
         try {
             DB::beginTransaction();
 
-            // Calculate total price based on ticket types
-            $basePrice = $journey['price'] ?? Journey::find($journey['id'])->Price;
-            $totalPrice = 0;
-            foreach ($passengers as $passenger) {
-                $ticketPrice = $basePrice;
-                if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
-                    $ticketPrice *= 0.9; // 10% discount
-                } elseif ($passenger['ticket_type'] === 'OKU') {
-                    $ticketPrice *= 0.7; // 30% discount
-                }
-                $totalPrice += $ticketPrice;
-            }
+            // Use Builder via Director
+            $builder = new ConcreteBookingBuilder();
+            $director = new BookingDirector();
+            $director->build($builder, $journey, $passengers, $selectedSeats);
 
-            $booking = Booking::create([
-                'BookingID' => 'BK' . str_pad(mt_rand(5, 99999), 5, '0', STR_PAD_LEFT),
-                'UserID' => (string) Auth::id(),
-                'TrainID' => $journey['train_id'] ?? Journey::find($journey['id'])->TrainID,
-                'JourneyID' => $journey['id'],
-                'BookingType' => 'OneWay',
-                'PaymentType' => null,
-                'TicketNo' => $passengersCount,
-                'Price' => $totalPrice,
-                'Status' => 'Pending',
-                'Created_at' => now()->format('d-m-Y'),
-            ]);
-
-            foreach ($passengers as $index => $passenger) {
-                $passengerData = [
-                    'PassengerID' => 'PS' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT),
-                    'BookingID' => $booking->BookingID,
-                    'Name' => $passenger['name'],
-                    'Gender' => $passenger['gender'],
-                    'ICno' => $passenger['mykad'] ?? null,
-                    'Passportno' => $passenger['passport'] ?? null,
-                    'PassportExpiryDate' => $passenger['passport_expiry'] ?? null,
-                    'Contactno' => $passenger['contact_no'],
-                    'TicketType' => $passenger['ticket_type'],
-                    'Created_at' => now()->format('d-m-Y'),
-                ];
-                Log::info('Passenger data before create:', [$passengerData]);
-                $passengerModel = Passenger::create($passengerData);
-
-                // Calculate individual ticket price
-                $ticketPrice = $basePrice;
-                if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
-                    $ticketPrice *= 0.9;
-                } elseif ($passenger['ticket_type'] === 'OKU') {
-                    $ticketPrice *= 0.7;
-                }
-
-                // Set SeatID to null for non-ETS services
-                $seatId = null;
-                if ($journey['train_service'] === 'ETS') {
-                    if (!isset($selectedSeats[$index])) {
-                        throw new \Exception("Seat index $index not found in selectedSeats: " . json_encode($selectedSeats));
-                    }
-                    $seatNo = $selectedSeats[$index];
-                    $seat = Seat::where('JourneyID', $journey['id'])->where('SeatNo', $seatNo)->first();
-                    $seatId = $seat->SeatID;
-                    $seat->update(['is_available' => 'N']);
-                }
-
-                Ticket::create([
-                    'TicketID' => 'TK' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT),
-                    'BookingID' => $booking->BookingID,
-                    'JourneyID' => $journey['id'],
-                    'SeatID' => $seatId, // Null for non-ETS services
-                    'PassengerID' => $passengerModel->PassengerID,
-                    'Status' => 'Pending',
-                    'Price' => $ticketPrice,
-                    'Created_at' => now()->format('d-m-Y'),
-                ]);
-            }
-
-            $journeyModel = Journey::find($journey['id']);
-            $journeyModel->decrement('SeatAvailable', $passengersCount);
+            $booking = $builder->getBooking();  // Get the final product
 
             DB::commit();
 
@@ -370,10 +267,10 @@ class TrainSelectionController extends Controller
             return redirect()->route('train.selection')->with('success', 'Booking created successfully. Proceed to payment.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Booking creation failed: ' . $e->getMessage() . ' | Full trace: ' . $e->getTraceAsString());
+            Log::error('Booking creation failed: ' . $e->getMessage());
             return redirect()->route('selectseat', [
                 'journey_id' => $journey['id'] ?? 0,
-                'passengers' => $passengersCount,
+                'passengers' => count($passengers),
             ])->with('error', 'Failed to create booking, please try again later!');
         }
     }
