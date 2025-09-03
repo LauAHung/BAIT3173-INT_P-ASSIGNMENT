@@ -79,8 +79,6 @@
                         <div class="data name">{{ $ticket->Passenger->Name ?? 'Unknown' }}</div>
                         <div class="info">Ticket type</div>
                         <div class="data">{{ $ticket->Passenger->TicketType ?? 'Unknown' }}</div>
-                        <div class="info">Ticket ID</div>
-                        <div class="data">{{ $ticket->TicketID ?? 'Unknown'}}</div>
                         <div class="info">Journey ID</div>
                         <div class="data">{{ $ticket->JourneyID ?? 'Unknown'}}</div>
                         <div class="info">Seat No.</div>
