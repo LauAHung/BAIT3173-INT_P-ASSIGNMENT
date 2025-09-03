@@ -27,8 +27,6 @@ class BookingController extends Controller
     ->whereIn('Status', ['Booked', 'Pending']) // ignore Paid status
     ->get()
     ->map(function ($booking) {
-        $booking->Journey->DepartureTime = \Carbon\Carbon::parse($booking->Journey->DepartureTime)->format('Y-m-d');
-
         // Buttons logic
         $booking->showProceedPayment = $booking->Status === 'Pending' && !$booking->PaymentType;
         $booking->showCancel = $booking->Status === 'Pending' && !$booking->PaymentType;
@@ -46,7 +44,6 @@ class BookingController extends Controller
             ->whereIn('Status', ['Completed', 'Cancelled'])
             ->get()
             ->map(function ($booking) {
-                $booking->Journey->DepartureTime = \Carbon\Carbon::parse($booking->Journey->DepartureTime)->format('Y-m-d');
                 $booking->showViewQR = $booking->Status === 'Completed';
                 $booking->showRateTrip = $booking->Status === 'Completed';
                 return $booking;
@@ -57,7 +54,6 @@ class BookingController extends Controller
         ->where('Status', 'Refunded')
         ->get()
         ->map(function ($booking) {
-            $booking->Journey->DepartureTime = \Carbon\Carbon::parse($booking->Journey->DepartureTime)->format('Y-m-d');
             return $booking;
         });
 
@@ -108,7 +104,7 @@ class BookingController extends Controller
             foreach ($tickets as $ticket) {
                 $ticket->update(['Status' => 'Cancelled']);
                 Seat::where('SeatID', $ticket->SeatID)
-                    ->update(['is_available' => 'Y']);
+                    ->update(['is_available' => 'Y', 'status' => 'Cancelled']);
             }
 
             // Update SeatAvailable in Journeys

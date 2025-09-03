@@ -62,13 +62,13 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
             throw new Exception('Seat count must match passenger count.');
         }
 
-        // Check availability
-        $availableCount = Seat::where('JourneyID', $this->journey['id'])
+        // Check for unavailable seats (is_available = 'N')
+        $unavailableCount = Seat::where('JourneyID', $this->journey['id'])
             ->whereIn('SeatNo', $this->selectedSeats)
-            ->where('is_available', 'Y')
+            ->where('is_available', 'N')
             ->count();
 
-        if ($availableCount !== count($this->passengers)) {
+        if ($unavailableCount > 0) {
             throw new Exception('One or more seats are unavailable.');
         }
 
@@ -119,12 +119,20 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
                 'Created_at' => now()->format('d-m-Y'),
             ]);
 
-            // Get seat ID if ETS
+            // Create new seat record if ETS
             $seatId = null;
             if ($this->journey['train_service'] === 'ETS' && isset($this->selectedSeats[$index])) {
-                $seat = Seat::where('JourneyID', $this->journey['id'])
-                    ->where('SeatNo', $this->selectedSeats[$index])
-                    ->first();
+                $seatNo = $this->selectedSeats[$index];
+                // Create new seat as unavailable
+                $seat = Seat::create([
+                    'SeatID' => 'SE' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT),
+                    'TrainID' => $this->journey['train_id'] ?? Journey::find($this->journey['id'])->TrainID,
+                    'JourneyID' => $this->journey['id'],
+                    'SeatNo' => $seatNo,
+                    'is_available' => 'N',
+                    'status' => 'Booked',
+                    'Created_at' => now()->format('Y-m-d H:i:s'),
+                ]);
                 $seatId = $seat->SeatID;
             }
 
@@ -145,13 +153,9 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
 
     public function updateSeatAvailability(): self
     {
+        if ($this->journey['train_service'] === 'ETS') {
         $journeyModel = Journey::find($this->journey['id']);
         $journeyModel->decrement('SeatAvailable', count($this->passengers));
-
-        if ($this->journey['train_service'] === 'ETS') {
-            Seat::where('JourneyID', $this->journey['id'])
-                ->whereIn('SeatNo', $this->selectedSeats)
-                ->update(['is_available' => 'N']);
         }
         return $this;
     }

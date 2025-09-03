@@ -180,7 +180,7 @@
                                 @php
                                 $seatNo = $row . $seatLetter;
                                 $seat = $seats->get($seatNo);
-                                $isAvailable = $seat && $seat->is_available == 'Y';
+                                $isAvailable = !$seat || $seat->is_available == 'Y';
                                 @endphp
                                 <li class="seat">
                                     <input type="checkbox" id="{{ $seatNo }}" {{ $isAvailable ? '' : 'disabled' }} />

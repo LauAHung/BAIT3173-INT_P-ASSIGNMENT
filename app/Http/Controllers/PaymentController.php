@@ -176,7 +176,7 @@ public function processRefund(Request $request, $bookingId)
         foreach ($tickets as $ticket) {
             $ticket->update(['Status' => 'Refunded']);
             Seat::where('SeatID', $ticket->SeatID)
-                ->update(['is_available' => 'Y']);
+                ->update(['is_available' => 'Y', 'status' => 'Refunded']);
             Log::info('Ticket and seat updated', [
                 'ticketId' => $ticket->id,
                 'seatId' => $ticket->SeatID

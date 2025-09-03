@@ -13,7 +13,7 @@ class Seat extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'SeatID', 'TrainID', 'JourneyID', 'SeatNo', 'is_available', 'Created_at',
+        'SeatID', 'TrainID', 'JourneyID', 'SeatNo', 'is_available','status', 'Created_at',
     ];
 
     public function journey()

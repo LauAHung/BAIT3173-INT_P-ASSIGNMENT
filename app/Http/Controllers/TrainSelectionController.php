@@ -83,11 +83,7 @@ class TrainSelectionController extends Controller
             $hasSearchFilters = true;
         }
 
-        // Always apply passengers filter (default to 1 if not provided)
-        $passengers = $request->filled('passengers') ? (int) $request->input('passengers') : 1;
-        $query->where('SeatAvailable', '>=', $passengers);
-
-        // Default: Fetch the first 5 scheduled journeys if no filters are applied
+        // Default: Fetch the first 5 scheduled journeys if no filters are applied FIFO
         if (!$hasSearchFilters) {
             $query->where('Status', 'Scheduled')->take(5);
         }
@@ -112,6 +108,11 @@ class TrainSelectionController extends Controller
 
         // Fetch the journey details
         $journey = Journey::with('train')->findOrFail($journeyId);
+
+        // Check seat availability for ETS trains
+        if ($journey->Train->TrainService === 'ETS' && $passengers > $journey->SeatAvailable) {
+            return redirect()->route('train.selection')->with('error', "The selected ETS train has only {$journey->SeatAvailable} seat(s) available, but you are booking for {$passengers} passenger(s). Please select another train or reduce the number of passengers.");
+        }
 
         // Store journey details in session
         session([

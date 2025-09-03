@@ -238,5 +238,34 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('No success message found');
     }
 });
+
+// Handle Select button click for seat availability check
+document.querySelectorAll('.btn-select').forEach(button => {
+    button.addEventListener('click', (event) => {
+        // Get the train card parent element
+        const trainCard = button.closest('.train-card');
+        const trainService = trainCard.querySelector('.train-name').textContent.includes('ETS') ? 'ETS' : '';
+        const seatAvailableElement = trainCard.querySelector('.train-capacity');
+        const passengers = parseInt(document.querySelector('select[name="passengers"]').value) || 1;
+
+        // Only check for ETS trains
+        if (trainService === 'ETS') {
+            const seatsAvailable = parseInt(seatAvailableElement.textContent.match(/\d+/)?.[0]) || 0;
+
+            if (passengers > seatsAvailable) {
+                event.preventDefault(); // Prevent the default link navigation
+                Swal.fire({
+                    title: 'Insufficient Seats',
+                    text: `The selected ETS train has only ${seatsAvailable} seat(s) available, but you are booking for ${passengers} passenger(s). Please select another train or reduce the number of passengers.`,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    width: 800,
+                    padding: '15px 20px',
+                });
+                return;
+            }
+        }
+    });
+});
 </script>
 @endsection
