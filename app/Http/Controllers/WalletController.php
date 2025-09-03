@@ -49,7 +49,7 @@ class WalletController extends Controller
                 ],
             ],
             'mode' => 'payment',
-            'success_url' => route('wallet.success') . '?session_id={CHECKOUT_SESSION_ID}&amount=' . $amount,
+            'success_url' => route('wallet.success') . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('profile'),
             'metadata' => [
                 'user_id' => Auth::id(),

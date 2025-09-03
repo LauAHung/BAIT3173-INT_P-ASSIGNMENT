@@ -16,6 +16,7 @@
             <ul>
                 <li class="sidebar-tab active" id="ongoing-tab">Ongoing</li>
                 <li class="sidebar-tab" id="past-tab">Past Trip</li>
+                <li class="sidebar-tab" id="refunded-tab">Refunded</li> 
             </ul>
         </aside>
         <!-- Main Content -->
@@ -70,15 +71,15 @@
                                     </a>
                                 @endif
                                 @if ($booking->showRefund)
-                                    <a href="{{ route('refund', ['bookingId' => $booking->BookingID]) }}">
+                                    <a href="{{ route('refund.page', ['bookingId' => $booking->BookingID]) }}">
                                         <button type="button" class="btn-refund">Refund</button>
                                     </a>
                                 @endif
                                 @if ($booking->showProceedPayment)
-    <a href="{{ route('proceedPayment', ['bookingId' => $booking->BookingID]) }}">
-        <button type="button" class="btn-payment">Proceed Payment</button>
-    </a>
-@endif
+                                <a href="{{ route('proceedPayment', ['bookingId' => $booking->BookingID]) }}">
+                                    <button type="button" class="btn-payment">Proceed Payment</button>
+                                </a>
+                                @endif
 
                                 @if ($booking->showCancel)
                                     <button type="button" class="btn-cancel" onclick="confirmCancel('{{ $booking->BookingID }}')">Cancel</button>
@@ -153,6 +154,57 @@
                     @empty
                     <div class="booking-item">
                         <p>No past bookings found.</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+              <!-- Refunded Section -->
+            <div class="refunded-booking" id="refunded-content" style="display:none;">
+                <div class="booking-heading">
+                    <h2>Refunded Bookings</h2>
+                </div>
+                <div class="booking-item-container">
+                    @php
+                    $refundedBookings = $refundedBookings ?? collect();
+                    @endphp
+                    @forelse ($refundedBookings as $booking)
+                    <div class="booking-item">
+                        <div class="booking-flex-row">
+                            <div class="booking-col booking-col-left">
+                                <img src="{{ asset('images/logo/' . ($booking->Journey->Train->TrainService ?? 'default_logo.png') . '_logo.png') }}"
+                                    alt="service_type" class="booking-logo">
+                                <div class="train-number">{{ $booking->Journey->Train->TrainNo ?? 'Unknown' }}</div>
+                                <div class="booking-id">Booking ID: {{ $booking->BookingID }}</div>
+                            </div>
+                            <div class="booking-col booking-col-middle">
+                                <div class="route-row dashed-line">
+                                    <span class="station">{{ $booking->Journey->FromLocation ?? 'Unknown' }}</span>
+                                    <span class="train-icon center-icon">
+                                        <i class="fas fa-train"></i>
+                                    </span>
+                                    <span class="station">{{ $booking->Journey->ToLocation ?? 'Unknown' }}</span>
+                                </div>
+                                <div class="time-row dashed-line">
+                                    <span class="time">{{ date('g:i A', strtotime($booking->Journey->DepartureTime ?? 'Unknown')) }}</span>
+                                    <span class="train-icon center-icon">
+                                        <i class="fas fa-train"></i>
+                                    </span>
+                                    <span class="time">{{ date('g:i A', strtotime($booking->Journey->ArrivalTime ?? 'Unknown')) }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="date">Date:
+                                        {{ date('d F Y', strtotime($booking->Journey->DepartureTime ?? 'Unknown')) }}</span>
+                                </div>
+                                <div class="status-row">
+                                    <span class="status refunded">Status: {{ $booking->Status }}</span>
+                                </div>
+                            </div>
+                            <!-- No buttons for refunded bookings -->
+                        </div>
+                    </div>
+                    @empty
+                    <div class="booking-item">
+                        <p>No refunded bookings found.</p>
                     </div>
                     @endforelse
                 </div>

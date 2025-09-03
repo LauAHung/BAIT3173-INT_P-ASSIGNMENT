@@ -119,8 +119,6 @@ Route::get('/selectseat/', [TrainSelectionController::class, 'showSelectSeat'])-
 Route::post('/booking/store', [TrainSelectionController::class, 'storeBooking'])->name('booking.store');
 
 Route::get('/booking', [BookingController::class, 'index'])->name('booking');
-Route::get('/booking/refund', [BookingController::class, 'refund'])->name('refund');
-Route::get('/booking/payment', [BookingController::class, 'payment'])->name('proceedPayment');
 Route::get('/booking/cancel/{bookingId}', [BookingController::class, 'cancel'])->name('cancel');
 Route::get('/booking/rate', [BookingController::class, 'rate'])->name('rateTrip');
 Route::get('/booking_detail/{bookingId}', [BookingController::class, 'show'])->name('bookingdetail');
@@ -248,3 +246,7 @@ Route::post('/payment', [PaymentController::class, 'processPayment'])->name('pay
 // -------- BOOKING PAYMENT --------
 Route::get('/payment/{bookingId}', [PaymentController::class, 'showPaymentPage'])->name('proceedPayment');
 Route::post('/payment/{bookingId}/complete', [PaymentController::class, 'completePayment'])->name('payment.complete');
+
+//Refund routes
+Route::get('/refund/{bookingId}', [PaymentController::class, 'showRefundPage'])->name('refund.page');
+Route::post('/refund/{bookingId}', [PaymentController::class, 'processRefund'])->name('refund.process');

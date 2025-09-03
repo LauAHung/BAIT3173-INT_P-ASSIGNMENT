@@ -51,9 +51,20 @@ class BookingController extends Controller
                 $booking->showRateTrip = $booking->Status === 'Completed';
                 return $booking;
             });
+            
+        $refundedBookings = Booking::with(['journey', 'journey.train'])
+        ->where('UserID', $userId)
+        ->where('Status', 'Refunded')
+        ->get()
+        ->map(function ($booking) {
+            $booking->Journey->DepartureTime = \Carbon\Carbon::parse($booking->Journey->DepartureTime)->format('Y-m-d');
+            return $booking;
+        });
 
+    Log::info('Refunded Bookings:', ['bookings' => $refundedBookings->toArray()]);
         // Ensure variables are always passed, even if empty
-        return view('BookingPage', compact('ongoingBookings', 'pastBookings'));
+        return view('BookingPage', compact('ongoingBookings', 'pastBookings','refundedBookings'));
+
     }
 
     public function show($bookingId)

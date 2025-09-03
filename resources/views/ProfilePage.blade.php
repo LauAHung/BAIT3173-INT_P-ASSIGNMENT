@@ -342,18 +342,7 @@ function updateWalletBalance(newBalance) {
     });
 }
 
-// Check if we need to update wallet balance after topup
-@if(session('success') && str_contains(session('success', ''), 'Topup successful'))
-    // Extract amount from success message and update display
-    const successMessage = '{{ session('success') }}';
-    const amountMatch = successMessage.match(/RM([\d,]+\.\d{2})/);
-    if (amountMatch) {
-        const topupAmount = parseFloat(amountMatch[1].replace(',', ''));
-        const currentBalance = {{ $user->wallet_balance ?? 0 }};
-        const newBalance = currentBalance + topupAmount;
-        updateWalletBalance(newBalance);
-    }
-@endif
+
 </script>
 
 <style>
