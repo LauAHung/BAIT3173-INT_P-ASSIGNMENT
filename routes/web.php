@@ -8,7 +8,9 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TrainSelectionController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\BookingDetailController;
 use App\Http\Controllers\WalletController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('HomePage');
@@ -80,7 +82,7 @@ Route::post('/profile/delete-account', [App\Http\Controllers\ProfileController::
 Route::get('/profile/activity', [App\Http\Controllers\ProfileController::class, 'activity'])->name('profile.activity');
 
 // Admin routes
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/users', [App\Http\Controllers\AdminController::class, 'users'])->name('admin.users');
     Route::get('/trains', [App\Http\Controllers\AdminController::class, 'trains'])->name('admin.trains');
@@ -91,9 +93,11 @@ Route::prefix('admin')->group(function () {
     
     // API endpoints for AJAX
     Route::get('/api/dashboard/stats', [App\Http\Controllers\AdminController::class, 'getDashboardStats']);
-    Route::get('/api/users', [App\Http\Controllers\AdminController::class, 'getUsers']);
-    Route::put('/api/users/{id}/status', [App\Http\Controllers\AdminController::class, 'updateUserStatus']);
-    Route::delete('/api/users/{id}', [App\Http\Controllers\AdminController::class, 'deleteUser']);
+    Route::get('/api/dashboard/filters', [App\Http\Controllers\AdminController::class, 'getDashboardFilters']);
+    Route::get('/api/dashboard/trips', [App\Http\Controllers\AdminController::class, 'getTripsPerMonth']);
+    Route::get('/api/dashboard/users-growth', [App\Http\Controllers\AdminController::class, 'getUsersGrowth']);
+    Route::get('/api/dashboard/profit', [App\Http\Controllers\AdminController::class, 'getProfitTrends']);
+    // Removed conflicting user management routes - using UserController instead
     Route::get('/api/trains', [App\Http\Controllers\AdminController::class, 'getTrains']);
     Route::post('/api/trains', [App\Http\Controllers\AdminController::class, 'addTrain']);
     Route::put('/api/trains/{id}', [App\Http\Controllers\AdminController::class, 'updateTrain']);
@@ -104,6 +108,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/api/refunds/process', [App\Http\Controllers\AdminController::class, 'processRefund']);
     Route::get('/api/export', [App\Http\Controllers\AdminController::class, 'exportData']);
     Route::get('/api/system/info', [App\Http\Controllers\AdminController::class, 'getSystemInfo']);
+    Route::get('/api/logs', [App\Http\Controllers\Admin\LogController::class, 'list']);
 });
 
 // Booking Module
@@ -154,34 +159,61 @@ Route::get('/payment', function () {
     return view('PaymentPage');
 })->name('payment');
 
-// Admin Page
+// Admin Page (protected)
 Route::get('dashboard', function () {
     return view('AdminPage/Dashboard');
-})->name('dashboard');
+})->middleware('admin')->name('dashboard');
 
-Route::get('train-management', function () {
-    return view('AdminPage/TrainManagement');
-})->name('train-management');
+// Entry point: if user is admin, go dashboard; else 403
+Route::get('/admin', function () {
+    $user = Auth::user();
+    if ($user && $user->account_status === 'admin') {
+        return redirect()->route('dashboard');
+    }
+    return response()->view('errors.403', [], 403);
+})->name('admin.index');
 
-Route::get('user-management', function () {
-    return view('AdminPage/UserManagement');
-})->name('user-management');
+Route::get('train-management', [App\Http\Controllers\Admin\TrainManagementController::class, 'index'])->middleware('admin')->name('train-management');
+Route::get('test-train', function() {
+    try {
+        $stations = \App\Models\Station::all();
+        return response()->json(['success' => true, 'stations' => $stations]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'error' => $e->getMessage()]);
+    }
+});
+Route::post('admin/train-management/train', [App\Http\Controllers\Admin\TrainManagementController::class, 'storeTrain'])->name('train-management.train.store');
+Route::post('admin/train-management/station', [App\Http\Controllers\Admin\TrainManagementController::class, 'storeStation'])->name('train-management.station.store');
+Route::post('admin/train-management/journey', [App\Http\Controllers\Admin\TrainManagementController::class, 'storeJourney'])->name('train-management.journey.store');
+
+// Update routes
+Route::post('admin/train-management/train/update', [App\Http\Controllers\Admin\TrainManagementController::class, 'updateTrain'])->name('train-management.train.update');
+Route::post('admin/train-management/station/update', [App\Http\Controllers\Admin\TrainManagementController::class, 'updateStation'])->name('train-management.station.update');
+Route::post('admin/train-management/journey/update', [App\Http\Controllers\Admin\TrainManagementController::class, 'updateJourney'])->name('train-management.journey.update');
+
+Route::get('user-management', [App\Http\Controllers\Admin\UserController::class, 'index'])->middleware('admin')->name('user-management');
+Route::put('admin/api/users/{userId}/status', [App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('admin.users.update-status');
+Route::delete('admin/api/users/{userId}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('admin.users.destroy');
+Route::get('admin/api/users/export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('admin.users.export');
 
 Route::get('news-email-publish', function () {
     return view('AdminPage/NewsEmailPublish');
-})->name('news-email-publish');
+})->middleware('admin')->name('news-email-publish');
 
 Route::get('card-approval', function () {
     return view('AdminPage/CardApproval');
-})->name('card-approval');
+})->middleware('admin')->name('card-approval');
 
 Route::get('scan_qr', function () {
     return view('AdminPage/ScanQR');
-})->name('scan_qr');
+})->middleware('admin')->name('scan_qr');
 
-Route::get('log', function () {
-    return view('AdminPage/Log');
-})->name('log');
+Route::get('log', [App\Http\Controllers\Admin\LogController::class, 'index'])->middleware('admin')->name('log');
+
+// Newsletter subscription
+Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::get('/admin/api/newsletter/subscribers', [App\Http\Controllers\NewsletterController::class, 'list'])->name('admin.newsletter.subscribers');
+Route::post('/admin/api/newsletter/unsubscribe', [App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('admin.newsletter.unsubscribe');
 
 Route::get('/concession_card',function(){
     return view('ConcessionCardPage');

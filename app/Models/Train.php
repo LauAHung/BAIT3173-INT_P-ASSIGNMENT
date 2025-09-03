@@ -8,7 +8,12 @@ class Train extends Model
 {
     protected $table = 'Trains';
     protected $primaryKey = 'TrainID';
+    public $incrementing = false;
+    protected $keyType = 'string';
+    public $timestamps = false;
+    
     protected $fillable = [
+        'TrainID',
         'StationID',
         'TrainNo',
         'TrainService',

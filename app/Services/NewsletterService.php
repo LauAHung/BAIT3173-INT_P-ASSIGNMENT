@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\NewsletterSubscriber;
 use Illuminate\Support\Facades\Mail;
 use Exception;
 
@@ -99,7 +100,15 @@ class NewsletterService
             case 'active':
                 return User::where('account_status', 'active')->get();
             case 'newsletter_subscribers':
-                return User::where('email_subscription->newsletter', true)->get();
+                // Merge internal users opted in and external subscribers
+                $internal = User::where('email_subscription->newsletter', true)->pluck('email')->toArray();
+                $external = NewsletterSubscriber::pluck('email')->toArray();
+                $emails = array_unique(array_merge($internal, $external));
+                return collect(array_map(function ($email) {
+                    $obj = new \stdClass();
+                    $obj->email = $email;
+                    return $obj;
+                }, $emails));
             case 'verified':
                 return User::whereNotNull('email_verified_at')->get();
             default:

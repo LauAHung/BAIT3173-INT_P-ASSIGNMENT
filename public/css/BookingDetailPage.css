@@ -166,7 +166,7 @@ section {
 }
 
 /* Modal Styles */
-.modal {
+.modal-qr {
     display: none;
     position: fixed;
     top: 0;
@@ -179,19 +179,19 @@ section {
     z-index: 1000;
 }
 
-.modal-content {
+.modal-content-qr {
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
 }
 
-.modal-content img {
+.modal-content-qr img {
     width: 300px;
     height: 300px;
 }
 
-.close {
+.close-qr {
     color: #aaa;
     font-size: 28px;
     font-weight: bold;
@@ -201,8 +201,8 @@ section {
     cursor: pointer;
 }
 
-.close:hover,
-.close:focus {
+.close-qr:hover,
+.close-qr:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;

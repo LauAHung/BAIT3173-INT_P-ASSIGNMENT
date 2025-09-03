@@ -18,9 +18,10 @@
 }
 
 .management-card {
-    background: #2c2638;
+    background: linear-gradient(135deg, #2d2d2d 0%, #1f1f1f 100%);
+    border: 1px solid #404040;
     border-radius: 15px;
-    box-shadow: 0 2px 12px rgba(109,84,181,0.18);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     padding: 28px 24px;
     min-width: 320px;
     flex: 1 1 350px;
@@ -50,36 +51,32 @@
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 10px 12px;
+    padding: 10px 16px;
     border-radius: 8px;
-    border: none;
-    background: #453f53;
-    color: #fff;
-    font-size: 1rem;
+    border: 1px solid #404040;
+    background: #1f1f1f;
+    color: #ffffff;
+    font-size: 14px;
     margin-bottom: 2px;
 }
 
-.btn-primary {
-    background: linear-gradient(90deg, #3a7bd5 60%, #00d2ff 100%);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 28px;
-    font-size: 1.05rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(109,84,181,0.18);
-    transition: background 0.2s;
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
-.btn-primary:hover {
-    background: linear-gradient(90deg, #00d2ff 60%, #3a7bd5 100%);
-}
+/* Button styles aligned with User Management */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-decoration: none; }
+.btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
 
 .data-tabs {
     display: flex;
     gap: 12px;
     margin-bottom: 18px;
+    margin-top: 30px;
 }
 
 .tab-btn {
@@ -101,26 +98,278 @@
 }
 
 .tab-content {
-    background: #2c2638;
+    background: linear-gradient(135deg, #2d2d2d 0%, #1f1f1f 100%);
+    border: 1px solid #404040;
     border-radius: 0 0 12px 12px;
-    box-shadow: 0 2px 12px rgba(109,84,181,0.10);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     padding: 24px;
     color: #fff;
 }
 
-.tab-content table {
-    width: 100%;
-    border-collapse: collapse;
-    color: #fff;
-}
+.table-container { background: linear-gradient(135deg, #2d2d2d 0%, #1f1f1f 100%); border: 1px solid #404040; border-radius: 16px; overflow: hidden; }
+.table { width: 100%; border-collapse: collapse; }
+.table th { background-color: #404040; color: #ffffff; font-weight: 600; padding: 16px; text-align: left; font-size: 14px; }
+.table td { padding: 16px; border-bottom: 1px solid #404040; color: #b3b3b3; font-size: 14px; }
+.table tr:hover { background-color: #404040; }
+.table tr:last-child td { border-bottom: none; }
 
 .tab-content th, .tab-content td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #453f53;
+    padding: 12px 16px;
     text-align: left;
+    border-bottom: 1px solid #453f53;
 }
 
-.tab-content th {
+/* Use global admin table header style (same as User Management) */
+.tab-content th { background: #404040; color: #ffffff; font-weight: 600; font-size: 14px; }
+
+.tab-content tr {
+    transition: background 0.2s ease;
+}
+
+.tab-content tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-content tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.tab-content td {
+    font-size: 0.9rem;
+    color: #e8e8e8;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-block;
+    min-width: 60px;
+    text-align: center;
+}
+
+.status-active {
+    background: #4CAF50;
+    color: white;
+}
+
+.status-inactive {
+    background: #f44336;
+    color: white;
+}
+
+.status-scheduled {
+    background: #2196F3;
+    color: white;
+}
+
+.status-delayed {
+    background: #FF9800;
+    color: white;
+}
+
+.status-canceled {
+    background: #9C27B0;
+    color: white;
+}
+
+/* Price styling */
+.price-value {
+    font-weight: 600;
+    color: #4CAF50;
+}
+
+/* ID styling */
+.id-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #FFD700;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.85rem;
+}
+
+/* Time styling */
+.time-value {
+    font-family: 'Courier New', monospace;
+    color: #87CEEB;
+    font-size: 0.85rem;
+}
+
+/* Scrollbar styling */
+.tab-content {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.tab-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tab-content::-webkit-scrollbar-track {
+    background: #1f1f1f;
+}
+
+.tab-content::-webkit-scrollbar-thumb {
     background: #3a7bd5;
+    border-radius: 3px;
+}
+
+/* Edit button styling */
+.btn-edit {
+    background: #FF9800;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-edit:hover {
+    background: #F57C00;
+}
+
+/* Modal styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background: #2c2638;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
     color: #fff;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+}
+
+.close:hover {
+    color: #fff;
+}
+
+.modal-content h3 {
+    margin-bottom: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-content .form-group {
+    margin-bottom: 15px;
+}
+
+.modal-content .form-group label {
+    display: block;
+    font-size: 0.9rem;
+    color: #bbb;
+    margin-bottom: 5px;
+}
+
+.modal-content .form-group input,
+.modal-content .form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: none;
+    background: #453f53;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.modal-content .btn-primary {
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.modal-content .btn-primary:hover {
+    background: #45a049;
+}
+
+/* Message Container (unified toast styles) */
+.message-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+}
+
+.message-content {
+    padding: 16px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.message-content.message-success {
+    background: #00bcd4;
+    color: #ffffff;
+}
+
+.message-content.message-error {
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+    color: #ffffff;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: 12px;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }

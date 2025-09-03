@@ -57,8 +57,8 @@ class LoginController extends Controller
                 // Update last login timestamp
                 $this->userRegistrationService->handleUserLogin($user);
                 
-                // Check if user is active
-                if ($user->account_status !== 'active') {
+                // Check if user is allowed (active or admin)
+                if (!in_array($user->account_status, ['active', 'admin'])) {
                     Auth::logout();
                     return back()->withErrors([
                         'email' => 'Your account is not active. Please check your email for verification.',
@@ -68,7 +68,12 @@ class LoginController extends Controller
                 // Log the user in
                 Auth::login($user, $request->boolean('remember'));
 
-                // Redirect to homepage after successful login
+                // Redirect based on role/status
+                if ($user->account_status === 'admin') {
+                    return redirect()->route('dashboard')->with('success', 'Welcome admin, ' . $user->first_name . '!');
+                }
+
+                // Default redirect to homepage after successful login
                 return redirect()->route('HomePage')->with('success', 'Welcome back, ' . $user->first_name . '!');
             }
         } catch (\Exception $e) {

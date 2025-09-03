@@ -371,7 +371,7 @@ class TrainSelectionController extends Controller
             return redirect()->route('selectseat', [
                 'journey_id' => $journey['id'] ?? 0,
                 'passengers' => $passengersCount,
-            ])->with('error', 'Failed to create booking: ' . $e->getMessage());
+            ])->with('error', 'Failed to create booking, please try again later!');
         }
     }
 }

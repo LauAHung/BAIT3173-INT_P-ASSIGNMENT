@@ -35,11 +35,11 @@
                         <div class="passenger-item">
                             <span class="passenger-label">Passenger {{ $index }}</span>
                             <span class="passenger-subtext">{{ $journey['from_location'] }} >
-                                {{ $journey['to_location'] }} (MYR {{ number_format($ticketPrice, 2) }}) 
+                                {{ $journey['to_location'] }} (MYR {{ number_format($ticketPrice, 2) }})
                                 @if ($passenger['ticket_type'] === 'Kanak-kanak/Child')
-                                    (10% Child Discount)
+                                    <br>(10% Child Discount)
                                 @elseif ($passenger['ticket_type'] === 'OKU')
-                                    (30% OKU Discount)
+                                    <br>(30% OKU Discount)
                                 @endif
                             </span>
                         </div>
@@ -203,20 +203,36 @@
             @endforeach
         </div>
     </div>
-    @if (session('error'))
-    <div class="error-message" style="color: red; margin: 10px 0;">
-        {{ session('error') }}
-    </div>
-    @endif
-    @if (session('success'))
-    <div class="success-message" style="color: green; margin: 10px 0;">
-        {{ session('success') }}
-    </div>
-    @endif
 </section>
 @endif
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const errorMessage = "{{ session('error') }}";
+    if (errorMessage) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops!',
+            html: `<p style="font-size:18px; margin:10px 0;">${errorMessage}</p>`,
+            confirmButtonText: 'Got it',
+            confirmButtonColor: '#d33', // Red confirm button
+            width: '500px',
+            padding: '30px',
+            backdrop: `
+                rgba(0,0,0,0.4)
+                left top
+                no-repeat
+            `,
+            customClass: {
+                popup: 'custom-error-popup',
+                title: 'custom-error-title',
+                confirmButton: 'custom-error-button'
+            }
+        });
+    }
+});
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const passengersCount = parseInt('{{ $passengersCount ?? 1 }}');
@@ -279,7 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmButtonText: 'Yes, Proceed',
             cancelButtonText: 'No, Cancel',
             customClass: {
-                popup: 'custom-swal-popup'
+                popup: 'custom-swal-popup',
+                confirmButton: 'confirm-green',
+                cancelButton: 'cancel-red'
             }
         }).then((result) => {
             if (result.isConfirmed) {

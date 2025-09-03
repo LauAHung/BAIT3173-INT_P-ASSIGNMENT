@@ -16,15 +16,7 @@
 
         {{-- Success messages are handled by the success modal component --}}
 
-        @if($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        <x-error_Modal />
         <!-- Include SweetAlert2 JS -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <!-- JavaScript to trigger SweetAlert2 -->
@@ -59,11 +51,15 @@
 
         <div class="or">Or log in with</div>
         <div class="oauth-btns">
-            <a href="{{ route('google.login') }}" class="oauth-btn">
+            <a href="{{ route('google.login') }}">
+              <button>
                 <img src="{{ asset('images/google_logo.png') }}" alt="Google Logo" id="google_logo">Google
+              </button>
             </a>
-            <a href="{{ route('facebook.redirect') }}" class="oauth-btn">
+            <a href="{{ route('facebook.redirect') }}">
+              <button>
                 <img src="{{ asset('images/facebook_logo.png') }}" alt="Facebook Logo" id="facebook_logo">Facebook
+              </button>
             </a>
         </div>
 
@@ -81,9 +77,5 @@
     </div>
   </div>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-  <x-error-modal />
-  <x-success-modal />
+  <x-success_Modal />
 @endsection

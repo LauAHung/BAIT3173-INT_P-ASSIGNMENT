@@ -1,5 +1,9 @@
+body > :only-child .ticket-info-section,
+.ticket-info-section:not(:has(+ .select-seat-section)) {
+    min-height: 600px; /* Adjust this value as needed */
+}
+
 .ticket-info-section {
-    min-height: 600px;
     display: flex;
     padding: 20px;
     gap: 20px;
@@ -572,12 +576,31 @@ ol {
     padding: 8px 16px;
 }
 
-.swal2-confirm {
+.confirm-green {
     background-color: #28a745;
     border-color: #28a745;
 }
 
-.swal2-cancel {
+.cancel-red {
     background-color: #dc3545;
     border-color: #dc3545;
+}
+
+/* --- Custom Error Styles --- */
+.custom-error-popup {
+    border-radius: 12px;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.custom-error-title {
+    font-size: 26px !important;
+    font-weight: bold;
+    color: #c0342f; /* Red error tone */
+}
+
+.custom-error-button {
+    font-size: 16px !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
 }
