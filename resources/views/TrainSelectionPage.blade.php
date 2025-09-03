@@ -187,7 +187,7 @@
             @endforeach
             @else
             <div class="result">
-                <p>No trains available matching your criteria.</p>
+                <p>No trains available matching your criteria on Today/Selected Date.</p>
             </div>
             @endif
         </div>

@@ -18,7 +18,7 @@
         </div>
         <nav>
             <ul>
-                <li><a href="{{ route('TrainSelectionPage') }}">Ticketing</a></li>
+                <li><a href="{{ route('HomePage') }}">Ticketing</a></li>
                 <li><a href="{{ route('DiscoverPage') }}">Discover</a></li>
                 <li><a href="{{ route('feedback') }}">Feedback</a></li>
                 <li><a href="#">Schedule</a></li>

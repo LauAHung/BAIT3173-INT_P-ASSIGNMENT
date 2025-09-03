@@ -40,6 +40,11 @@ class TrainSelectionController extends Controller
             } else {
                 Log::warning('Failed to parse journeydate: ', ['input' => $inputDate]);
             }
+        } else {
+            // Use today's date if journeydate is empty
+            $today = now()->format('Y-m-d');
+            $query->whereDate('DepartureTime', $today);
+            $hasSearchFilters = true;
         }
 
         // Apply filter for train service type
