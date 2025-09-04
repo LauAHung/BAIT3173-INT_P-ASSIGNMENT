@@ -121,6 +121,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
 
 // Booking Module
 Route::get('/train-selection', [TrainSelectionController::class, 'index'])->name('train.selection');
+Route::get('/train-selection/return', [TrainSelectionController::class, 'indexReturn'])->name('train.selection.return');
 Route::get('/passengerinfo', [TrainSelectionController::class, 'showPassengerInfo'])->name('passengerinfo');
 Route::post('/passenger-info/store', [TrainSelectionController::class, 'storePassengerInfo'])->name('store.passengerinfo');
 Route::get('/selectseat/', [TrainSelectionController::class, 'showSelectSeat'])->name('selectseat');

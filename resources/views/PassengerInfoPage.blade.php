@@ -18,6 +18,9 @@
     @endif
     <form action="{{ route('store.passengerinfo') }}" method="POST" data-selectseat-url="{{ route('selectseat') }}">
         @csrf
+        <input type="hidden" name="journey_id" value="{{ $journey->JourneyID }}">
+        <input type="hidden" name="journey_id2" value="{{ $journey2->JourneyID ?? '' }}">
+        <input type="hidden" name="booking_type" value="{{ $bookingType ?? 'OneWay' }}">
         <div class="passenger-main-layout">
             <div class="passenger-info-panel">
                 <div class="heading">
@@ -100,7 +103,7 @@
             <div class="passenger-side-info">
                 <div class="side-card">
                     <div class="side-title">Total price:</div>
-                    <div class="side-price">MYR {{ number_format($journey->Price * $passengers, 2) }}</div>
+                    <div class="side-price">MYR {{ number_format(($journey->Price + ($journey2 ? $journey2->Price : 0)) * $passengers, 2) }}</div>
                 </div>
                 <div class="side-card">
                     <div class="side-title">Trip Summary</div>
@@ -122,6 +125,27 @@
                             {{ $duration }}, Non-Stop
                         </div>
                     </div>
+                    <br>
+                    @if ($bookingType == 'Return' && $journey2)
+                    <div class="side-summary">
+                        <div>Return on {{ date('l, d F Y', strtotime($journey2->DepartureTime)) }}</div>
+                        <div class="side-flight">
+                            <span>{{ date('h:i A', strtotime($journey2->DepartureTime)) }}</span>
+                            <span class="side-plane"><i class="fas fa-train"></i></span>
+                            <span>{{ date('h:i A', strtotime($journey2->ArrivalTime)) }}</span>
+                        </div>
+                        <div>{{ $journey2->FromLocation}} → {{ $journey2->ToLocation}}</div>
+                        <div>
+                            <?php
+                                $departure2 = new DateTime($journey2->DepartureTime);
+                                $arrival2 = new DateTime($journey2->ArrivalTime);
+                                $interval2 = $departure2->diff($arrival2);
+                                $duration2 = $interval2->format('%hh %imin');
+                            ?>
+                            {{ $duration2 }}, Non-Stop
+                        </div>
+                    </div>
+                    @endif
                 </div>
                 <div class="side-card">
                     <button type="submit" class="side-btn main">Select Seat</button>

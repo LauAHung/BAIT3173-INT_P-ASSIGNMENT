@@ -25,11 +25,11 @@
         <form action="{{ route('train.selection') }}" method="GET">
             <div class="train-type-toggle">
                 <div class="toggle-container">
-                    <input type="radio" id="return-train" name="booking-type" class="train-option" checked
+                    <input type="radio" id="return-train" name="booking_type" class="train-option" checked
                         onclick="handleTrainTypeChange()">
                     <label for="return-train">Return</label>
 
-                    <input type="radio" id="one-way-train" name="booking-type" class="train-option"
+                    <input type="radio" id="one-way-train" name="booking_type" class="train-option"
                         onclick="handleTrainTypeChange()">
                     <label for="one-way-train">One Way</label>
 
@@ -38,7 +38,7 @@
             </div>
 
             <div class="ticket-search-container">
-                <div class="search-form" action="{{ route('train.selection') }}" method="GET" id="searchForm">
+                <div class="search-form" method="GET" id="searchForm">
                     <!-- Hidden input for bookingtype -->
                     <div class="form-group">
                         <label>Depart Location</label>

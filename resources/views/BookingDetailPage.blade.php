@@ -49,6 +49,10 @@
                                 <label class="booking-label">Status: </label>
                                 <span class="booking-value">{{ $booking->Status ?? 'Unknown' }}</span>
                             </div>
+                            <div class="booking-info">
+                                <label class="booking-label">Total Price: </label>
+                                <span class="booking-value">RM {{ $booking->Price ? number_format($booking->Price, 2) : 'Unknown' }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -109,7 +109,10 @@ class BookingController extends Controller
 
             // Update SeatAvailable in Journeys
             $journey = Journey::find($booking->JourneyID);
-            $journey->increment('SeatAvailable', $booking->TicketNo);
+            if ($journey->train->TrainService === 'ETS') {
+                $journey->increment('SeatAvailable', $booking->TicketNo);
+            }
+            
 
             DB::commit();
 
