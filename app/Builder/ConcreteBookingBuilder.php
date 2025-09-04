@@ -119,20 +119,31 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
                 'Created_at' => now()->format('d-m-Y'),
             ]);
 
-            // Create new seat record if ETS
+            // Get or create seat ID if ETS
             $seatId = null;
             if ($this->journey['train_service'] === 'ETS' && isset($this->selectedSeats[$index])) {
                 $seatNo = $this->selectedSeats[$index];
-                // Create new seat as unavailable
-                $seat = Seat::create([
-                    'SeatID' => 'SE' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT),
-                    'TrainID' => $this->journey['train_id'] ?? Journey::find($this->journey['id'])->TrainID,
-                    'JourneyID' => $this->journey['id'],
-                    'SeatNo' => $seatNo,
-                    'is_available' => 'N',
-                    'status' => 'Booked',
-                    'Created_at' => now()->format('Y-m-d H:i:s'),
-                ]);
+                $seat = Seat::where('JourneyID', $this->journey['id'])
+                    ->where('SeatNo', $seatNo)
+                    ->first();
+
+                if ($seat) {
+                    // Update existing seat to unavailable
+                    $seat->is_available = 'N';
+                    $seat->status = 'Booked';
+                    $seat->save();
+                } else {
+                    // Create new seat as unavailable
+                    $seat = Seat::create([
+                        'SeatID' => 'SE' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT),
+                        'TrainID' => $this->journey['train_id'] ?? Journey::find($this->journey['id'])->TrainID,
+                        'JourneyID' => $this->journey['id'],
+                        'SeatNo' => $seatNo,
+                        'is_available' => 'N',
+                        'status' => 'Booked',
+                        'Created_at' => now()->format('d-m-Y'),
+                    ]);
+                }
                 $seatId = $seat->SeatID;
             }
 
