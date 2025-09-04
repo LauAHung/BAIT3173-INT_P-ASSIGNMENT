@@ -11,8 +11,11 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    /** @var \App\Services\UserRegistrationService */
     private UserRegistrationService $userRegistrationService;
+    /** @var \App\Factories\UserFactoryManager */
     private UserFactoryManager $userFactoryManager;
+    /** @var \App\Factories\MailFactoryManager */
     private MailFactoryManager $mailFactoryManager;
 
     public function __construct(
@@ -31,6 +34,7 @@ class ProfileController extends Controller
      */
     public function show()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         
         // If there's a success message, refresh the user data to get the latest wallet balance
@@ -46,6 +50,7 @@ class ProfileController extends Controller
      */
     public function edit()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         return view('profile.edit', compact('user'));
     }
@@ -55,14 +60,17 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         $validated = $request->validate([
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . $user->user_id . ',user_id',
+            'phone' => 'sometimes|nullable|string|regex:/^\+?[0-9\s\-]{7,15}$/|unique:users,phone,' . $user->user_id . ',user_id',
             'gender' => 'sometimes|string|in:male,female',
-            'date_of_birth' => 'sometimes|date',
+            // Must be a date and at least 13 years old
+            'date_of_birth' => 'sometimes|date|before_or_equal:' . now()->subYears(13)->toDateString(),
             'profile_picture' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
             'confirm_password' => 'sometimes|string',
             'newsletter' => 'boolean',
@@ -102,6 +110,9 @@ class ProfileController extends Controller
         if (isset($validated['email'])) {
             $message = 'Email updated successfully!';
         }
+        if (isset($validated['phone'])) {
+            $message = 'Phone number updated successfully!';
+        }
 
         return redirect()->route('profile')->with('success', $message);
     }
@@ -119,6 +130,7 @@ class ProfileController extends Controller
      */
     public function changePassword(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         // If user has no password (social login), allow setting password without current password
@@ -188,6 +200,7 @@ class ProfileController extends Controller
             'password' => 'required|string',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         if (!Hash::check($request->password, $user->password)) {

@@ -22,6 +22,7 @@ class User extends Authenticatable
         'gender',
         'date_of_birth',
         'profile_picture',
+        'phone',
         'social_provider',
         'social_provider_id',
         'social_provider_data',
@@ -46,6 +47,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
         'password_reset_expires_at' => 'datetime',
+        'password_reset_otp_expires_at' => 'datetime',
         'email_subscription' => 'array',
         'social_provider_data' => 'array'
     ];

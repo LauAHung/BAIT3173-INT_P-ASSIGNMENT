@@ -65,8 +65,8 @@ class LoginController extends Controller
                     ]);
                 }
 
-                // Log the user in
-                Auth::login($user, $request->boolean('remember'));
+                // Log the user in (remember me removed)
+                Auth::login($user, false);
 
                 // Redirect based on role/status
                 if ($user->account_status === 'admin') {
@@ -110,54 +110,75 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle forgot password request
+     * Handle forgot password (OTP) - send OTP to email
      */
-    public function handleForgotPassword(Request $request)
+    public function handleForgotPasswordOtp(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email'
-        ]);
+        $request->validate(['email' => 'required|email']);
 
-        $success = $this->userRegistrationService->handleForgotPassword($request->email);
-
-        if ($success) {
-            return back()->with('success', 'Password reset link has been sent to your email.');
+        $sent = $this->userRegistrationService->sendPasswordResetOtp($request->email);
+        if ($sent) {
+            return redirect()->route('password.verify-otp', ['email' => $request->email])
+                ->with('success', 'We have emailed a 6-digit OTP to you.');
         }
-
         return back()->withErrors(['email' => 'We could not find a user with that email address.']);
     }
 
-    /**
-     * Show password reset form
-     */
-    public function showResetPasswordForm(string $token)
+    /** Show OTP verification form */
+    public function showVerifyOtpForm(Request $request)
     {
-        return view('auth.reset-password', compact('token'));
+        $email = $request->query('email');
+        return view('auth.verify-otp', compact('email'));
     }
 
-    /**
-     * Handle password reset
-     */
-    public function handleResetPassword(Request $request)
+    /** Verify OTP and redirect to reset form */
+    public function verifyOtp(Request $request)
     {
         $request->validate([
-            'token' => 'required',
+            'email' => 'required|email',
+            'otp' => 'required|digits:6'
+        ]);
+
+        $valid = $this->userRegistrationService->verifyPasswordResetOtp($request->email, $request->otp);
+        if ($valid) {
+            return redirect()->route('password.reset.otp', ['email' => $request->email])
+                ->with('success', 'OTP verified. Please reset your password.');
+        }
+        return back()->withErrors(['otp' => 'Invalid or expired OTP.']);
+    }
+
+    /** Show reset form after OTP verified */
+    public function showResetPasswordOtpForm(Request $request)
+    {
+        $email = $request->query('email');
+        return view('auth.reset-password', compact('email'));
+    }
+
+    /** Handle password reset with OTP verified */
+    public function handleResetPasswordWithOtp(Request $request)
+    {
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required|string|min:8',
             'password_confirmation' => 'nullable|string|same:password',
         ]);
 
-        $success = $this->userRegistrationService->resetPassword(
-            $request->token,
-            $request->password
-        );
-
+        $success = $this->userRegistrationService->resetPasswordAfterOtp($request->email, $request->password);
         if ($success) {
             return redirect()->route('signin')->with('success', 'Your password has been reset successfully.');
         }
-
-        return back()->withErrors(['email' => 'Invalid or expired reset token.']);
+        return back()->withErrors(['email' => 'Password reset failed.']);
     }
+
+    /**
+     * Show password reset form
+     */
+    // Deprecated token-based reset views removed in favor of OTP flow
+
+    /**
+     * Handle password reset
+     */
+    // Deprecated token-based reset handler removed in favor of OTP flow
 
     /**
      * Verify email address

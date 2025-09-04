@@ -27,9 +27,11 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Password reset routes
 Route::get('/forgot-password', [LoginController::class, 'showForgotPasswordForm'])->name('password.request');
-Route::post('/forgot-password', [LoginController::class, 'handleForgotPassword'])->name('password.email');
-Route::get('/reset-password/{token}', [LoginController::class, 'showResetPasswordForm'])->name('password.reset');
-Route::post('/reset-password', [LoginController::class, 'handleResetPassword'])->name('password.update');
+Route::post('/forgot-password', [LoginController::class, 'handleForgotPasswordOtp'])->name('password.email');
+Route::get('/verify-otp', [LoginController::class, 'showVerifyOtpForm'])->name('password.verify-otp');
+Route::post('/verify-otp', [LoginController::class, 'verifyOtp'])->name('password.verify-otp.post');
+Route::get('/reset-password', [LoginController::class, 'showResetPasswordOtpForm'])->name('password.reset.otp');
+Route::post('/reset-password', [LoginController::class, 'handleResetPasswordWithOtp'])->name('password.update.otp');
 
 // Email verification
 Route::get('/verify-email/{token}', [LoginController::class, 'verifyEmail'])->name('verification.verify');

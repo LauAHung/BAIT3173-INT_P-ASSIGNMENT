@@ -23,18 +23,26 @@
         <form action="{{ route('signup.handle') }}" method="POST">
           @csrf
           <div class="form-group">
-            <input type="text" name="first_name" placeholder="First name" value="{{ old('first_name') }}" required>
-            @error('first_name') <div class="error">{{ $message }}</div> @enderror
-            <input type="text" name="last_name" placeholder="Last name" value="{{ old('last_name') }}" required>
-            @error('last_name') <div class="error">{{ $message }}</div> @enderror
+            <div class="field">
+              <input type="text" name="first_name" placeholder="First name" value="{{ old('first_name') }}" required class="@error('first_name') input-error @enderror">
+              @error('first_name') <div class="error">{{ $message }}</div> @enderror
+            </div>
+            <div class="field">
+              <input type="text" name="last_name" placeholder="Last name" value="{{ old('last_name') }}" required class="@error('last_name') input-error @enderror">
+              @error('last_name') <div class="error">{{ $message }}</div> @enderror
+            </div>
           </div>
           <div class="form-group">
-            <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
-            @error('email') <div class="error">{{ $message }}</div> @enderror
+            <div class="field">
+              <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required class="@error('email') input-error @enderror">
+              @error('email') <div class="error">{{ $message }}</div> @enderror
+            </div>
           </div>
           <div class="form-group">
-            <input type="password" name="password" placeholder="Enter your password" required>
-            @error('password') <div class="error">{{ $message }}</div> @enderror
+            <div class="field">
+              <input type="password" name="password" placeholder="Enter your password" required class="@error('password') input-error @enderror">
+              @error('password') <div class="error">{{ $message }}</div> @enderror
+            </div>
           </div>
           <div class="checkbox">
             <input type="checkbox" name="terms" required>
