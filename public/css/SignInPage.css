@@ -122,6 +122,11 @@ input[type="password"] {
 .oauth-btns {
   display: flex;
   gap: 10px;
+  justify-content: center;
+}
+
+.oauth-btns a {
+  text-decoration: none;
 }
 
 .oauth-btns button {
@@ -140,6 +145,7 @@ input[type="password"] {
   font-weight: 600;
   letter-spacing: 2px;
   transition: all 0.2s ease-in;
+  text-decoration: none;
 }
 
 .oauth-btns button:hover {
