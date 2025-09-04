@@ -23,7 +23,7 @@ class ProfileController extends Controller
         $this->userRegistrationService = $userRegistrationService;
         $this->userFactoryManager = $userFactoryManager;
         $this->mailFactoryManager = $mailFactoryManager;
-        $this->middleware('auth');
+        $this->middleware('auth.required');
     }
 
     /**
@@ -200,7 +200,7 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        return redirect()->route('home')->with('success', 'Your account has been deleted successfully.');
+        return redirect()->route('HomePage')->with('success', 'Your account has been deleted successfully.');
     }
 
     /**

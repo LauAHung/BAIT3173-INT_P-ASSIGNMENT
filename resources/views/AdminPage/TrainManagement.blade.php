@@ -1,6 +1,7 @@
 @extends('Layout.master_admin')
 
 @section('title', 'Admin - Train Management')
+@section('page-title', 'Train Management')
 
 @push('styles')
     <link href="css/AdminPage/TrainManagement.css" rel="stylesheet">
@@ -9,7 +10,6 @@
 
 @section('content')
 <div class="train-management-container">
-    <h2 class="page-title">Train Management</h2>
 
     <div class="management-cards">
         <!-- Train Info Card -->
@@ -465,13 +465,7 @@ document.getElementById('trainForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
-    
-    // Debug: Log form data
-    console.log('Form data:');
-    for (let [key, value] of formData.entries()) {
-        console.log(key + ': ' + value);
-    }
-    
+
     fetch('/admin/train-management/train', {
         method: 'POST',
         body: formData,
@@ -481,17 +475,12 @@ document.getElementById('trainForm').addEventListener('submit', function(e) {
         }
     })
     .then(response => {
-        console.log('Response status:', response.status);
         if (!response.ok) {
-            return response.text().then(text => {
-                console.log('Error response:', text);
-                throw new Error('Network response was not ok: ' + response.status);
-            });
+            throw new Error('Network response was not ok');
         }
         return response.json();
     })
     .then(data => {
-        console.log('Success response:', data);
         if (data.success) {
             showMessage(data.message || 'Saved successfully.', 'success');
             setTimeout(() => location.reload(), 1000);
@@ -500,7 +489,6 @@ document.getElementById('trainForm').addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         showMessage('An error occurred while saving the train. Please check the console for details.', 'error');
     });
 });
@@ -534,7 +522,6 @@ document.getElementById('stationForm').addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         showMessage('An error occurred while saving the station. Please check the console for details.', 'error');
     });
 });
@@ -576,7 +563,6 @@ document.getElementById('journeyForm').addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         showMessage('An error occurred while saving the journey. Please check the console for details.', 'error');
     });
 });
@@ -687,7 +673,6 @@ document.getElementById('editTrainForm').addEventListener('submit', function(e) 
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         showMessage('An error occurred while updating the train.', 'error');
     });
 });
@@ -715,7 +700,6 @@ document.getElementById('editStationForm').addEventListener('submit', function(e
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         showMessage('An error occurred while updating the station.', 'error');
     });
 });
@@ -751,7 +735,6 @@ document.getElementById('editJourneyForm').addEventListener('submit', function(e
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         showMessage('An error occurred while updating the journey.', 'error');
     });
 });

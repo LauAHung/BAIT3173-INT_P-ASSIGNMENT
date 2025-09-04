@@ -22,6 +22,9 @@ const journeyTime = document.getElementById('journey-time');
 const journeyStatus = document.getElementById('journey-status');
 const checkinBtn = document.getElementById('checkin-btn');
 const checkoutBtn = document.getElementById('checkout-btn');
+// New elements
+let trainNoEl = document.getElementById('train-no');
+let trainServiceEl = document.getElementById('train-service');
 
 // Sample passenger data (in real app, this would come from database)
 const samplePassengers = {
@@ -131,42 +134,47 @@ function scanQRCode() {
 }
 
 // Handle scanned QR code data
-function handleQRCode(data) {
+async function handleQRCode(data) {
     console.log('QR Code scanned:', data);
-    
-    // Stop scanning temporarily
     stopScanner();
-    
-    // Simulate processing delay
-    setTimeout(() => {
-        // Check if it's a valid passenger ID
-        if (samplePassengers[data]) {
-            displayPassengerInfo(samplePassengers[data]);
-            updateStatusIndicator('QR Code Scanned Successfully', true);
-        } else {
-            // Invalid QR code
-            alert('Invalid QR Code. Please try again.');
-            updateStatusIndicator('Invalid QR Code', false);
-            clearPassengerInfo();
+    // Expect data is TicketID
+    try {
+        const res = await fetch(`/admin/api/tickets/${encodeURIComponent(data)}`, { headers: { 'Accept': 'application/json' } });
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+            throw new Error(json.message || 'Invalid ticket');
         }
-    }, 500);
+        const info = json.data;
+        displayFromApi(info);
+        updateStatusIndicator('QR Code Scanned Successfully', true);
+        currentTicketId = info.ticketId;
+    } catch (e) {
+        alert(e.message || 'Invalid QR Code. Please try again.');
+        updateStatusIndicator('Invalid QR Code', false);
+        clearPassengerInfo();
+        // allow scanning again
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+    }
 }
 
-// Display passenger information
-function displayPassengerInfo(passenger) {
-    passengerName.textContent = passenger.name;
-    journeyId.textContent = passenger.journeyId;
-    departLocation.textContent = passenger.depart;
-    toLocation.textContent = passenger.to;
-    journeyDate.textContent = passenger.date;
-    journeyTime.textContent = passenger.time;
-    
-    // Update status badge
-    journeyStatus.className = `status-badge ${passenger.status}`;
-    journeyStatus.querySelector('.status-text').textContent = passenger.status.toUpperCase();
-    
-    // Enable/disable action buttons based on current status
-    updateActionButtons(passenger.status);
+function displayFromApi(info) {
+    passengerName.textContent = info.passenger?.name || '-';
+    journeyId.textContent = info.journey?.id || '-';
+    departLocation.textContent = info.journey?.from || '-';
+    toLocation.textContent = info.journey?.to || '-';
+    const dep = info.journey?.departure ? new Date(info.journey.departure) : null;
+    const arr = info.journey?.arrival ? new Date(info.journey.arrival) : null;
+    journeyDate.textContent = dep ? dep.toISOString().slice(0,10) : '-';
+    journeyTime.textContent = dep ? dep.toTimeString().slice(0,5) : '-';
+    if (!trainNoEl) trainNoEl = document.getElementById('train-no');
+    if (!trainServiceEl) trainServiceEl = document.getElementById('train-service');
+    if (trainNoEl) trainNoEl.textContent = info.train?.no || '-';
+    if (trainServiceEl) trainServiceEl.textContent = info.train?.service || '-';
+    const st = (info.status || 'pending').toLowerCase();
+    journeyStatus.className = `status-badge ${st}`;
+    journeyStatus.querySelector('.status-text').textContent = st.toUpperCase();
+    updateActionButtons(st);
 }
 
 // Clear passenger information
@@ -187,7 +195,8 @@ function clearPassengerInfo() {
 // Update action buttons based on current status
 function updateActionButtons(status) {
     switch (status) {
-        case 'paid':
+        case 'pending':
+        case 'paid': // treat as pending
             checkinBtn.disabled = false;
             checkoutBtn.disabled = true;
             break;
@@ -206,18 +215,29 @@ function updateActionButtons(status) {
 }
 
 // Update passenger status
-function updateStatus(newStatus) {
-    const currentJourneyId = journeyId.textContent;
-    if (currentJourneyId === '-') return;
-    
-    // Update sample data (in real app, this would update database)
-    if (samplePassengers[currentJourneyId]) {
-        samplePassengers[currentJourneyId].status = newStatus;
-        displayPassengerInfo(samplePassengers[currentJourneyId]);
-        
-        // Show success message
-        const statusText = newStatus === 'checkin' ? 'Checked In' : 'Checked Out';
-        showNotification(`${statusText} successfully!`, 'success');
+let currentTicketId = null;
+async function updateStatus(newStatus) {
+    if (!currentTicketId) return;
+    const url = newStatus === 'checkin'
+        ? `/admin/api/tickets/${encodeURIComponent(currentTicketId)}/checkin`
+        : `/admin/api/tickets/${encodeURIComponent(currentTicketId)}/checkout`;
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+        const json = await res.json();
+        if (!res.ok || !json.success) throw new Error(json.message || 'Update failed');
+        // refresh info
+        const infoRes = await fetch(`/admin/api/tickets/${encodeURIComponent(currentTicketId)}`, { headers: { 'Accept': 'application/json' } });
+        const infoJson = await infoRes.json();
+        if (infoRes.ok && infoJson.success) displayFromApi(infoJson.data);
+        showNotification(`${newStatus === 'checkin' ? 'Checked In' : 'Checked Out'} successfully!`, 'success');
+    } catch (e) {
+        alert(e.message || 'Operation failed');
     }
 }
 

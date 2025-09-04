@@ -1,6 +1,7 @@
 @extends('Layout.master_admin')
 
 @section('title', 'Admin - News Email Publish')
+@section('page-title', 'News & Email')
 
 @push('styles')
     <link href="css/AdminPage/NewsEmailPublish.css" rel="stylesheet">
@@ -9,7 +10,6 @@
 
 @section('content')
 <div class="news-email-container">
-    <h2 class="page-title">News Email Publish</h2>
     <div class="email-send-card">
         <form id="newsletterSendForm">
             <div class="form-group">

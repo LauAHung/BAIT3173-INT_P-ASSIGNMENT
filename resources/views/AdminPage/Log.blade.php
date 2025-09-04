@@ -1,6 +1,7 @@
 @extends('Layout.master_admin')
 
 @section('title', 'Admin - Log')
+@section('page-title', 'Logs')
 
 @push('styles')
     <link href="{{ asset('css/AdminPage/AdminPage.css') }}" rel="stylesheet">
