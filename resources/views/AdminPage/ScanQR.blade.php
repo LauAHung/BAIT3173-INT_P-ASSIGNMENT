@@ -1,6 +1,7 @@
 @extends('Layout.master_admin')
 
 @section('title', 'Admin - Scan QR')
+@section('page-title', 'Scan QR')
 
 @push('styles')
     <link href="css/AdminPage/ScanQR.css" rel="stylesheet">
@@ -58,30 +59,42 @@
                     <label>Passenger Name</label>
                     <p id="passenger-name">-</p>
                 </div>
+                <div class="info-row" style="display:flex; gap:12px;">
+                    <div class="info-group" style="flex:1;">
+                        <label>Train Service</label>
+                        <p id="train-service">-</p>
+                    </div>
+                    <div class="info-group" style="flex:1;">
+                        <label>Train No</label>
+                        <p id="train-no">-</p>
+                    </div>
+                </div>
                 
                 <div class="info-group">
                     <label>Journey ID</label>
                     <p id="journey-id">-</p>
                 </div>
                 
-                <div class="info-group">
-                    <label>From</label>
-                    <p id="depart-location">-</p>
+                <div class="info-row" style="display:flex; gap:12px;">
+                    <div class="info-group" style="flex:1;">
+                        <label>From</label>
+                        <p id="depart-location">-</p>
+                    </div>
+                    <div class="info-group" style="flex:1;">
+                        <label>To</label>
+                        <p id="to-location">-</p>
+                    </div>
                 </div>
                 
-                <div class="info-group">
-                    <label>To</label>
-                    <p id="to-location">-</p>
-                </div>
-                
-                <div class="info-group">
-                    <label>Date</label>
-                    <p id="journey-date">-</p>
-                </div>
-                
-                <div class="info-group">
-                    <label>Time</label>
-                    <p id="journey-time">-</p>
+                <div class="info-row" style="display:flex; gap:12px;">
+                    <div class="info-group" style="flex:1;">
+                        <label>Date</label>
+                        <p id="journey-date">-</p>
+                    </div>
+                    <div class="info-group" style="flex:1;">
+                        <label>Time</label>
+                        <p id="journey-time">-</p>
+                    </div>
                 </div>
                 
                 <div class="info-group">

@@ -72,14 +72,16 @@ Route::post('/signup', [SignupController::class, 'handleSignup'])
 ->name('signup.handle');
 
 // Profile routes
-Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile');
-Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
-Route::post('/profile/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-Route::get('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'showChangePassword'])->name('profile.change-password');
-Route::post('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'changePassword'])->name('profile.change-password.post');
-Route::post('/profile/email-subscription', [App\Http\Controllers\ProfileController::class, 'updateEmailSubscription'])->name('profile.email-subscription');
-Route::post('/profile/delete-account', [App\Http\Controllers\ProfileController::class, 'deleteAccount'])->name('profile.delete-account');
-Route::get('/profile/activity', [App\Http\Controllers\ProfileController::class, 'activity'])->name('profile.activity');
+Route::middleware('auth.required')->group(function () {
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile');
+    Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::post('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'changePassword'])->name('profile.change-password.post');
+    Route::post('/profile/email-subscription', [App\Http\Controllers\ProfileController::class, 'updateEmailSubscription'])->name('profile.email-subscription');
+    Route::post('/profile/delete-account', [App\Http\Controllers\ProfileController::class, 'deleteAccount'])->name('profile.delete-account');
+    Route::get('/profile/activity', [App\Http\Controllers\ProfileController::class, 'activity'])->name('profile.activity');
+});
 
 // Admin routes
 Route::prefix('admin')->middleware('admin')->group(function () {
@@ -104,6 +106,10 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::delete('/api/trains/{id}', [App\Http\Controllers\AdminController::class, 'deleteTrain']);
     Route::post('/api/qr/scan', [App\Http\Controllers\AdminController::class, 'scanQR']);
     Route::post('/api/qr/generate', [App\Http\Controllers\AdminController::class, 'generateQR']);
+    // Ticket info + status updates for ScanQR page
+    Route::get('/api/tickets/{ticketId}', [App\Http\Controllers\Admin\TicketController::class, 'show']);
+    Route::post('/api/tickets/{ticketId}/checkin', [App\Http\Controllers\Admin\TicketController::class, 'checkIn']);
+    Route::post('/api/tickets/{ticketId}/checkout', [App\Http\Controllers\Admin\TicketController::class, 'checkOut']);
     Route::post('/api/newsletter/send', [App\Http\Controllers\AdminController::class, 'sendNewsletter']);
     Route::post('/api/refunds/process', [App\Http\Controllers\AdminController::class, 'processRefund']);
     Route::get('/api/export', [App\Http\Controllers\AdminController::class, 'exportData']);

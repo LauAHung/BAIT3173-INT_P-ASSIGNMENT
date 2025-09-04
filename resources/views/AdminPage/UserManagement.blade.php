@@ -144,9 +144,6 @@
                                     <button class="btn btn-success btn-sm save-btn" data-user-id="{{ $user->user_id }}">
                                         <i class="fas fa-save"></i>
                                     </button>
-                                    <button class="btn btn-danger btn-sm delete-btn" data-user-id="{{ $user->user_id }}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -181,79 +178,30 @@
 
 @push('scripts')
 <script>
-// Simple test to ensure script loads
-console.log('=== User Management Script Loaded ===');
-console.log('Testing console output...');
-
-// test function removed
-
-// Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-
-    // Test if we can find any buttons
-    const allButtons = document.querySelectorAll('button');
-    console.log('Total buttons found:', allButtons.length);
-    
-    // Add event listeners for save buttons
     const saveButtons = document.querySelectorAll('.save-btn');
-    console.log('Found save buttons:', saveButtons.length);
-    
-    saveButtons.forEach((button, index) => {
-        const userId = button.getAttribute('data-user-id');
-        console.log(`Setting up save button ${index} for user:`, userId);
-        
+    saveButtons.forEach((button) => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Save button clicked!');
             const userId = this.getAttribute('data-user-id');
-            console.log('Save button clicked for user:', userId);
             saveUserChanges(userId);
         });
     });
-    
-    // Add event listeners for delete buttons
-    const deleteButtons = document.querySelectorAll('.delete-btn');
-    console.log('Found delete buttons:', deleteButtons.length);
-    
-    deleteButtons.forEach((button, index) => {
-        const userId = button.getAttribute('data-user-id');
-        console.log(`Setting up delete button ${index} for user:`, userId);
-        
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Delete button clicked!');
-            const userId = this.getAttribute('data-user-id');
-            console.log('Delete button clicked for user:', userId);
-            deleteUser(userId);
-        });
-    });
-    
-    // Add event listeners for status select changes
+
     const statusSelects = document.querySelectorAll('.status-select');
-    console.log('Found status selects:', statusSelects.length);
-    
-    statusSelects.forEach((select, index) => {
-        const userId = select.getAttribute('data-user-id');
-        console.log(`Setting up status select ${index} for user:`, userId);
-        
+    statusSelects.forEach((select) => {
         select.addEventListener('change', function() {
-            const userId = this.getAttribute('data-user-id');
-            const status = this.value;
-            console.log('Status changed for user:', userId, 'to:', status);
+            // Intentionally no-op; admin must click save to persist
         });
     });
-    
-    console.log('Event listeners set up successfully');
 });
 
 function filterUsers() {
     const search = document.getElementById('search-username').value;
     const status = document.getElementById('filter-status').value;
-    
     let url = '{{ route("user-management") }}?';
     if (search) url += `search=${encodeURIComponent(search)}&`;
     if (status) url += `status=${encodeURIComponent(status)}&`;
-    
     window.location.href = url;
 }
 
@@ -262,20 +210,11 @@ function resetFilters() {
 }
 
 function updateUserStatus(userId, status) {
-    console.log('Updating user status:', userId, status);
-    
-    // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]');
     if (!csrfToken) {
-        console.error('CSRF token not found');
         showMessage('CSRF token not found. Please refresh the page.', 'error');
         return;
     }
-    
-    console.log('CSRF Token:', csrfToken.getAttribute('content'));
-    console.log('Request URL:', `/admin/api/users/${userId}/status`);
-    console.log('Request body:', JSON.stringify({ status: status }));
-    
     fetch(`/admin/api/users/${userId}/status`, {
         method: 'PUT',
         headers: {
@@ -283,120 +222,41 @@ function updateUserStatus(userId, status) {
             'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
             'Accept': 'application/json'
         },
-        body: JSON.stringify({ status: status })
+        body: JSON.stringify({ status })
     })
     .then(response => {
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.json();
     })
     .then(data => {
-        console.log('Response data:', data);
         if (data.success) {
             showMessage('User status updated successfully!', 'success');
-            // Optionally reload the page to show updated data
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
+            setTimeout(() => window.location.reload(), 1000);
         } else {
             showMessage('Failed to update user status: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         showMessage('Error updating user status: ' + error.message, 'error');
     });
 }
 
 function saveUserChanges(userId) {
-    console.log('saveUserChanges called for user:', userId);
-    
     const row = document.querySelector(`tr[data-user-id="${userId}"]`);
-    if (!row) {
-        console.error('Row not found for user:', userId);
-        showMessage('Error: User row not found', 'error');
-        return;
-    }
-    
+    if (!row) { showMessage('Error: User row not found', 'error'); return; }
     const statusSelect = row.querySelector('.status-select');
-    if (!statusSelect) {
-        console.error('Status select not found for user:', userId);
-        showMessage('Error: Status select not found', 'error');
-        return;
-    }
-    
-    const status = statusSelect.value;
-    console.log('Saving status:', status, 'for user:', userId);
-    
-    updateUserStatus(userId, status);
-}
-
-function deleteUser(userId) {
-    console.log('Deleting user:', userId);
-    
-    if (confirm('Are you sure you want to delete this user?')) {
-        // Get CSRF token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]');
-        if (!csrfToken) {
-            console.error('CSRF token not found');
-            showMessage('CSRF token not found. Please refresh the page.', 'error');
-            return;
-        }
-        
-        console.log('CSRF Token:', csrfToken.getAttribute('content'));
-        console.log('Request URL:', `/admin/api/users/${userId}`);
-        
-        fetch(`/admin/api/users/${userId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            console.log('Delete response status:', response.status);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            return response.json();
-        })
-        .then(data => {
-            console.log('Delete response data:', data);
-            if (data.success) {
-                showMessage('User deleted successfully!', 'success');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } else {
-                showMessage('Failed to delete user: ' + (data.message || 'Unknown error'), 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Delete error:', error);
-            showMessage('Error deleting user: ' + error.message, 'error');
-        });
-    }
+    if (!statusSelect) { showMessage('Error: Status select not found', 'error'); return; }
+    updateUserStatus(userId, statusSelect.value);
 }
 
 function showMessage(message, type) {
     const container = document.getElementById('message-container');
     const messageText = document.getElementById('message-text');
     const messageContent = document.getElementById('message-content');
-    
     messageText.textContent = message;
     messageContent.className = `message-content message-${type}`;
     container.style.display = 'block';
-    
-    setTimeout(() => {
-        container.style.display = 'none';
-    }, 5000);
+    setTimeout(() => { container.style.display = 'none'; }, 5000);
 }
 
 function closeMessage() {
@@ -406,11 +266,9 @@ function closeMessage() {
 function exportUsers() {
     const search = document.getElementById('search-username').value;
     const status = document.getElementById('filter-status').value;
-    
     let url = '/admin/api/users/export?';
     if (search) url += `search=${encodeURIComponent(search)}&`;
     if (status) url += `status=${encodeURIComponent(status)}&`;
-    
     window.location.href = url;
 }
 </script>
