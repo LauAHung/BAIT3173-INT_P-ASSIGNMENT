@@ -15,15 +15,164 @@ body {
     scroll-behavior: smooth;
 }
 
+#header{
+    background-image: url(../images/concession1.jpg);
+    height: 150px;
+    margin-top:50px;
+    opacity:0.8;
+    background-size: cover;
+}
+
+.first-section {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .first-section .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96c93d);
+            background-size: 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -2;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .first-section .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .first-section .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); opacity: 0.5; }
+            50% { opacity: 0.2; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        .first-section .particle:nth-child(1) { width: 10px; height: 10px; left: 10%; animation-delay: 0s; }
+        .first-section .particle:nth-child(2) { width: 15px; height: 15px; left: 20%; animation-delay: 2s; }
+        .first-section .particle:nth-child(3) { width: 8px; height: 8px; left: 30%; animation-delay: 4s; }
+        .first-section .particle:nth-child(4) { width: 12px; height: 12px; left: 40%; animation-delay: 6s; }
+        .first-section .particle:nth-child(5) { width: 20px; height: 20px; left: 50%; animation-delay: 8s; }
+        .first-section .particle:nth-child(6) { width: 14px; height: 14px; left: 60%; animation-delay: 10s; }
+        .first-section .particle:nth-child(7) { width: 16px; height: 16px; left: 70%; animation-delay: 12s; }
+        .first-section .particle:nth-child(8) { width: 9px; height: 9px; left: 80%; animation-delay: 14s; }
+
+        /* Animated Neon Border for first-section */
+        .first-section {
+            border: 3px solid transparent;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(78, 205, 196, 0.7), 0 0 30px rgba(255, 107, 107, 0.5);
+            animation: neonPulse 3s ease-in-out infinite;
+            position: relative;
+        }
+
+        .first-section::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            right: -6px;
+            bottom: -6px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.3), rgba(78, 205, 196, 0.3), rgba(69, 183, 209, 0.3), rgba(150, 201, 61, 0.3));
+            background-size: 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -3;
+        }
+
+        @keyframes neonPulse {
+            0% {
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(78, 205, 196, 0.7), 0 0 30px rgba(255, 107, 107, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(78, 205, 196, 1), 0 0 45px rgba(255, 107, 107, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(78, 205, 196, 0.7), 0 0 30px rgba(255, 107, 107, 0.5);
+            }
+        }
+
+.first-section .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #656464, #ecf1f1, #bd92c4, #5353ed);
+            background-size: 400%;
+            animation: gradientShift 10s ease infinite;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .first-section .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .first-section .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); opacity: 0.5; }
+            50% { opacity: 0.2; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        .first-section .particle:nth-child(1) { width: 10px; height: 10px; left: 10%; animation-delay: 0s; }
+        .first-section .particle:nth-child(2) { width: 15px; height: 15px; left: 20%; animation-delay: 2s; }
+        .first-section .particle:nth-child(3) { width: 8px; height: 8px; left: 30%; animation-delay: 4s; }
+        .first-section .particle:nth-child(4) { width: 12px; height: 12px; left: 40%; animation-delay: 6s; }
+        .first-section .particle:nth-child(5) { width: 20px; height: 20px; left: 50%; animation-delay: 8s; }
+        .first-section .particle:nth-child(6) { width: 14px; height: 14px; left: 60%; animation-delay: 10s; }
+        .first-section .particle:nth-child(7) { width: 16px; height: 16px; left: 70%; animation-delay: 12s; }
+        .first-section .particle:nth-child(8) { width: 9px; height: 9px; left: 80%; animation-delay: 14s; }
+
 .first-section {
     position: relative;
     height: 100vh;
+    width:100%;
     scroll-snap-align: start;
     display: flex; /* Keep flexbox but change direction */
     justify-content: center; /* Centers children horizontally */
     align-items: center; /* Centers children vertically */
     overflow: hidden;
-    background-image: url('../images/concession_bg.jpg');
+    background: linear-gradient(135deg, #e2e0f4, #656365);
+    border-color: #374151;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    color: #e0e0e0;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -38,12 +187,14 @@ body {
 }
 
 .preface, .img_preface {
+    z-index: 2;
     width: 50%; /* Sets equal width for both divs */
 }
 
 .preface p{
     background: radial-gradient(circle, rgba(255, 255, 255, 0.7), transparent);
     padding: 10px 20px;
+    font-style: italic;
     color: #333;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -51,16 +202,6 @@ body {
     font-weight: bold;
 }
 
-.header_img {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.header_img img {
-  width: 100%;
-  height: auto;
-}
 
 .first-section .preface{
     width:50%;
@@ -89,6 +230,7 @@ body {
 }
 
 .first-section h1{
+    font-style: italic;
     color:red;
     font-size:30px;
     text-align: center;
@@ -106,13 +248,6 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 1) 0%, /* White with 50% opacity on left */
-        rgba(255, 255, 255, 0) 10%, /* Fully transparent near left */
-        rgba(255, 255, 255, 0) 90%, /* Fully transparent near right */
-        rgba(255, 255, 255, 1) 100% /* White with 50% opacity on right */
-    );
     z-index: 1; /* Places gradient above the background image */
 }
 
@@ -308,6 +443,7 @@ body {
 .concession-card {
     background: white;
     border-radius: 1rem;
+    overflow: hidden;
     padding: 2rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     border: 1px solid #e5e7eb;
@@ -316,6 +452,7 @@ body {
     text-align:center;
     transition: transform 0.3s ease, background-color 0.3s ease;
 }
+
 
 .concession-card button{
     justify-content: center;
@@ -329,6 +466,8 @@ body {
     transform: scale(0.99);   
     overflow-x: hidden;
     overflow-y:hidden;
+    border:1px solid black;
+    background-color: #f2f2f2;
     box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2);
 }
 

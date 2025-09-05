@@ -15,16 +15,21 @@
 
 @section('content')
     <main>
-        <section  class = header_img>
-            <div>
-                <img src="../images/concession1.jpg" alt="Concession Card Header Image" style="width:100%; height:auto;">
-            </div>
-        </section>
+        <div id="header"></div>
         <section class="first-section">
+            <div class="background"></div>
+            <div class="particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>    
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
             <div class="preface">
-                <h1>
-                    Special Benefit
-                </h1><br><br><br>
+                <h1>Special Benefit</h1><br><br><br>
                 <p>
                     Exclusive benefits, thoughtful discounts – everyone can enjoy the freedom of travel. <br><br><br>
                     Benefits designed for students, seniors, and special groups – making travel truly accessible, 
@@ -32,7 +37,7 @@
                 </p>
             </div>
             <div class="img_preface">
-                <img src="../images/concession_card.png">
+                <img src="../images/concession_card.png" alt="Concession Card">
             </div>
         </section>
 
