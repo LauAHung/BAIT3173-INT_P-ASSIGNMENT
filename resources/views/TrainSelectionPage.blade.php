@@ -246,23 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(() => {
             console.log('Success toast displayed');
         });
-    } else if (infoMessage) {
-        console.log('Info message detected:', infoMessage);
-        Swal.fire({
-            title: 'Info',
-            text: infoMessage,
-            icon: 'info',
-            timer: 3000,
-            showConfirmButton: false,
-            toast: true,
-            width: 800,
-            padding: '15px 20px',
-            customClass: {
-                popup: 'custom-larger-toast'
-            }
-        }).then(() => {
-            console.log('Info toast displayed');
-        });
     } else {
         console.log('No message found');
     }

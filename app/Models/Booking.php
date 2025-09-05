@@ -25,6 +25,11 @@ class Booking extends Model
         return $this->belongsTo(Journey::class, 'JourneyID', 'JourneyID');
     }
 
+    public function journey2()
+    {
+        return $this->belongsTo(Journey::class, 'JourneyID2', 'JourneyID');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'UserID', 'user_id');

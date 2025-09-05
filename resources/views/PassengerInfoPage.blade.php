@@ -74,7 +74,8 @@
                                         <select name="passenger[{{ $i }}][ticket_type]" id="ticket-type-{{ $i }}" required>
                                             <option value="" disabled selected>-- Please Select --</option>
                                             <option value="Dewasa/Adult">Dewasa/Adult</option>
-                                            <option value="Kanak-kanak/Child">Kanak-kanak/Child</option>
+                                            <option value="Pelajar/Student">Pelajar/Student</option>
+                                            <option value="Warga Emas/Senior Citizen">Warga Emas/Senior Citizen</option>
                                             <option value="OKU">OKU</option>
                                         </select>
                                         <span class="error" id="error-p{{ $i }}-ticket_type"></span>

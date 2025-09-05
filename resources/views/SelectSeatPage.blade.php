@@ -26,9 +26,12 @@
                         $ticketPrice = $journey['price'];
                         $discountText = '';
                         $discountFactor = 1.0;
-                        if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                        if ($passenger['ticket_type'] === 'Pelajar/Student') {
                             $discountFactor = 0.9;
-                            $discountText = '<br>(10% Child Discount)';
+                            $discountText = '<br>(10% Student Discount)';
+                        } elseif ($passenger['ticket_type'] === 'Warga Emas/Senior Citizen') {
+                            $discountFactor = 0.8;
+                            $discountText = '<br>(20% Senior Citizen Discount)';
                         } elseif ($passenger['ticket_type'] === 'OKU') {
                             $discountFactor = 0.7;
                             $discountText = '<br>(30% OKU Discount)';
@@ -100,15 +103,17 @@
                     @php
                         $ticketPrice = $journey['price'];
                         $discountFactor = 1.0;
-                        if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                        if ($passenger['ticket_type'] === 'Pelajar/Student') {
                             $discountFactor = 0.9;
+                        } elseif ($passenger['ticket_type'] === 'Warga Emas/Senior Citizen') {
+                            $discountFactor = 0.8;
                         } elseif ($passenger['ticket_type'] === 'OKU') {
                             $discountFactor = 0.7;
                         }
                         $ticketPrice *= $discountFactor;
                     @endphp
                     <div class="price-info">
-                        <div>Ticket Outbound ({{ $index }})</div>
+                        <div>Ticket ({{ $index }})</div>
                         <div>RM {{ number_format($ticketPrice, 2) }}</div>
                     </div>
                     @endforeach
@@ -140,7 +145,11 @@
     <div class="seat-info-box">
         <div class="seat-info">
             <div class="seat-head-info">
+                @if (request()->input('booking_type') == 'Return')
                 <h2>{{ $journey['from_location'] }} > {{ $journey['to_location'] }} (Outbound)</h2><br>
+                @else
+                <h2>{{ $journey['from_location'] }} > {{ $journey['to_location'] }}</h2><br>
+                @endif
                 <h4>Select Seats ({{ $passengersCount }} required)</h4>
             </div>
 
