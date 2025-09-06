@@ -1,5 +1,6 @@
 let applications = JSON.parse(localStorage.getItem('concessionApplications') || '[]');
 let currentApplicationType = null;
+let statusCurrentPage = 0;
 
 class ApplicationHandler {
     constructor() {
@@ -85,8 +86,14 @@ function showScreen(screenName) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.concession-card').forEach(card => {
-        card.addEventListener('click', () => selectConcessionType(card.dataset.type));
+    // Attach event listener to "Apply Now" buttons
+    document.querySelectorAll('.concession-card .btn-primary').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default button behavior
+            const card = button.closest('.concession-card');
+            console.log('Button clicked for type:', card.dataset.type); // Debug log
+            selectConcessionType(card.dataset.type);
+        });
     });
 
     document.getElementById('adminBackBtn').addEventListener('click', () => showScreen('main'));
@@ -104,11 +111,35 @@ document.addEventListener('DOMContentLoaded', () => {
             : 'Click to upload student ID photo';
     });
 
+    // Close modal when clicking the close button
+    const closeViewBtn = document.getElementById('closeView');
+    if (closeViewBtn) {
+        closeViewBtn.addEventListener('click', () => {
+            const viewModal = document.getElementById('viewModal');
+            if (viewModal) {
+                viewModal.classList.remove('active');
+                console.log('Modal closed via close button'); // Debug log
+            }
+        });
+    }
+
+    // Close modal when clicking outside the content (backdrop)
+    const viewModal = document.getElementById('viewModal');
+    if (viewModal) {
+        viewModal.addEventListener('click', (e) => {
+            if (e.target === viewModal) {
+                viewModal.classList.remove('active');
+                console.log('Modal closed via backdrop click'); // Debug log
+            }
+        });
+    }
+
     updateAdminStats();
     loadApplicationsTable();
 });
 
 function selectConcessionType(type) {
+    console.log('selectConcessionType called with type:', type); // Debug log
     currentApplicationType = type;
     showScreen('form');
     document.querySelectorAll('.conditional-fields').forEach(field => field.classList.remove('active'));
@@ -121,6 +152,7 @@ function selectConcessionType(type) {
 function handleFormSubmission(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
+    formData.append('_token', document.querySelector('input[name="_token"]').value); // Add CSRF token for backend
     const application = {
         id: 'APP' + Date.now(),
         type: formData.get('type'),
@@ -133,12 +165,17 @@ function handleFormSubmission(e) {
     if (application.type === 'oku') {
         application.okuCardNumber = formData.get('okuCardNumber');
         application.disability = formData.get('disability');
+        application.passportNumber = formData.get('passportNumber');
     } else if (application.type === 'senior') {
-        application.age = parseInt(formData.get('age'));
+        application.age = parseInt(formData.get('age')) || null;
         application.citizenship = formData.get('citizenship');
+        application.gender = formData.get('gender');
+        application.dateOfBirth = formData.get('dateOfBirth');
     } else if (application.type === 'student') {
         application.matrixNumber = formData.get('matrixNumber');
         application.schoolName = formData.get('schoolName');
+        application.studentCitizenship = formData.get('studentCitizenship');
+        application.educationLevel = formData.get('educationLevel');
         const photo = formData.get('studentIdPhoto');
         if (photo && photo.size > 0) application.photoName = photo.name;
     }
@@ -149,21 +186,92 @@ function handleFormSubmission(e) {
         return;
     }
 
-    applications.push(application);
-    localStorage.setItem('concessionApplications', JSON.stringify(applications));
-    showApplicationStatus(application);
+    // Submit to backend via AJAX
+    fetch('/concession/submit', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                applications.push(data.application);
+                localStorage.setItem('concessionApplications', JSON.stringify(applications));
+                showApplicationStatus(data.application);
+            } else {
+                let errorMsg = data.message || 'Submission failed';
+                if (data.errors) {
+                    errorMsg = Object.values(data.errors).flat().join('\n');
+                }
+                alert(errorMsg);
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting application:', error);
+            alert('Failed to submit application');
+            // Fallback to localStorage if backend fails
+            applications.push(application);
+            localStorage.setItem('concessionApplications', JSON.stringify(applications));
+            showApplicationStatus(application);
+        });
 }
 
 function showApplicationStatus(app) {
     showScreen('status');
+    statusCurrentPage = 0;
+    renderStatusTable();
+}
+
+function renderStatusTable() {
+    const pageSize = 10;
+    const sortedApplications = [...applications].sort((a, b) => new Date(b.applicationDate) - new Date(a.applicationDate));
+    const total = sortedApplications.length;
+    const maxPage = Math.ceil(total / pageSize) - 1;
+    statusCurrentPage = Math.max(0, Math.min(statusCurrentPage, maxPage));
+
+    const start = statusCurrentPage * pageSize;
+    const end = start + pageSize;
+    const paginatedApps = sortedApplications.slice(start, end);
+
     const statusContent = document.getElementById('statusContent');
     statusContent.innerHTML = `
-        <h2>${app.status.toUpperCase()}</h2>
-        <p>Name: ${app.fullName}</p>
-        <p>Type: ${app.type.toUpperCase()}</p>
-        <p>Status: ${app.status.toUpperCase()}</p>
-        <p>Date: ${new Date(app.applicationDate).toLocaleDateString()}</p>
+        <h2>Your Applications (${total})</h2>
+        <div class="applications-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Date & Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${paginatedApps.map(app => `
+                        <tr>
+                            <td>${app.fullName}</td>
+                            <td><span class="status-badge ${app.type}">${app.type.toUpperCase()}</span></td>
+                            <td><span class="status-badge ${app.status}">${app.status.toUpperCase()}</td>
+                            <td>${new Date(app.applicationDate).toLocaleString()}</td>
+                            <td>
+                                <button class="action-btn view" onclick="viewApplication('${app.id}')">View</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination">
+            ${statusCurrentPage > 0 ? `<button class="btn" onclick="changeStatusPage(-1)">← Previous</button>` : ''}
+            <span>Page ${statusCurrentPage + 1} of ${maxPage + 1}</span>
+            ${statusCurrentPage < maxPage ? `<button class="btn" onclick="changeStatusPage(1)">Next →</button>` : ''}
+        </div>
     `;
+}
+
+function changeStatusPage(delta) {
+    statusCurrentPage += delta;
+    renderStatusTable();
 }
 
 function updateAdminStats() {
@@ -179,7 +287,8 @@ function loadApplicationsTable() {
         <tr>
             <td>${app.fullName}</td>
             <td><span class="status-badge ${app.type}">${app.type.toUpperCase()}</span></td>
-            <td><span class="status-badge ${app.status}">${app.status.toUpperCase()}</span></td>
+            <td><span class="status-badge ${app.status}">${app.status.toUpperCase()}</td>
+            <td>${new Date(app.applicationDate).toLocaleDateString()}</td>
             <td>
                 <button class="action-btn view" onclick="viewApplication('${app.id}')">View</button>
                 ${app.status === 'pending' ? `
@@ -192,8 +301,66 @@ function loadApplicationsTable() {
 }
 
 function viewApplication(id) {
-    const app = applications.find(a => a.id === id);
-    if (app) alert(JSON.stringify(app, null, 2));
+    try {
+        const app = applications.find(a => a.id === id);
+        if (!app) {
+            console.error('Application not found for ID:', id);
+            alert('Application not found');
+            return;
+        }
+
+        const modal = document.getElementById('viewModal');
+        const modalContent = document.getElementById('applicationDetails');
+        
+        if (!modal || !modalContent) {
+            console.error('Modal or modal content element not found');
+            alert('Error: Modal not found');
+            return;
+        }
+
+        // Generate table content based on application type
+        let detailsTable = `
+            <h3>Application Details</h3>
+            <table class="details-table">
+                <tr><th>Field</th><th>Value</th></tr>
+                <tr><td>Name</td><td>${app.fullName || '-'}</td></tr>
+                <tr><td>IC Number</td><td>${app.ic || '-'}</td></tr>
+                <tr><td>Concession Type</td><td>${app.type.toUpperCase()}</td></tr>
+                <tr><td>Status</td><td>${app.status.toUpperCase()}</td></tr>
+                <tr><td>Date & Time</td><td>${new Date(app.applicationDate).toLocaleString()}</td></tr>
+        `;
+
+        if (app.type === 'oku') {
+            detailsTable += `
+                <tr><td>Passport Number</td><td>${app.passportNumber || '-'}</td></tr>
+                <tr><td>OKU Card Number</td><td>${app.okuCardNumber || '-'}</td></tr>
+                <tr><td>Disability Information</td><td>${app.disability || '-'}</td></tr>
+            `;
+        } else if (app.type === 'senior') {
+            detailsTable += `
+                <tr><td>Age</td><td>${app.age || '-'}</td></tr>
+                <tr><td>Citizenship</td><td>${app.citizenship || '-'}</td></tr>
+                <tr><td>Gender</td><td>${app.gender || '-'}</td></tr>
+                <tr><td>Date of Birth</td><td>${app.dateOfBirth || '-'}</td></tr>
+            `;
+        } else if (app.type === 'student') {
+            detailsTable += `
+                <tr><td>Matrix Number</td><td>${app.matrixNumber || '-'}</td></tr>
+                <tr><td>School Name</td><td>${app.schoolName || '-'}</td></tr>
+                <tr><td>Citizenship</td><td>${app.studentCitizenship || '-'}</td></tr>
+                <tr><td>Education Level</td><td>${app.educationLevel || '-'}</td></tr>
+                <tr><td>Student ID Photo</td><td>${app.photoName || '-'}</td></tr>
+            `;
+        }
+
+        detailsTable += '</table>';
+        modalContent.innerHTML = detailsTable;
+        modal.classList.add('active');
+        console.log('Modal opened for application ID:', id); // Debug log
+    } catch (error) {
+        console.error('Error in viewApplication:', error);
+        alert('Failed to display application details');
+    }
 }
 
 function approveApplication(id) {

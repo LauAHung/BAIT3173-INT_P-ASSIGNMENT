@@ -117,9 +117,9 @@ body {
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(45deg, #656464, #ecf1f1, #bd92c4, #5353ed);
+            background: linear-gradient(90deg, #656464, #a6aaaa, #bd92c4, #5353ed);
             background-size: 400%;
-            animation: gradientShift 10s ease infinite;
+            animation: gradientShift 5s ease infinite;
             z-index: 1;
         }
 
@@ -919,6 +919,8 @@ body {
     border-radius: 0.75rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    width: 100%; /* Fixed full width */
+    height: 500px; /* Fixed height - adjust as needed */
 }
 
 .applications-table h3 {
@@ -930,11 +932,14 @@ body {
 
 .table-container {
     overflow-x: auto;
+    overflow-y: scroll; /* Enable vertical scrolling */
+    max-height: calc(100% - 50px); /* Adjust based on header height to prevent resizing */
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* Helps maintain column widths */
 }
 
 th {
@@ -946,6 +951,9 @@ th {
     font-size: 0.875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    position: sticky; /* Make headers sticky if needed */
+    top: 0;
+    z-index: 10;
 }
 
 td {
@@ -1060,6 +1068,10 @@ tr:hover {
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
+    position: relative; /* Ensure positioning context */
+    z-index: 1001; /* Higher than backdrop */
+    opacity: 1; /* Ensure full opacity */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Add shadow for visibility */
 }
 
 .modal-content h3 {
@@ -1185,4 +1197,114 @@ tr:hover {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Modal styles (consolidated - removed duplicates) */
+.modal {
+    display:block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1001; /* Ensure above backdrop */
+    opacity: 1;
+}
+
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.details-table th,
+.details-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.details-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.btn {
+    padding: 8px 16px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+/* Ensure status table is styled consistently */
+.applications-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.applications-table th,
+.applications-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.applications-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+}
+
+.status-badge.oku { background-color: #007bff; }
+.status-badge.senior { background-color: #28a745; }
+.status-badge.student { background-color: #ffc107; }
+.status-badge.pending { background-color: #ffc107; }
+.status-badge.approved { background-color: #28a745; }
+.status-badge.rejected { background-color: #dc3545; }
+
+.action-btn {
+    padding: 4px 8px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.action-btn.view {
+    background-color: #007bff;
+    color: white;
 }

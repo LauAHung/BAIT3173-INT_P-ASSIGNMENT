@@ -9,10 +9,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 @endpush
 
-@push('scripts')
-    <script src="{{ asset('js/ConcessionCard.js') }}" defer></script>
-@endpush
-
 @section('content')
     <main>
         <div id="header"></div>
@@ -362,17 +358,7 @@
             </div>
 
             <!-- Modals -->
-            <div id="rejectModal" class="modal">
-                <div class="modal-content">
-                    <h3>Reject Application</h3>
-                    <p>Please provide a reason for rejection:</p>
-                    <textarea id="rejectionReason" rows="4" placeholder="Enter rejection reason..."></textarea>
-                    <div class="modal-actions">
-                        <button id="cancelReject" class="btn btn-secondary">Cancel</button>
-                        <button id="confirmReject" class="btn btn-danger">Confirm Reject</button>
-                    </div>
-                </div>
-            </div>
+            
 
             <div id="viewModal" class="modal">
                 <div class="modal-content">
@@ -386,5 +372,6 @@
         </section>
     </main>
 
+<script src="{{ asset('js/ConcessionCard.js') }}" defer></script>
     
 @endsection

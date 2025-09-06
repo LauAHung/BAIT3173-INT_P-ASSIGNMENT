@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class ConcessionCardController extends Controller
 {
@@ -34,13 +35,18 @@ class ConcessionCardController extends Controller
                 'type' => 'required|in:oku,senior,student',
                 'fullName' => 'required|string|max:255',
                 'ic' => 'required|string|size:12|regex:/^\d+$/',
-                'okuCardNumber' => 'required_if:type,oku|string|min:8',
-                'disability' => 'required_if:type,oku|string',
-                'age' => 'required_if:type,senior|integer|min:60',
-                'citizenship' => 'required_if:type,senior|string',
-                'matrixNumber' => 'required_if:type,student|string|min:4',
-                'schoolName' => 'required_if:type,student|string',
-                'studentIdPhoto' => 'required_if:type,student|image|max:2048'
+                'okuCardNumber' => 'required_if:type,oku|nullable|string|min:8',
+                'disability' => 'required_if:type,oku|nullable|string',
+                'age' => 'required_if:type,senior|nullable|integer|min:60',
+                'citizenship' => 'required_if:type,senior|nullable|string',
+                'matrixNumber' => 'required_if:type,student|nullable|string|min:4',
+                'schoolName' => 'required_if:type,student|nullable|string',
+                'studentIdPhoto' => 'required_if:type,student|nullable|image|max:2048',
+                'passportNumber' => 'nullable|string',
+                'gender' => 'required_if:type,senior|nullable|string|in:male,female',
+                'dateOfBirth' => 'nullable|date',
+                'studentCitizenship' => 'required_if:type,student|nullable|string',
+                'educationLevel' => 'required_if:type,student|nullable|string|in:primary,secondary,college,university'
             ]);
 
             $application = [
@@ -55,12 +61,17 @@ class ConcessionCardController extends Controller
             if ($request->type === 'oku') {
                 $application['okuCardNumber'] = $request->okuCardNumber;
                 $application['disability'] = $request->disability;
+                $application['passportNumber'] = $request->passportNumber;
             } elseif ($request->type === 'senior') {
                 $application['age'] = (int)$request->age;
                 $application['citizenship'] = $request->citizenship;
+                $application['gender'] = $request->gender;
+                $application['dateOfBirth'] = $request->dateOfBirth;
             } elseif ($request->type === 'student') {
                 $application['matrixNumber'] = $request->matrixNumber;
                 $application['schoolName'] = $request->schoolName;
+                $application['studentCitizenship'] = $request->studentCitizenship;
+                $application['educationLevel'] = $request->educationLevel;
                 if ($request->hasFile('studentIdPhoto')) {
                     $path = $request->file('studentIdPhoto')->store('student_photos', 'public');
                     $application['photoName'] = basename($path);
@@ -75,6 +86,13 @@ class ConcessionCardController extends Controller
                 'success' => true,
                 'application' => $application
             ]);
+        } catch (ValidationException $e) {
+            Log::error('Validation failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Application submission failed: ' . $e->getMessage());
             return response()->json([
