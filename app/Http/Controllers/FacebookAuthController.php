@@ -51,6 +51,19 @@ class FacebookAuthController extends Controller
 
                 $user = $this->userFactoryManager->createUser('facebook', $socialData);
             } else {
+                // Check if user is allowed (active or admin) before logging in
+                if (!in_array($user->account_status, ['active', 'admin'])) {
+                    if ($user->account_status === 'suspended') {
+                        return redirect()->route('signin')->withErrors([
+                            'email' => 'Your account is currently suspended. It may be caused by breaking the rules. Please contact administrator for assistance.',
+                        ]);
+                    }
+                    
+                    return redirect()->route('signin')->withErrors([
+                        'email' => 'Your account is not active. Please check your email for verification.',
+                    ]);
+                }
+                
                 // Update last login for existing user
                 $user = $this->userRegistrationService->handleUserLogin($user);
             }

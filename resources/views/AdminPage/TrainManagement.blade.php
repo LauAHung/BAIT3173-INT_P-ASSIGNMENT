@@ -17,10 +17,7 @@
             <h3><i class="fas fa-train"></i> Train</h3>
             <form id="trainForm">
                 @csrf
-                <div class="form-group">
-                    <label for="train_id">Train ID</label>
-                    <input type="text" id="train_id" name="train_id" required>
-                </div>
+                <input type="hidden" id="train_id" name="train_id">
                 <div class="form-group">
                     <label for="train_no">Train No</label>
                     <input type="text" id="train_no" name="train_no" required>
@@ -34,10 +31,7 @@
                         <option value="Intercity">Intercity</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="seat_count">Seat Count</label>
-                    <input type="number" id="seat_count" name="seat_count" min="1" required>
-                </div>
+                <input type="hidden" id="seat_count" name="seat_count" value="200">
                 <div class="form-group">
                     <label for="is_available">Status</label>
                     <select id="is_available" name="is_available" required>
@@ -64,10 +58,7 @@
             <h3><i class="fas fa-subway"></i> Train Station</h3>
             <form id="stationForm">
                 @csrf
-                <div class="form-group">
-                    <label for="station_id_input">Station ID</label>
-                    <input type="text" id="station_id_input" name="station_id" required>
-                </div>
+                <input type="hidden" id="station_id_input" name="station_id">
                 <div class="form-group">
                     <label for="station_name">Station Name</label>
                     <input type="text" id="station_name" name="station_name" required>
@@ -93,10 +84,7 @@
             <h3><i class="fas fa-route"></i> Journey</h3>
             <form id="journeyForm">
                 @csrf
-                <div class="form-group">
-                    <label for="journey_id">Journey ID</label>
-                    <input type="text" id="journey_id" name="journey_id" required>
-                </div>
+                <input type="hidden" id="journey_id" name="journey_id">
                 <div class="form-group">
                     <label for="journey_train_id">Train ID</label>
                     <select id="journey_train_id" name="train_id" required>
@@ -132,23 +120,12 @@
                     <label for="arrival_time">Arrival Time</label>
                     <input type="datetime-local" id="arrival_time" name="arrival_time" required>
                 </div>
-                <div class="form-group">
-                    <label for="seat_available">Seat Available</label>
-                    <input type="number" id="seat_available" name="seat_available" min="0" required>
-                </div>
+                <input type="hidden" id="seat_available" name="seat_available" value="200">
                 <div class="form-group">
                     <label for="price">Price</label>
                     <input type="number" id="price" name="price" step="0.01" min="0" required>
                 </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status" name="status" required>
-                        <option value="">Select Status</option>
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Delayed">Delayed</option>
-                        <option value="Canceled">Canceled</option>
-                    </select>
-                </div>
+                <input type="hidden" id="status" name="status" value="Scheduled">
                 <button type="submit" class="btn btn-primary">Save Journey</button>
             </form>
         </div>
@@ -270,7 +247,17 @@
                              </span>
                          </td>
                          <td>
-                             <button class="btn-edit" onclick="editJourney('{{ $journey->JourneyID }}', '{{ $journey->TrainID }}', '{{ $journey->FromLocation }}', '{{ $journey->ToLocation }}', '{{ \Carbon\Carbon::parse($journey->DepartureTime)->format('Y-m-d H:i') }}', '{{ \Carbon\Carbon::parse($journey->ArrivalTime)->format('Y-m-d H:i') }}', '{{ $journey->SeatAvailable }}', '{{ $journey->Price }}', '{{ $journey->Status }}')">
+                             <button class="btn-edit" 
+                                     data-journey-id="{{ $journey->JourneyID }}"
+                                     data-train-id="{{ $journey->TrainID }}"
+                                     data-from-location="{{ $journey->FromLocation }}"
+                                     data-to-location="{{ $journey->ToLocation }}"
+                                     data-departure-time="{{ \Carbon\Carbon::parse($journey->DepartureTime)->format('Y-m-d H:i') }}"
+                                     data-arrival-time="{{ \Carbon\Carbon::parse($journey->ArrivalTime)->format('Y-m-d H:i') }}"
+                                     data-seat-available="{{ $journey->SeatAvailable }}"
+                                     data-price="{{ $journey->Price }}"
+                                     data-status="{{ $journey->Status }}"
+                                     onclick="editJourneyFromData(this)">
                                  <i class="fas fa-edit"></i> Edit
                              </button>
                          </td>
@@ -304,10 +291,7 @@
                     <option value="Intercity">Intercity</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="edit_seat_count">Seat Count</label>
-                <input type="number" id="edit_seat_count" name="seat_count" min="1" required>
-            </div>
+            <input type="hidden" id="edit_seat_count" name="seat_count" value="200">
             <div class="form-group">
                 <label for="edit_is_available">Status</label>
                 <select id="edit_is_available" name="is_available" required>
@@ -402,22 +386,21 @@
                 <label for="edit_arrival_time">Arrival Time</label>
                 <input type="datetime-local" id="edit_arrival_time" name="arrival_time" required>
             </div>
-            <div class="form-group">
-                <label for="edit_seat_available">Seat Available</label>
-                <input type="number" id="edit_seat_available" name="seat_available" min="0" required>
-            </div>
-            <div class="form-group">
-                <label for="edit_price">Price</label>
-                <input type="number" id="edit_price" name="price" step="0.01" min="0" required>
-            </div>
-            <div class="form-group">
-                <label for="edit_status">Status</label>
-                <select id="edit_status" name="status" required>
-                    <option value="">Select Status</option>
-                    <option value="Scheduled">Scheduled</option>
-                    <option value="Delayed">Delayed</option>
-                    <option value="Canceled">Canceled</option>
-                </select>
+            <input type="hidden" id="edit_seat_available" name="seat_available" value="200">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit_price">Price</label>
+                    <input type="number" id="edit_price" name="price" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_status">Status</label>
+                    <select id="edit_status" name="status" required>
+                        <option value="">Select Status</option>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Delayed">Delayed</option>
+                        <option value="Canceled">Canceled</option>
+                    </select>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">Update Journey</button>
         </form>
@@ -433,6 +416,22 @@
 </div>
 
 <script>
+// Auto-generate IDs
+function generateTrainId() {
+    // This will be handled by the backend, but we can set a placeholder
+    return 'TR' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+}
+
+function generateStationId() {
+    // This will be handled by the backend, but we can set a placeholder
+    return 'ST' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+}
+
+function generateJourneyId() {
+    // This will be handled by the backend, but we can set a placeholder
+    return 'JR' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+}
+
 function showTab(tab) {
     document.getElementById('tab-train').style.display = (tab === 'train') ? 'block' : 'none';
     document.getElementById('tab-station').style.display = (tab === 'station') ? 'block' : 'none';
@@ -611,7 +610,7 @@ function editTrain(trainId, trainNo, trainService, seatCount, isAvailable, stati
     document.getElementById('edit_train_id').value = trainId;
     document.getElementById('edit_train_no').value = trainNo;
     document.getElementById('edit_train_service').value = trainService;
-    document.getElementById('edit_seat_count').value = seatCount;
+    document.getElementById('edit_seat_count').value = 200; // Default value
     document.getElementById('edit_is_available').value = isAvailable;
     document.getElementById('edit_station_id').value = stationId;
     document.getElementById('editTrainModal').style.display = 'block';
@@ -632,10 +631,24 @@ function editJourney(journeyId, trainId, fromLocation, toLocation, departureTime
     document.getElementById('edit_to_location').value = toLocation;
     document.getElementById('edit_departure_time').value = departureTime;
     document.getElementById('edit_arrival_time').value = arrivalTime;
-    document.getElementById('edit_seat_available').value = seatAvailable;
+    document.getElementById('edit_seat_available').value = 200; // Default value
     document.getElementById('edit_price').value = price;
-    document.getElementById('edit_status').value = status;
+    document.getElementById('edit_status').value = status; // Use actual status value
     document.getElementById('editJourneyModal').style.display = 'block';
+}
+
+function editJourneyFromData(button) {
+    const journeyId = button.getAttribute('data-journey-id');
+    const trainId = button.getAttribute('data-train-id');
+    const fromLocation = button.getAttribute('data-from-location');
+    const toLocation = button.getAttribute('data-to-location');
+    const departureTime = button.getAttribute('data-departure-time');
+    const arrivalTime = button.getAttribute('data-arrival-time');
+    const seatAvailable = button.getAttribute('data-seat-available');
+    const price = button.getAttribute('data-price');
+    const status = button.getAttribute('data-status');
+    
+    editJourney(journeyId, trainId, fromLocation, toLocation, departureTime, arrivalTime, seatAvailable, price, status);
 }
 
 function closeModal(modalId) {

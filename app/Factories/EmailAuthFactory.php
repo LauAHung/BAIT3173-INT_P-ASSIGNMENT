@@ -31,6 +31,11 @@ class EmailAuthFactory extends AuthFactory
             return null;
         }
 
+        if ($user->account_status === 'suspended') {
+            $this->errors[] = 'Your account is currently suspended. It may be caused by breaking the rules. Please contact administrator for assistance.';
+            return null;
+        }
+        
         if ($user->account_status !== 'active') {
             $this->errors[] = 'Account is not active';
             return null;

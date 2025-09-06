@@ -226,10 +226,6 @@ Route::get('/concession_card',function(){
     return view('ConcessionCardPage');
 })->name('concession_card');
 
-Route::get('/test',function(){
-    return view('test');
-})->name('concession_card');
-
 //Discover
 Route::get('/discover', function () {
     return view('DiscoverPage');

@@ -12,20 +12,21 @@ class AdminModuleService
 {
     public function createTrain(array $data): array
     {
+        // Auto-generate Train ID
+        $trainId = $this->generateTrainId();
+        
         $validated = validator($data, [
-            'train_id' => 'required|string|max:50|unique:Trains,TrainID',
             'train_no' => 'required|string|max:50',
             'train_service' => 'required|string|max:100',
-            'seat_count' => 'required|integer|min:1',
             'is_available' => 'required|in:Active,Unavailable',
             'station_id' => 'required|string|exists:Stations,StationID',
         ])->validate();
 
         $train = new Train();
-        $train->TrainID = $validated['train_id'];
+        $train->TrainID = $trainId;
         $train->TrainNo = $validated['train_no'];
         $train->TrainService = $validated['train_service'];
-        $train->SeatCount = $validated['seat_count'];
+        $train->SeatCount = 200; // Default value
         $train->Is_available = $validated['is_available'];
         $train->StationID = $validated['station_id'];
         $train->Created_at = now();
@@ -45,7 +46,6 @@ class AdminModuleService
             'train_id' => 'required|string|exists:Trains,TrainID',
             'train_no' => 'required|string|max:50',
             'train_service' => 'required|string|max:100',
-            'seat_count' => 'required|integer|min:1',
             'is_available' => 'required|in:Active,Unavailable',
             'station_id' => 'required|string|exists:Stations,StationID',
         ])->validate();
@@ -55,7 +55,7 @@ class AdminModuleService
 
         $train->TrainNo = $validated['train_no'];
         $train->TrainService = $validated['train_service'];
-        $train->SeatCount = $validated['seat_count'];
+        $train->SeatCount = 200; // Default value
         $train->Is_available = $validated['is_available'];
         $train->StationID = $validated['station_id'];
         $train->save();
@@ -67,15 +67,17 @@ class AdminModuleService
 
     public function createStation(array $data): array
     {
+        // Auto-generate Station ID
+        $stationId = $this->generateStationId();
+        
         $validated = validator($data, [
-            'station_id' => 'required|string|max:50|unique:Stations,StationID',
             'station_name' => 'required|string|max:100',
             'location' => 'required|string|max:255',
             'is_active' => 'required|boolean',
         ])->validate();
 
         $station = new Station();
-        $station->StationID = $validated['station_id'];
+        $station->StationID = $stationId;
         $station->StationName = $validated['station_name'];
         $station->Location = $validated['location'];
         $station->Is_active = $validated['is_active'];
@@ -113,28 +115,28 @@ class AdminModuleService
 
     public function createJourney(array $data): array
     {
+        // Auto-generate Journey ID
+        $journeyId = $this->generateJourneyId();
+        
         $validated = validator($data, [
-            'journey_id' => 'required|string|max:50|unique:Journeys,JourneyID',
             'train_id' => 'required|string|exists:Trains,TrainID',
             'from_location' => 'required|string|max:100',
             'to_location' => 'required|string|max:100|different:from_location',
             'departure_time' => 'required|date',
             'arrival_time' => 'required|date|after:departure_time',
-            'seat_available' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
-            'status' => 'required|in:Scheduled,Delayed,Canceled',
         ])->validate();
 
         $journey = new Journey();
-        $journey->JourneyID = $validated['journey_id'];
+        $journey->JourneyID = $journeyId;
         $journey->TrainID = $validated['train_id'];
         $journey->FromLocation = $validated['from_location'];
         $journey->ToLocation = $validated['to_location'];
         $journey->DepartureTime = $validated['departure_time'];
         $journey->ArrivalTime = $validated['arrival_time'];
-        $journey->SeatAvailable = $validated['seat_available'];
+        $journey->SeatAvailable = 200; // Default value
         $journey->Price = $validated['price'];
-        $journey->Status = $validated['status'];
+        $journey->Status = 'Scheduled'; // Default value
         $journey->Created_at = now();
         $journey->save();
 
@@ -152,7 +154,6 @@ class AdminModuleService
             'to_location' => 'required|string|max:100|different:from_location',
             'departure_time' => 'required|date',
             'arrival_time' => 'required|date|after:departure_time',
-            'seat_available' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
             'status' => 'required|in:Scheduled,Delayed,Canceled',
         ])->validate();
@@ -165,9 +166,9 @@ class AdminModuleService
         $journey->ToLocation = $validated['to_location'];
         $journey->DepartureTime = $validated['departure_time'];
         $journey->ArrivalTime = $validated['arrival_time'];
-        $journey->SeatAvailable = $validated['seat_available'];
+        $journey->SeatAvailable = 200; // Default value
         $journey->Price = $validated['price'];
-        $journey->Status = $validated['status'];
+        $journey->Status = $validated['status']; // Use the selected status
         $journey->save();
 
         app(AdminActivityLogger::class)->log('update_journey', [ 'journey_id' => $journey->JourneyID ]);
@@ -183,6 +184,60 @@ class AdminModuleService
         $user->save();
         app(AdminActivityLogger::class)->log('change_user_status', [ 'target_user_id' => $user->user_id, 'new_status' => $status ]);
         return ['success' => true, 'message' => 'User status updated successfully', 'user' => $user];
+    }
+
+    /**
+     * Generate auto-incrementing Train ID starting with TR
+     */
+    private function generateTrainId(): string
+    {
+        $lastTrain = Train::orderBy('TrainID', 'desc')->first();
+        
+        if (!$lastTrain) {
+            return 'TR001';
+        }
+        
+        // Extract the number part from the last TrainID
+        $lastNumber = (int) substr($lastTrain->TrainID, 2);
+        $newNumber = $lastNumber + 1;
+        
+        return 'TR' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Generate auto-incrementing Station ID starting with ST
+     */
+    private function generateStationId(): string
+    {
+        $lastStation = Station::orderBy('StationID', 'desc')->first();
+        
+        if (!$lastStation) {
+            return 'ST001';
+        }
+        
+        // Extract the number part from the last StationID
+        $lastNumber = (int) substr($lastStation->StationID, 2);
+        $newNumber = $lastNumber + 1;
+        
+        return 'ST' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Generate auto-incrementing Journey ID starting with JR
+     */
+    private function generateJourneyId(): string
+    {
+        $lastJourney = Journey::orderBy('JourneyID', 'desc')->first();
+        
+        if (!$lastJourney) {
+            return 'JR001';
+        }
+        
+        // Extract the number part from the last JourneyID
+        $lastNumber = (int) substr($lastJourney->JourneyID, 2);
+        $newNumber = $lastNumber + 1;
+        
+        return 'JR' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
     }
 }
 

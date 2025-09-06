@@ -46,7 +46,7 @@ class NewsletterController extends Controller
         })->get(['email', 'subscribed_at']);
 
         // Internal users who opted in
-        $internalUsers = \App\Models\User::where('email_subscription->newsletter', true)
+        $internalUsers = \App\Models\User::whereRaw("JSON_EXTRACT(email_subscription, '$.newsletter') = 'true'")
             ->when($search, function ($q) use ($search) {
                 $q->where('email', 'like', "%{$search}%");
             })

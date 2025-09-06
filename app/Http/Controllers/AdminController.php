@@ -150,7 +150,7 @@ class AdminController extends Controller
             ->when($state, function ($qq) use ($state) {
                 $qq->where('S.Location', $state);
             })
-            ->selectRaw("strftime('%Y-%m', Bookings.Created_at) as ym, count(*) as total")
+            ->selectRaw("DATE_FORMAT(Bookings.Created_at, '%Y-%m') as ym, count(*) as total")
             ->groupBy('ym')
             ->orderBy('ym');
 
@@ -167,7 +167,7 @@ class AdminController extends Controller
     public function getUsersGrowth(): JsonResponse
     {
         $rows = \App\Models\User::query()
-            ->selectRaw("strftime('%Y-%m', created_at) as ym, count(*) as total")
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, count(*) as total")
             ->groupBy('ym')
             ->orderBy('ym')
             ->get();
@@ -180,7 +180,7 @@ class AdminController extends Controller
     public function getProfitTrends(): JsonResponse
     {
         $rows = \App\Models\Booking::query()
-            ->selectRaw("strftime('%Y-%m', Created_at) as ym, sum(Price) as total")
+            ->selectRaw("DATE_FORMAT(Created_at, '%Y-%m') as ym, sum(Price) as total")
             ->groupBy('ym')
             ->orderBy('ym')
             ->get();

@@ -36,6 +36,8 @@
                 <option value="change_user_status">Change User Status</option>
                 <option value="delete_user">Delete User</option>
                 <option value="send_newsletter">Send News</option>
+                <option value="ticket_checkin">Ticket Check-in</option>
+                <option value="ticket_checkout">Ticket Check-out</option>
             </select>
             <button class="btn btn-primary" onclick="loadLogs()">Apply</button>
         </div>
@@ -111,6 +113,12 @@ function formatDetails(details, action) {
     }
     if (action === 'send_newsletter' && d) {
         return `Sent newsletter "${d.subject}" to ${toTitle(d.recipients)}`;
+    }
+    if (action === 'ticket_checkin' && d && d.ticket_id) {
+        return `Checked in ticket ${d.ticket_id}`;
+    }
+    if (action === 'ticket_checkout' && d && d.ticket_id) {
+        return `Checked out ticket ${d.ticket_id}`;
     }
     try { return `<pre style="margin:0;color:#9ecbff;white-space:pre-wrap;">${JSON.stringify(d, null, 2)}</pre>`; } catch (e) { return d || ''; }
 }

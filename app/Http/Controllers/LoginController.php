@@ -60,6 +60,14 @@ class LoginController extends Controller
                 // Check if user is allowed (active or admin)
                 if (!in_array($user->account_status, ['active', 'admin'])) {
                     Auth::logout();
+                    
+                    // Provide specific error message for suspended users
+                    if ($user->account_status === 'suspended') {
+                        return back()->withErrors([
+                            'email' => 'Your account is currently suspended. It may be caused by breaking the rules. Please contact administrator for assistance.',
+                        ]);
+                    }
+                    
                     return back()->withErrors([
                         'email' => 'Your account is not active. Please check your email for verification.',
                     ]);
@@ -75,6 +83,16 @@ class LoginController extends Controller
 
                 // Default redirect to homepage after successful login
                 return redirect()->route('HomePage')->with('success', 'Welcome back, ' . $user->first_name . '!');
+            } else {
+                // Authentication failed - get specific error from factory
+                $factory = $this->authFactoryManager->getFactory('email');
+                $errors = $factory->getErrors();
+                
+                if (!empty($errors)) {
+                    return back()->withErrors([
+                        'email' => $errors[0], // Use the first error message
+                    ])->withInput($request->only('email'));
+                }
             }
         } catch (\Exception $e) {
             return back()->withErrors([
@@ -82,7 +100,7 @@ class LoginController extends Controller
             ])->withInput($request->only('email'));
         }
 
-        // Authentication failed
+        // Fallback error message
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->withInput($request->only('email'));
