@@ -8,8 +8,6 @@ use App\Models\Ticket;
 use App\Models\Seat;
 use App\Models\Journey;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Exception;
 
 class ConcreteBookingBuilder implements BookingBuilderInterface

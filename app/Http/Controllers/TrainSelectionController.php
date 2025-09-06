@@ -6,8 +6,6 @@ use App\Models\Journey;
 use App\Builder\BookingDirector;
 use App\Builder\ConcreteBookingBuilder;
 use App\Models\Passenger;
-use App\Models\Ticket;
-use App\Models\Seat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
