@@ -11,6 +11,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingDetailController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ConcessionCardController;
 
 Route::get('/', function () {
     return view('HomePage');
@@ -255,3 +256,18 @@ Route::post('/payment/{bookingId}/complete', [PaymentController::class, 'complet
 //Refund routes
 Route::get('/refund/{bookingId}', [PaymentController::class, 'showRefundPage'])->name('refund.page');
 Route::post('/refund/{bookingId}', [PaymentController::class, 'processRefund'])->name('refund.process');
+
+// Concession Card Application routes
+Route::get('/concession_card', function () {
+    return view('ConcessionCardPage');
+})->name('concession_card');
+
+// Concession Card Application routes
+Route::prefix('concession')->group(function () {
+    Route::get('/applications', [ConcessionCardController::class, 'getApplications'])->name('concession.applications');
+    Route::post('/submit', [ConcessionCardController::class, 'submitApplication'])->name('concession.submit');
+    Route::get('/view/{id}', [ConcessionCardController::class, 'viewApplication'])->name('concession.view');
+    Route::post('/approve/{id}', [ConcessionCardController::class, 'approveApplication'])->name('concession.approve');
+    Route::post('/reject/{id}', [ConcessionCardController::class, 'rejectApplication'])->name('concession.reject');
+    Route::get('/stats', [ConcessionCardController::class, 'getAdminStats'])->name('concession.stats');
+});

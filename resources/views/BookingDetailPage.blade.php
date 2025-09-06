@@ -32,18 +32,35 @@
                                     {{ $booking->Journey->ToLocation ?? 'Unknown' }}</span>
                             </div>
 
+                            @if ($booking->BookingType == 'Return')
                             <div class="booking-info">
-                                <label class="booking-label">Departure: </label>
+                                <label class="booking-label">Return: </label>
+                                <span class="booking-value">{{ $booking->journey2->FromLocation ?? 'Unknown' }} to
+                                        {{ $booking->journey2->ToLocation ?? 'Unknown' }}</span>
+                            </div>
+                            @endif
+
+                            <div class="booking-info">
+                                <label class="booking-label">DepartDate: </label>
+                                <span
+                                    class="booking-value">{{ \Carbon\Carbon::parse($booking->Journey->DepartureTime ?? '')->format('d F Y') }}</span>
+                                |
                                 <span
                                     class="booking-value">{{ date('g:i A', strtotime($booking->Journey->DepartureTime ?? 'Unknown')) }}
                                     - {{ date('g:i A', strtotime($booking->Journey->ArrivalTime ?? 'Unknown')) }}</span>
                             </div>
 
+                            @if ($booking->BookingType == 'Return')
                             <div class="booking-info">
-                                <label class="booking-label">Date: </label>
+                                <label class="booking-label">ReturnDate: </label>
                                 <span
-                                    class="booking-value">{{ \Carbon\Carbon::parse($booking->Journey->DepartureTime ?? '')->format('d F Y') }}</span>
+                                    class="booking-value">{{ \Carbon\Carbon::parse($booking->journey2->DepartureTime ?? '')->format('d F Y') }}</span>
+                                |
+                                <span
+                                    class="booking-value">{{ date('g:i A', strtotime($booking->journey2->DepartureTime ?? 'Unknown')) }}
+                                    - {{ date('g:i A', strtotime($booking->journey2->ArrivalTime ?? 'Unknown')) }}</span>
                             </div>
+                            @endif
 
                             <div class="booking-info">
                                 <label class="booking-label">Status: </label>

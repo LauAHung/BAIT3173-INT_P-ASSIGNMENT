@@ -6,8 +6,6 @@ use App\Models\Journey;
 use App\Builder\BookingDirector;
 use App\Builder\ConcreteBookingBuilder;
 use App\Models\Passenger;
-use App\Models\Ticket;
-use App\Models\Seat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -227,7 +225,7 @@ class TrainSelectionController extends Controller
                 'booking_type' => $bookingType,
             ]);
 
-            return redirect()->route('train.selection.return', $request->all())->with('info', 'Outbound journey selected. Now select your return journey.');
+            return redirect()->route('train.selection.return', $request->all());
         }
 
         $journey2 = null;
@@ -286,7 +284,7 @@ class TrainSelectionController extends Controller
             'passenger.*.name' => ['required', 'regex:/^[a-zA-Z\s\'-]{2,}$/', 'max:255'],
             'passenger.*.contact_no' => ['required', 'regex:/^01[0-9]-[0-9]{7,8}$/', 'max:20'],
             'passenger.*.gender' => 'required|in:male,female',
-            'passenger.*.ticket_type' => 'required|in:Dewasa/Adult,Kanak-kanak/Child,OKU',
+            'passenger.*.ticket_type' => 'required|in:Dewasa/Adult,Pelajar/Student,Warga Emas/Senior Citizen,OKU',
             'passenger.*.mykad' => ['nullable', 'regex:/^\d{12}$/', 'max:20', 'required_without:passenger.*.passport'],
             'passenger.*.passport' => ['nullable', 'regex:/^[a-zA-Z0-9]{6,12}$/', 'max:20', 'required_without:passenger.*.mykad'],
             'passenger.*.passport_expiry' => ['nullable', 'date'],

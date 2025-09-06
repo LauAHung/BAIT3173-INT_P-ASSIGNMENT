@@ -8,8 +8,6 @@ use App\Models\Ticket;
 use App\Models\Seat;
 use App\Models\Journey;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Exception;
 
 class ConcreteBookingBuilder implements BookingBuilderInterface
@@ -56,8 +54,10 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
         $basePrice = $this->journey['price'] ?? Journey::find($this->journey['id'])->Price;
         foreach ($this->passengers as $index => $passenger) {
             $ticketPrice = $basePrice;
-            if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+            if ($passenger['ticket_type'] === 'Pelajar/Student') {
                 $ticketPrice *= 0.9;
+            } elseif ($passenger['ticket_type'] === 'Warga Emas/Senior Citizen') {
+                $ticketPrice *= 0.8;
             } elseif ($passenger['ticket_type'] === 'OKU') {
                 $ticketPrice *= 0.7;
             }
@@ -68,11 +68,13 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
             $returnBasePrice = $this->returnJourney['price'] ?? Journey::find($this->returnJourney['id'])->Price;
             foreach ($this->passengers as $index => $passenger) {
                 $returnTicketPrice = $returnBasePrice;
-                if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
+                if ($passenger['ticket_type'] === 'Pelajar/Student') {
                     $returnTicketPrice *= 0.9;
+                } elseif ($passenger['ticket_type'] === 'Warga Emas/Senior Citizen') {
+                    $returnTicketPrice *= 0.8;
                 } elseif ($passenger['ticket_type'] === 'OKU') {
                     $returnTicketPrice *= 0.7;
-                }
+                } 
                 $this->returnTicketPrices[$index] = $returnTicketPrice;
             }
         }

@@ -202,6 +202,7 @@
 
 <script src="{{ asset('js/TrainSelect.js') }}" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 flatpickr("#depart-date", {
     minDate: "today",
@@ -210,7 +211,7 @@ flatpickr("#depart-date", {
         if (dateStr) {
             document.getElementById('return-date').disabled = document.querySelector('input[name="booking_type"]').value === 'OneWay';
             flatpickr("#return-date", {
-                minDate: dateStr,
+                minDate: "today" || dateStr,
                 dateFormat: "M d, Y"
             });
         }
@@ -218,14 +219,10 @@ flatpickr("#depart-date", {
     disable: [
         function(date) {
             // Disable depart-date input for return journey selection
-            return {{ session('selected_journey') && request()->input('booking_type') == 'Return' ? 'true' : 'false' }};
+            return ;
         }
     ]
 });
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
 document.addEventListener('DOMContentLoaded', () => {
     const successMessage = "{{ session('success') }}";
     const infoMessage = "{{ session('info') }}";
@@ -245,23 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }).then(() => {
             console.log('Success toast displayed');
-        });
-    } else if (infoMessage) {
-        console.log('Info message detected:', infoMessage);
-        Swal.fire({
-            title: 'Info',
-            text: infoMessage,
-            icon: 'info',
-            timer: 3000,
-            showConfirmButton: false,
-            toast: true,
-            width: 800,
-            padding: '15px 20px',
-            customClass: {
-                popup: 'custom-larger-toast'
-            }
-        }).then(() => {
-            console.log('Info toast displayed');
         });
     } else {
         console.log('No message found');

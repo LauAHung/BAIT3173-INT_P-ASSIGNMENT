@@ -19,38 +19,45 @@
             <div class="passenger-container">
                 <div class="passenger-info-details">
                     @php
-                        $totalPrice = 0;
+                    $totalPrice = 0;
                     @endphp
                     @foreach ($passengers as $index => $passenger)
                     @php
-                        $ticketPrice = $journey['price'];
-                        $discountText = '';
-                        $discountFactor = 1.0;
-                        if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
-                            $discountFactor = 0.9;
-                            $discountText = '<br>(10% Child Discount)';
-                        } elseif ($passenger['ticket_type'] === 'OKU') {
-                            $discountFactor = 0.7;
-                            $discountText = '<br>(30% OKU Discount)';
-                        }
-                        $ticketPrice *= $discountFactor;
-                        $totalPrice += $ticketPrice;
+                    $ticketPrice = $journey['price'];
+                    $discountText = '';
+                    $discountFactor = 1.0;
+                    if ($passenger['ticket_type'] === 'Pelajar/Student') {
+                    $discountFactor = 0.9;
+                    $discountText = '<br>(10% Student Discount)';
+                    } elseif ($passenger['ticket_type'] === 'Warga Emas/Senior Citizen') {
+                    $discountFactor = 0.8;
+                    $discountText = '<br>(20% Senior Citizen Discount)';
+                    } elseif ($passenger['ticket_type'] === 'OKU') {
+                    $discountFactor = 0.7;
+                    $discountText = '<br>(30% OKU Discount)';
+                    }
+                    $ticketPrice *= $discountFactor;
+                    $totalPrice += $ticketPrice;
 
-                        $ticketPrice2 = 0;
-                        $discountText2 = '';
-                        if (isset($journey2)) {
-                            $ticketPrice2 = $journey2['price'];
-                            $ticketPrice2 *= $discountFactor;
-                            $discountText2 = $discountText;
-                            $totalPrice += $ticketPrice2;
-                        }
+                    $ticketPrice2 = 0;
+                    $discountText2 = '';
+                    if (isset($journey2)) {
+                    $ticketPrice2 = $journey2['price'];
+                    $ticketPrice2 *= $discountFactor;
+                    $discountText2 = $discountText;
+                    $totalPrice += $ticketPrice2;
+                    }
                     @endphp
                     <div class="passenger-info">
                         <div class="passenger-item">
                             <span class="passenger-label">Passenger {{ $index }}</span>
-                            <span class="passenger-subtext">{{ $journey['from_location'] }} > {{ $journey['to_location'] }} (MYR {{ number_format($ticketPrice, 2) }}) {!! $discountText !!}</span>
+                            <span class="passenger-subtext">{{ $journey['from_location'] }} >
+                                {{ $journey['to_location'] }} (MYR {{ number_format($ticketPrice, 2) }}) {!!
+                                $discountText !!}</span>
                             @if (isset($journey2))
-                            <span class="passenger-subtext">{{ $journey2['from_location'] }} > {{ $journey2['to_location'] }} (MYR {{ number_format($ticketPrice2, 2) }}) {!! $discountText2 !!}</span>
+                            <span class="passenger-subtext">{{ $journey2['from_location'] }} >
+                                {{ $journey2['to_location'] }} (MYR {{ number_format($ticketPrice2, 2) }}) {!!
+                                $discountText2 !!}</span>
                             @endif
                         </div>
                         <div class="details-item">
@@ -95,28 +102,42 @@
                             {{ date('h:i A)', strtotime($journey['arrival_time'])) }}</div>
                     </div>
                 </div>
+                @if (request()->input('booking_type') == 'Return')
+                <div class="trip-details-col">
+                    <img src="{{ asset('images/logo/' . ($journey['train_service'] == 'ETS' ? 'ets_logo.png' : ($journey['train_service'] == 'Komuter' ? 'komuter_logo.png' : 'intercity_logo.png'))) }}"
+                        alt="service-type">
+                    <div class="depart-part">
+                        <span class="label">RETURN</span>
+                        <div>{{ $journey2['train_no'] }}</div>
+                        <div>{{ date('D, M d (h:i A', strtotime($journey2['departure_time'])) }} -
+                            {{ date('h:i A)', strtotime($journey2['arrival_time'])) }}</div>
+                    </div>
+                </div>
+                @endif
                 <div class="trip-price-info">
                     @foreach ($passengers as $index => $passenger)
                     @php
-                        $ticketPrice = $journey['price'];
-                        $discountFactor = 1.0;
-                        if ($passenger['ticket_type'] === 'Kanak-kanak/Child') {
-                            $discountFactor = 0.9;
-                        } elseif ($passenger['ticket_type'] === 'OKU') {
-                            $discountFactor = 0.7;
-                        }
-                        $ticketPrice *= $discountFactor;
+                    $ticketPrice = $journey['price'];
+                    $discountFactor = 1.0;
+                    if ($passenger['ticket_type'] === 'Pelajar/Student') {
+                    $discountFactor = 0.9;
+                    } elseif ($passenger['ticket_type'] === 'Warga Emas/Senior Citizen') {
+                    $discountFactor = 0.8;
+                    } elseif ($passenger['ticket_type'] === 'OKU') {
+                    $discountFactor = 0.7;
+                    }
+                    $ticketPrice *= $discountFactor;
                     @endphp
                     <div class="price-info">
-                        <div>Ticket Outbound ({{ $index }})</div>
+                        <div>Ticket ({{ $index }})</div>
                         <div>RM {{ number_format($ticketPrice, 2) }}</div>
                     </div>
                     @endforeach
                     @if (isset($journey2))
                     @foreach ($passengers as $index => $passenger)
                     @php
-                        $ticketPrice2 = $journey2['price'];
-                        $ticketPrice2 *= $discountFactor;
+                    $ticketPrice2 = $journey2['price'];
+                    $ticketPrice2 *= $discountFactor;
                     @endphp
                     <div class="price-info">
                         <div>Ticket Return ({{ $index }})</div>
@@ -140,7 +161,11 @@
     <div class="seat-info-box">
         <div class="seat-info">
             <div class="seat-head-info">
+                @if (request()->input('booking_type') == 'Return')
                 <h2>{{ $journey['from_location'] }} > {{ $journey['to_location'] }} (Outbound)</h2><br>
+                @else
+                <h2>{{ $journey['from_location'] }} > {{ $journey['to_location'] }}</h2><br>
+                @endif
                 <h4>Select Seats ({{ $passengersCount }} required)</h4>
             </div>
 
@@ -172,15 +197,15 @@
             @php
             $seats = \App\Models\Seat::where('JourneyID', $journey['id'])->get()->keyBy('SeatNo');
             $coaches = [
-                'coach1' => range(1, 13),
-                'coach2' => range(14, 26),
-                'coach3' => range(27, 39),
-                'coach4' => range(40, 52),
+            'coach1' => range(1, 13),
+            'coach2' => range(14, 26),
+            'coach3' => range(27, 39),
+            'coach4' => range(40, 52),
             ];
             @endphp
 
             @foreach ($coaches as $coachId => $rows)
-            <div id="{{ $coachId }}" @if($coachId=='coach1') style="display: block" @else style="display: none" @endif>
+            <div id="{{ $coachId }}" @if($coachId=='coach1' ) style="display: block" @else style="display: none" @endif>
                 <div class="train">
                     <div class="exit front train-body">
                         <div>Toilet</div>
@@ -265,15 +290,16 @@
             @php
             $seats2 = \App\Models\Seat::where('JourneyID', $journey2['id'])->get()->keyBy('SeatNo');
             $coaches2 = [
-                'return_coach1' => range(1, 13),
-                'return_coach2' => range(14, 26),
-                'return_coach3' => range(27, 39),
-                'return_coach4' => range(40, 52),
+            'return_coach1' => range(1, 13),
+            'return_coach2' => range(14, 26),
+            'return_coach3' => range(27, 39),
+            'return_coach4' => range(40, 52),
             ];
             @endphp
 
             @foreach ($coaches2 as $coachId => $rows)
-            <div id="{{ $coachId }}" @if($coachId=='return_coach1') style="display: block" @else style="display: none" @endif>
+            <div id="{{ $coachId }}" @if($coachId=='return_coach1' ) style="display: block" @else style="display: none"
+                @endif>
                 <div class="train">
                     <div class="exit front train-body">
                         <div>Toilet</div>
@@ -298,7 +324,8 @@
                                 $isAvailable = !$seat || $seat->is_available == 'Y';
                                 @endphp
                                 <li class="seat return-seat">
-                                    <input type="checkbox" id="return_{{ $seatNo }}" {{ $isAvailable ? '' : 'disabled' }} />
+                                    <input type="checkbox" id="return_{{ $seatNo }}"
+                                        {{ $isAvailable ? '' : 'disabled' }} />
                                     <label for="return_{{ $seatNo }}">{{ $seatNo }}</label>
                                 </li>
                                 @endif
@@ -355,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedSeats2 = [];
 
     // Outbound coach selector
-    @if ($journey['train_service'] === 'ETS')
+    @if($journey['train_service'] === 'ETS')
     const coachSelectOutbound = document.getElementById('coach-select-outbound');
     const coachesOutbound = ['coach1', 'coach2', 'coach3', 'coach4'];
 
@@ -381,7 +408,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (checkbox.checked) {
                 if (selectedSeats.length >= passengersCount) {
                     checkbox.checked = false;
-                    alert('You cannot select more seats than the number of passengers < ' + passengersCount + ' >.');
+                    alert('You cannot select more seats than the number of passengers < ' +
+                        passengersCount + ' >.');
                 } else {
                     selectedSeats.push(checkbox.id);
                 }
@@ -393,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
     @endif
 
     // Return coach selector
-    @if (isset($journey2) && $journey2['train_service'] === 'ETS')
+    @if(isset($journey2) && $journey2['train_service'] === 'ETS')
     const coachSelectReturn = document.getElementById('coach-select-return');
     const coachesReturn = ['return_coach1', 'return_coach2', 'return_coach3', 'return_coach4'];
 
@@ -419,12 +447,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (checkbox.checked) {
                 if (selectedSeats2.length >= passengersCount) {
                     checkbox.checked = false;
-                    alert('You cannot select more seats than the number of passengers < ' + passengersCount + ' >.');
+                    alert('You cannot select more seats than the number of passengers < ' +
+                        passengersCount + ' >.');
                 } else {
                     selectedSeats2.push(checkbox.id.replace('return_', ''));
                 }
             } else {
-                selectedSeats2 = selectedSeats2.filter(seat => seat !== checkbox.id.replace('return_', ''));
+                selectedSeats2 = selectedSeats2.filter(seat => seat !== checkbox.id.replace(
+                    'return_', ''));
             }
         });
     });
@@ -433,14 +463,14 @@ document.addEventListener('DOMContentLoaded', () => {
     window.submitBooking = function() {
         let isValid = true;
 
-        @if ($journey['train_service'] === 'ETS')
+        @if($journey['train_service'] === 'ETS')
         if (selectedSeats.length !== passengersCount) {
             alert('Please select exactly ' + passengersCount + ' seat(s) for the outbound journey.');
             isValid = false;
         }
         @endif
 
-        @if (isset($journey2) && $journey2['train_service'] === 'ETS')
+        @if(isset($journey2) && $journey2['train_service'] === 'ETS')
         if (selectedSeats2.length !== passengersCount) {
             alert('Please select exactly ' + passengersCount + ' seat(s) for the return journey.');
             isValid = false;
