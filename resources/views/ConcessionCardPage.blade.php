@@ -58,7 +58,7 @@
                                     <li>Original JKM (OKU) Card</li>
                                     <li>Disability Information</li>
                                 </ul>
-                                <button class="btn btn-primary" style="margin:auto">Apply Now</button>
+                                <button class="btn btn-primary">Apply Now</button>
                             </div>
 
                             <div class="concession-card" data-type="senior">
@@ -73,6 +73,7 @@
                                     <li>Malaysian Citizenship</li>
                                 </ul>
                                 <button class="btn btn-primary">Apply Now</button>
+                                <button class="btn btn-secondary" onclick="showScreen('admin')">View Applications</button>
                             </div>
 
                             <div class="concession-card" data-type="student">
@@ -272,8 +273,7 @@
                         <div class="admin-container">
                             <div class="admin-header">
                                 <div>
-                                    <h2>Admin Dashboard</h2>
-                                    <p>Review and manage concession card applications</p>
+                                    <h2>Application List</h2>
                                 </div>
                                 <button id="adminBackBtn" class="btn btn-secondary">Back to Main</button>
                             </div>
@@ -334,7 +334,6 @@
                             </div>
 
                             <div class="applications-table">
-                                <h3>Applications</h3>
                                 <div class="table-container">
                                     <table id="applicationsTable">
                                         <thead>
@@ -351,25 +350,25 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div class="pagination">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </main>
             </div>
+        </section>
 
-            <!-- Modals -->
-            
-
-            <div id="viewModal" class="modal">
-                <div class="modal-content">
-                    <h3>Application Details</h3>
-                    <div id="applicationDetails"></div>
-                    <div class="modal-actions">
-                        <button id="closeView" class="btn btn-secondary">Close</button>
-                    </div>
+        <!-- Modals (moved here to avoid overflow: hidden clipping from .second-section) -->
+        <div id="viewModal" class="modal">
+            <div class="modal-content">
+                <h3>Application Details</h3>
+                <div id="applicationDetails"></div>
+                <div class="modal-actions">
+                    <button id="closeView" class="btn btn-secondary">Close</button>
                 </div>
             </div>
-        </section>
+        </div>
     </main>
 
 <script src="{{ asset('js/ConcessionCard.js') }}" defer></script>

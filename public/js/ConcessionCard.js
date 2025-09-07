@@ -86,12 +86,11 @@ function showScreen(screenName) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Attach event listener to "Apply Now" buttons
     document.querySelectorAll('.concession-card .btn-primary').forEach(button => {
         button.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent default button behavior
+            e.preventDefault();
             const card = button.closest('.concession-card');
-            console.log('Button clicked for type:', card.dataset.type); // Debug log
+            console.log('Button clicked for type:', card.dataset.type);
             selectConcessionType(card.dataset.type);
         });
     });
@@ -111,25 +110,23 @@ document.addEventListener('DOMContentLoaded', () => {
             : 'Click to upload student ID photo';
     });
 
-    // Close modal when clicking the close button
     const closeViewBtn = document.getElementById('closeView');
     if (closeViewBtn) {
         closeViewBtn.addEventListener('click', () => {
             const viewModal = document.getElementById('viewModal');
             if (viewModal) {
                 viewModal.classList.remove('active');
-                console.log('Modal closed via close button'); // Debug log
+                console.log('Modal closed via close button');
             }
         });
     }
 
-    // Close modal when clicking outside the content (backdrop)
     const viewModal = document.getElementById('viewModal');
     if (viewModal) {
         viewModal.addEventListener('click', (e) => {
             if (e.target === viewModal) {
                 viewModal.classList.remove('active');
-                console.log('Modal closed via backdrop click'); // Debug log
+                console.log('Modal closed via backdrop click');
             }
         });
     }
@@ -139,20 +136,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function selectConcessionType(type) {
-    console.log('selectConcessionType called with type:', type); // Debug log
+    console.log('selectConcessionType called with type:', type);
     currentApplicationType = type;
     showScreen('form');
     document.querySelectorAll('.conditional-fields').forEach(field => field.classList.remove('active'));
     document.getElementById(`${type}Fields`).classList.add('active');
     document.getElementById('formTitle').textContent = `${type.toUpperCase()} Concession Application`;
-    document.getElementById('applicationType').value = type;
+    document.getElementById('applicationType').value = type; // FIX: Set the hidden type input
     document.getElementById('applicationForm').reset();
 }
 
 function handleFormSubmission(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
-    formData.append('_token', document.querySelector('input[name="_token"]').value); // Add CSRF token for backend
+    formData.append('_token', document.querySelector('input[name="_token"]').value);
     const application = {
         id: 'APP' + Date.now(),
         type: formData.get('type'),
@@ -186,7 +183,6 @@ function handleFormSubmission(e) {
         return;
     }
 
-    // Submit to backend via AJAX
     fetch('/concession/submit', {
         method: 'POST',
         body: formData
@@ -208,7 +204,6 @@ function handleFormSubmission(e) {
         .catch(error => {
             console.error('Error submitting application:', error);
             alert('Failed to submit application');
-            // Fallback to localStorage if backend fails
             applications.push(application);
             localStorage.setItem('concessionApplications', JSON.stringify(applications));
             showApplicationStatus(application);
@@ -282,8 +277,18 @@ function updateAdminStats() {
 }
 
 function loadApplicationsTable() {
+    const pageSize = 10;
+    const sortedApplications = [...applications].sort((a, b) => new Date(b.applicationDate) - new Date(a.applicationDate));
+    const total = sortedApplications.length;
+    const maxPage = Math.ceil(total / pageSize) - 1;
+    let adminCurrentPage = Math.max(0, Math.min(statusCurrentPage, maxPage));
+
+    const start = adminCurrentPage * pageSize;
+    const end = start + pageSize;
+    const paginatedApps = sortedApplications.slice(start, end);
+
     const tbody = document.querySelector('#applicationsTable tbody');
-    tbody.innerHTML = applications.map(app => `
+    tbody.innerHTML = paginatedApps.map(app => `
         <tr>
             <td>${app.fullName}</td>
             <td><span class="status-badge ${app.type}">${app.type.toUpperCase()}</span></td>
@@ -298,6 +303,20 @@ function loadApplicationsTable() {
             </td>
         </tr>
     `).join('');
+
+    const paginationContainer = document.querySelector('.applications-table .pagination');
+    if (paginationContainer) {
+        paginationContainer.innerHTML = `
+            ${adminCurrentPage > 0 ? `<button class="btn" onclick="changeAdminPage(-1)">← Previous</button>` : ''}
+            <span>Page ${adminCurrentPage + 1} of ${maxPage + 1}</span>
+            ${adminCurrentPage < maxPage ? `<button class="btn" onclick="changeAdminPage(1)">Next →</button>` : ''}
+        `;
+    }
+}
+
+function changeAdminPage(delta) {
+    statusCurrentPage += delta;
+    loadApplicationsTable();
 }
 
 function viewApplication(id) {
@@ -318,7 +337,6 @@ function viewApplication(id) {
             return;
         }
 
-        // Generate table content based on application type
         let detailsTable = `
             <h3>Application Details</h3>
             <table class="details-table">
@@ -356,7 +374,7 @@ function viewApplication(id) {
         detailsTable += '</table>';
         modalContent.innerHTML = detailsTable;
         modal.classList.add('active');
-        console.log('Modal opened for application ID:', id); // Debug log
+        console.log('Modal opened for application ID:', id);
     } catch (error) {
         console.error('Error in viewApplication:', error);
         alert('Failed to display application details');
@@ -381,4 +399,4 @@ function rejectApplication(id) {
         updateAdminStats();
         loadApplicationsTable();
     }
-}
+}   
