@@ -341,7 +341,7 @@
                                                 <th>Applicant</th>
                                                 <th>Type</th>
                                                 <th>Status</th>
-                                                <th>Date</th>
+                                                <th>Date & Time</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -362,7 +362,6 @@
         <!-- Modals (moved here to avoid overflow: hidden clipping from .second-section) -->
         <div id="viewModal" class="modal">
             <div class="modal-content">
-                <h3>Application Details</h3>
                 <div id="applicationDetails"></div>
                 <div class="modal-actions">
                     <button id="closeView" class="btn btn-secondary">Close</button>

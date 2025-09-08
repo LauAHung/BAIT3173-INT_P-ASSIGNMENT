@@ -142,7 +142,7 @@ function selectConcessionType(type) {
     document.querySelectorAll('.conditional-fields').forEach(field => field.classList.remove('active'));
     document.getElementById(`${type}Fields`).classList.add('active');
     document.getElementById('formTitle').textContent = `${type.toUpperCase()} Concession Application`;
-    document.getElementById('applicationType').value = type; // FIX: Set the hidden type input
+    document.getElementById('applicationType').value = type;
     document.getElementById('applicationForm').reset();
 }
 
@@ -250,6 +250,9 @@ function renderStatusTable() {
                             <td>${new Date(app.applicationDate).toLocaleString()}</td>
                             <td>
                                 <button class="action-btn view" onclick="viewApplication('${app.id}')">View</button>
+                                ${app.status !== 'pending' ? `
+                                    <button class="action-btn withdraw" onclick="withdrawApplication('${app.id}')">Withdraw</button>
+                                ` : ''}
                             </td>
                         </tr>
                     `).join('')}
@@ -293,13 +296,18 @@ function loadApplicationsTable() {
             <td>${app.fullName}</td>
             <td><span class="status-badge ${app.type}">${app.type.toUpperCase()}</span></td>
             <td><span class="status-badge ${app.status}">${app.status.toUpperCase()}</td>
-            <td>${new Date(app.applicationDate).toLocaleDateString()}</td>
-            <td>
+            <td>${new Date(app.applicationDate).toLocaleString()}</td>
+            <td class="action-buttons">
                 <button class="action-btn view" onclick="viewApplication('${app.id}')">View</button>
                 ${app.status === 'pending' ? `
                     <button class="action-btn approve" onclick="approveApplication('${app.id}')">Approve</button>
                     <button class="action-btn reject" onclick="rejectApplication('${app.id}')">Reject</button>
-                ` : ''}
+                    <button class="action-btn withdraw hidden" onclick="withdrawApplication('${app.id}')">Withdraw</button>
+                ` : `
+                    <button class="action-btn approve hidden" onclick="approveApplication('${app.id}')">Approve</button>
+                    <button class="action-btn reject hidden" onclick="rejectApplication('${app.id}')">Reject</button>
+                    <button class="action-btn withdraw" onclick="withdrawApplication('${app.id}')">Withdraw</button>
+                `}
             </td>
         </tr>
     `).join('');
@@ -399,4 +407,14 @@ function rejectApplication(id) {
         updateAdminStats();
         loadApplicationsTable();
     }
-}   
+}
+
+function withdrawApplication(id) {
+    const app = applications.find(a => a.id === id);
+    if (app) {
+        app.status = 'pending';
+        localStorage.setItem('concessionApplications', JSON.stringify(applications));
+        updateAdminStats();
+        loadApplicationsTable();
+    }
+}
