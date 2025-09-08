@@ -13,7 +13,6 @@ class ConcessionCardController extends Controller
     public function getApplications(Request $request)
     {
         try {
-            // Load applications from session or storage
             $applications = session('concessionApplications', []);
             return response()->json([
                 'success' => true,
@@ -34,34 +33,48 @@ class ConcessionCardController extends Controller
             $validated = $request->validate([
                 'type' => 'required|in:oku,senior,student',
                 'fullName' => 'required|string|max:255',
-                'ic' => 'required|string|size:12|regex:/^\d+$/',
+                'ic' => 'nullable|string|size:12|regex:/^\d+$/',
+                'passportNumber' => 'nullable|string',
                 'okuCardNumber' => 'required_if:type,oku|nullable|string|min:8',
-                'disability' => 'required_if:type,oku|nullable|string',
+                'disabilityType' => 'required_if:type,oku|nullable|string|in:visual,hearing,mobility,cognitive,other',
+                'otherDisability' => 'required_if:disabilityType,other|nullable|string',
                 'age' => 'required_if:type,senior|nullable|integer|min:60',
                 'citizenship' => 'required_if:type,senior|nullable|string',
                 'matrixNumber' => 'required_if:type,student|nullable|string|min:4',
                 'schoolName' => 'required_if:type,student|nullable|string',
                 'studentIdPhoto' => 'required_if:type,student|nullable|image|max:2048',
-                'passportNumber' => 'nullable|string',
                 'gender' => 'required_if:type,senior|nullable|string|in:male,female',
                 'dateOfBirth' => 'nullable|date',
                 'studentCitizenship' => 'required_if:type,student|nullable|string',
                 'educationLevel' => 'required_if:type,student|nullable|string|in:primary,secondary,college,university'
+            ], [
+                'ic_or_passport.required' => 'Either IC Number or Passport Number is required.'
             ]);
+
+            // Custom validation for IC or Passport
+            if (!$request->filled('ic') && !$request->filled('passportNumber')) {
+                throw ValidationException::withMessages([
+                    'ic' => 'Either IC Number or Passport Number is required.',
+                    'passportNumber' => 'Either IC Number or Passport Number is required.'
+                ]);
+            }
 
             $application = [
                 'id' => 'APP' . time(),
                 'type' => $request->type,
                 'fullName' => $request->fullName,
                 'ic' => $request->ic,
+                'passportNumber' => $request->passportNumber,
                 'status' => 'pending',
                 'applicationDate' => now()->toIso8601String()
             ];
 
             if ($request->type === 'oku') {
                 $application['okuCardNumber'] = $request->okuCardNumber;
-                $application['disability'] = $request->disability;
-                $application['passportNumber'] = $request->passportNumber;
+                $application['disabilityType'] = $request->disabilityType;
+                if ($request->disabilityType === 'other') {
+                    $application['otherDisability'] = $request->otherDisability;
+                }
             } elseif ($request->type === 'senior') {
                 $application['age'] = (int)$request->age;
                 $application['citizenship'] = $request->citizenship;

@@ -23,14 +23,20 @@ class ApplicationHandler {
 class OKUApplicationHandler extends ApplicationHandler {
     canHandle(application) { return application.type === 'oku'; }
     processApplication(application) {
+        if (!application.ic && !application.passportNumber) {
+            return { valid: false, message: 'Either IC Number or Passport Number is required' };
+        }
+        if (application.ic && (application.ic.length !== 12 || !/^\d+$/.test(application.ic))) {
+            return { valid: false, message: 'IC number must be exactly 12 digits and contain only numbers' };
+        }
         if (!application.okuCardNumber || application.okuCardNumber.length < 8) {
             return { valid: false, message: 'OKU Card Number must be at least 8 characters' };
         }
-        if (!application.disability) {
-            return { valid: false, message: 'Disability information is required' };
+        if (!application.disabilityType) {
+            return { valid: false, message: 'Disability Type is required' };
         }
-        if (!application.ic || application.ic.length !== 12 || !/^\d+$/.test(application.ic)) {
-            return { valid: false, message: 'IC number must be exactly 12 digits and contain only numbers' };
+        if (application.disabilityType === 'other' && !application.otherDisability) {
+            return { valid: false, message: 'Other Disability Information is required when selecting Other' };
         }
         return { valid: true };
     }
@@ -39,14 +45,17 @@ class OKUApplicationHandler extends ApplicationHandler {
 class SeniorCitizenApplicationHandler extends ApplicationHandler {
     canHandle(application) { return application.type === 'senior'; }
     processApplication(application) {
+        if (!application.ic && !application.passportNumber) {
+            return { valid: false, message: 'Either IC Number or Passport Number is required' };
+        }
+        if (application.ic && (application.ic.length !== 12 || !/^\d+$/.test(application.ic))) {
+            return { valid: false, message: 'IC number must be exactly 12 digits and contain only numbers' };
+        }
         if (!application.age || application.age < 60) {
             return { valid: false, message: 'Age must be 60 or above' };
         }
         if (!application.citizenship) {
             return { valid: false, message: 'Citizenship is required' };
-        }
-        if (!application.ic || application.ic.length !== 12) {
-            return { valid: false, message: 'IC number must be 12 digits' };
         }
         return { valid: true };
     }
@@ -55,14 +64,17 @@ class SeniorCitizenApplicationHandler extends ApplicationHandler {
 class StudentApplicationHandler extends ApplicationHandler {
     canHandle(application) { return application.type === 'student'; }
     processApplication(application) {
+        if (!application.ic && !application.passportNumber) {
+            return { valid: false, message: 'Either IC Number or Passport Number is required' };
+        }
+        if (application.ic && (application.ic.length !== 12 || !/^\d+$/.test(application.ic))) {
+            return { valid: false, message: 'IC number must be exactly 12 digits and contain only numbers' };
+        }
         if (!application.matrixNumber || application.matrixNumber.length < 4) {
             return { valid: false, message: 'Matrix number must be at least 4 characters' };
         }
         if (!application.schoolName) {
             return { valid: false, message: 'School name is required' };
-        }
-        if (!application.ic || application.ic.length !== 12) {
-            return { valid: false, message: 'IC number must be 12 digits' };
         }
         return { valid: true };
     }
@@ -90,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const card = button.closest('.concession-card');
-            console.log('Button clicked for type:', card.dataset.type);
             selectConcessionType(card.dataset.type);
         });
     });
@@ -104,11 +115,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fileInput = document.getElementById('studentIdPhoto');
     const fileUpload = document.getElementById('fileUpload');
-    fileInput.addEventListener('change', () => {
-        fileUpload.querySelector('p').textContent = fileInput.files.length > 0
-            ? `Uploaded: ${fileInput.files[0].name}`
-            : 'Click to upload student ID photo';
-    });
+    if (fileInput && fileUpload) {
+        fileInput.addEventListener('change', () => {
+            fileUpload.querySelector('p').textContent = fileInput.files.length > 0
+                ? `Uploaded: ${fileInput.files[0].name}`
+                : 'Click to upload student ID photo';
+        });
+    }
+
+    const disabilityTypeSelect = document.getElementById('disabilityType');
+    const otherDisabilityContainer = document.getElementById('otherDisabilityContainer');
+    if (disabilityTypeSelect && otherDisabilityContainer) {
+        disabilityTypeSelect.addEventListener('change', (e) => {
+            otherDisabilityContainer.style.display = e.target.value === 'other' ? 'flex' : 'none';
+            if (e.target.value !== 'other') {
+                document.getElementById('otherDisability').value = '';
+            }
+        });
+    }
 
     const closeViewBtn = document.getElementById('closeView');
     if (closeViewBtn) {
@@ -116,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const viewModal = document.getElementById('viewModal');
             if (viewModal) {
                 viewModal.classList.remove('active');
-                console.log('Modal closed via close button');
             }
         });
     }
@@ -126,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
         viewModal.addEventListener('click', (e) => {
             if (e.target === viewModal) {
                 viewModal.classList.remove('active');
-                console.log('Modal closed via backdrop click');
             }
         });
     }
@@ -136,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function selectConcessionType(type) {
-    console.log('selectConcessionType called with type:', type);
     currentApplicationType = type;
     showScreen('form');
     document.querySelectorAll('.conditional-fields').forEach(field => field.classList.remove('active'));
@@ -144,6 +165,10 @@ function selectConcessionType(type) {
     document.getElementById('formTitle').textContent = `${type.toUpperCase()} Concession Application`;
     document.getElementById('applicationType').value = type;
     document.getElementById('applicationForm').reset();
+    const otherDisabilityContainer = document.getElementById('otherDisabilityContainer');
+    if (otherDisabilityContainer) {
+        otherDisabilityContainer.style.display = 'none';
+    }
 }
 
 function handleFormSubmission(e) {
@@ -155,14 +180,17 @@ function handleFormSubmission(e) {
         type: formData.get('type'),
         fullName: formData.get('fullName'),
         ic: formData.get('ic'),
+        passportNumber: formData.get('passportNumber'),
         status: 'pending',
         applicationDate: new Date().toISOString()
     };
 
     if (application.type === 'oku') {
         application.okuCardNumber = formData.get('okuCardNumber');
-        application.disability = formData.get('disability');
-        application.passportNumber = formData.get('passportNumber');
+        application.disabilityType = formData.get('disabilityType');
+        if (application.disabilityType === 'other') {
+            application.otherDisability = formData.get('otherDisability');
+        }
     } else if (application.type === 'senior') {
         application.age = parseInt(formData.get('age')) || null;
         application.citizenship = formData.get('citizenship');
@@ -250,9 +278,6 @@ function renderStatusTable() {
                             <td>${new Date(app.applicationDate).toLocaleString()}</td>
                             <td>
                                 <button class="action-btn view" onclick="viewApplication('${app.id}')">View</button>
-                                ${app.status !== 'pending' ? `
-                                    <button class="action-btn withdraw" onclick="withdrawApplication('${app.id}')">Withdraw</button>
-                                ` : ''}
                             </td>
                         </tr>
                     `).join('')}
@@ -351,6 +376,7 @@ function viewApplication(id) {
                 <tr><th>Field</th><th>Value</th></tr>
                 <tr><td>Name</td><td>${app.fullName || '-'}</td></tr>
                 <tr><td>IC Number</td><td>${app.ic || '-'}</td></tr>
+                <tr><td>Passport Number</td><td>${app.passportNumber || '-'}</td></tr>
                 <tr><td>Concession Type</td><td>${app.type.toUpperCase()}</td></tr>
                 <tr><td>Status</td><td>${app.status.toUpperCase()}</td></tr>
                 <tr><td>Date & Time</td><td>${new Date(app.applicationDate).toLocaleString()}</td></tr>
@@ -358,9 +384,9 @@ function viewApplication(id) {
 
         if (app.type === 'oku') {
             detailsTable += `
-                <tr><td>Passport Number</td><td>${app.passportNumber || '-'}</td></tr>
                 <tr><td>OKU Card Number</td><td>${app.okuCardNumber || '-'}</td></tr>
-                <tr><td>Disability Information</td><td>${app.disability || '-'}</td></tr>
+                <tr><td>Disability Type</td><td>${app.disabilityType || '-'}</td></tr>
+                ${app.disabilityType === 'other' ? `<tr><td>Other Disability</td><td>${app.otherDisability || '-'}</td></tr>` : ''}
             `;
         } else if (app.type === 'senior') {
             detailsTable += `
@@ -382,7 +408,6 @@ function viewApplication(id) {
         detailsTable += '</table>';
         modalContent.innerHTML = detailsTable;
         modal.classList.add('active');
-        console.log('Modal opened for application ID:', id);
     } catch (error) {
         console.error('Error in viewApplication:', error);
         alert('Failed to display application details');

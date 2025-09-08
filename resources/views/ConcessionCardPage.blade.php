@@ -7,6 +7,26 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Knewave&display=swap" rel="stylesheet">
+    <style>
+        #otherDisabilityContainer {
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        #otherDisabilityContainer label {
+            margin-bottom: 0;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        #otherDisabilityContainer textarea {
+            flex: 1;
+            min-width: 0;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -14,18 +34,8 @@
         <div id="header"></div>
         <section class="first-section">
             <div class="background"></div>
-            <div class="particles">
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>    
-                <div class="particle"></div>
-                <div class="particle"></div>
-            </div>
             <div class="preface">
-                <h1>Special Benefit</h1><br><br><br>
+                <h1>★★ 𝓢𝓹𝓮𝓬𝓲𝓪𝓵 𝓑𝓮𝓷𝓮𝓯𝓲𝓽 ★★</h1><br><br><br>
                 <p>
                     Exclusive benefits, thoughtful discounts – everyone can enjoy the freedom of travel. <br><br><br>
                     Benefits designed for students, seniors, and special groups – making travel truly accessible, 
@@ -54,7 +64,7 @@
                                 <h3>OKU (Orang Kurang Upaya)</h3>
                                 <p>For persons with disabilities holding valid OKU cards</p>
                                 <ul class="requirements">
-                                    <li>Valid IC/Passport</li>
+                                    <li>Valid IC or Passport</li>
                                     <li>Original JKM (OKU) Card</li>
                                     <li>Disability Information</li>
                                 </ul>
@@ -69,7 +79,7 @@
                                 <p>For citizens aged 60 and above</p>
                                 <ul class="requirements">
                                     <li>Age 60+</li>
-                                    <li>Valid IC</li>
+                                    <li>Valid IC or Passport</li>
                                     <li>Malaysian Citizenship</li>
                                 </ul>
                                 <button class="btn btn-primary">Apply Now</button>
@@ -83,6 +93,7 @@
                                 <h3>Student</h3>
                                 <p>For current students in educational institutions</p>
                                 <ul class="requirements">
+                                    <li>Valid IC or Passport</li>
                                     <li>Valid Student ID</li>
                                     <li>Matrix Number</li>
                                     <li>School Verification</li>
@@ -140,8 +151,13 @@
                                         <span class="error-message"></span>
                                     </div>
                                     <div class="form-group">
-                                        <label for="ic">IC Number *</label>
-                                        <input type="text" id="ic" name="ic" maxlength="12" required>
+                                        <label for="ic">IC Number</label>
+                                        <input type="text" id="ic" name="ic" maxlength="12">
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="passportNumber">Passport Number</label>
+                                        <input type="text" id="passportNumber" name="passportNumber">
                                         <span class="error-message"></span>
                                     </div>
                                 </div>
@@ -150,18 +166,26 @@
                                 <div id="okuFields" class="conditional-fields">
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="passportNumber">Passport Number (Optional)</label>
-                                            <input type="text" id="passportNumber" name="passportNumber">
-                                        </div>
-                                        <div class="form-group">
                                             <label for="okuCardNumber">OKU Card Number *</label>
-                                            <input type="text" id="okuCardNumber" name="okuCardNumber">
+                                            <input type="text" id="okuCardNumber" name="okuCardNumber" required>
                                             <span class="error-message"></span>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="disability">Disability Information *</label>
-                                        <textarea id="disability" name="disability" rows="1"></textarea>
+                                        <label for="disabilityType">Disability Type *</label>
+                                        <select id="disabilityType" name="disabilityType" required>
+                                            <option value="">Select Disability Type</option>
+                                            <option value="visual">Visual Impairment</option>
+                                            <option value="hearing">Hearing Impairment</option>
+                                            <option value="mobility">Mobility Impairment</option>
+                                            <option value="cognitive">Cognitive Disability</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group" id="otherDisabilityContainer">
+                                        <label for="otherDisability">Other Disability Information *</label>
+                                        <textarea id="otherDisability" name="otherDisability" rows="1"></textarea>
                                         <span class="error-message"></span>
                                     </div>
                                 </div>
@@ -359,7 +383,7 @@
             </div>
         </section>
 
-        <!-- Modals (moved here to avoid overflow: hidden clipping from .second-section) -->
+        <!-- Modals -->
         <div id="viewModal" class="modal">
             <div class="modal-content">
                 <div id="applicationDetails"></div>

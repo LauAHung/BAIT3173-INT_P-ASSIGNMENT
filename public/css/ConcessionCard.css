@@ -17,7 +17,7 @@ body {
 
 #header {
     background-image: url(../images/concession1.jpg);
-    height: 150px;
+    height: 20px;
     margin-top: 50px;
     opacity: 0.8;
     background-size: cover;
@@ -32,18 +32,12 @@ body {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background: linear-gradient(135deg, #e2e0f4, #656365);
-    border-color: #374151;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-    color: #e0e0e0;
+    background-image: url(../images/trainstation2.png);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     word-spacing: 3px;
     letter-spacing: 1px;
-    border: 3px solid transparent;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(78, 205, 196, 0.7), 0 0 30px rgba(255, 107, 107, 0.5);
-    animation: neonPulse 3s ease-in-out infinite;
 }
 
 .first-section::before {
@@ -56,20 +50,7 @@ body {
     border: 2px solid rgba(255, 255, 255, 0.2);
     background: linear-gradient(45deg, rgba(255, 107, 107, 0.3), rgba(78, 205, 196, 0.3), rgba(69, 183, 209, 0.3), rgba(150, 201, 61, 0.3));
     background-size: 400%;
-    animation: gradientShift 15s ease infinite;
     z-index: -3;
-}
-
-@keyframes neonPulse {
-    0% {
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(78, 205, 196, 0.7), 0 0 30px rgba(255, 107, 107, 0.5);
-    }
-    50% {
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(78, 205, 196, 1), 0 0 45px rgba(255, 107, 107, 0.8);
-    }
-    100% {
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(78, 205, 196, 0.7), 0 0 30px rgba(255, 107, 107, 0.5);
-    }
 }
 
 .first-section .background {
@@ -78,16 +59,9 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, #656464, #a6aaaa, #bd92c4, #5353ed);
     background-size: 400%;
     animation: gradientShift 5s ease infinite;
     z-index: 1;
-}
-
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
 }
 
 .first-section .particles {
@@ -132,15 +106,17 @@ body {
     width: 50%;
 }
 
-.preface p {
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.7), transparent);
+.preface p{
+    background-color: white;
     padding: 10px 20px;
     font-style: italic;
     color: #333;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     font-size: 18px;
-    font-weight: bold;
+    font-family: "Knewave", system-ui;
+    font-weight: 400;
+    font-style: normal;
 }
 
 .first-section .preface {
@@ -174,7 +150,9 @@ body {
     color: red;
     font-size: 30px;
     text-align: center;
-    font-weight: bold;
+    font-family: "Knewave", system-ui;
+    font-style: normal;
+    font-weight:bold;
 }
 
 .first-section p {
@@ -193,7 +171,7 @@ body {
 
 .second-section {
     position: relative;
-    height: 110vh;
+    height: 120vh;
     scroll-snap-align: start;
     display: flex;
     flex-direction: row;
@@ -665,7 +643,7 @@ body {
 }
 
 .status-container {
-    max-width: 800px;
+    max-width: 100%;
     margin: 0 auto;
 }
 
