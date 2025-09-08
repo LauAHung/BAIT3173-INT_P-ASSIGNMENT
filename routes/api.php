@@ -149,4 +149,10 @@ Route::prefix('user')->group(function () {
             'version' => '1.0.0'
         ]);
     });
-}); 
+});
+
+Route::prefix('bookings')->group(function () {
+    Route::get('/bookings', [App\Http\Controllers\Api\BookingApiController::class, 'index']);
+    Route::get('/bookings_detail/{id}', [App\Http\Controllers\Api\BookingApiController::class, 'show']);
+    Route::post('/bookings/{id}/cancel', [App\Http\Controllers\Api\BookingApiController::class, 'cancel']);
+});

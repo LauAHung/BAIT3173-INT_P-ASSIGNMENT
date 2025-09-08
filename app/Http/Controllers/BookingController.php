@@ -41,7 +41,7 @@ class BookingController extends Controller
 
         $pastBookings = Booking::with(['journey', 'journey.train'])
             ->where('UserID', $userId)
-            ->whereIn('Status', ['Completed', 'Cancelled'])
+            ->where('Status', 'Completed')
             ->get()
             ->map(function ($booking) {
                 $booking->showViewQR = $booking->Status === 'Completed';
@@ -51,7 +51,7 @@ class BookingController extends Controller
             
         $refundedBookings = Booking::with(['journey', 'journey.train'])
         ->where('UserID', $userId)
-        ->where('Status', 'Refunded')
+        ->whereIn('Status', ['Refunded', 'Cancelled'])
         ->get()
         ->map(function ($booking) {
             return $booking;

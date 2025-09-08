@@ -159,11 +159,11 @@ class OKUApplicationHandler extends ApplicationHandler {
         if (!application.okuCardNumber || application.okuCardNumber.length < 8) {
             return { valid: false, message: 'OKU Card Number must be at least 8 characters' };
         }
-        if (!application.disability) {
-            return { valid: false, message: 'Disability information is required' };
+        if (!application.disabilityType) {
+            return { valid: false, message: 'Disability Type is required' };
         }
-        if (!application.ic || application.ic.length !== 12 || !/^\d+$/.test(application.ic)) {
-            return { valid: false, message: 'IC number must be exactly 12 digits and contain only numbers' };
+        if (application.disabilityType === 'other' && !application.otherDisability) {
+            return { valid: false, message: 'Other Disability Information is required when selecting Other' };
         }
         return { valid: true };
     }
@@ -244,9 +244,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Attach event listener to "Apply Now" buttons (only for main screen cards)
     document.querySelectorAll('.concession-card .btn-primary').forEach(button => {
         button.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent default button behavior
+            e.preventDefault();
             const card = button.closest('.concession-card');
-            console.log('Button clicked for type:', card.dataset.type); // Debug log
             selectConcessionType(card.dataset.type);
         });
     });
@@ -274,25 +273,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Close modal when clicking the close button
     const closeViewBtn = document.getElementById('closeView');
     if (closeViewBtn) {
         closeViewBtn.addEventListener('click', () => {
             const viewModal = document.getElementById('viewModal');
             if (viewModal) {
                 viewModal.classList.remove('active');
-                console.log('Modal closed via close button'); // Debug log
             }
         });
     }
 
-    // Close modal when clicking outside the content (backdrop)
     const viewModal = document.getElementById('viewModal');
     if (viewModal) {
         viewModal.addEventListener('click', (e) => {
             if (e.target === viewModal) {
                 viewModal.classList.remove('active');
-                console.log('Modal closed via backdrop click'); // Debug log
             }
         });
     }
@@ -318,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function selectConcessionType(type) {
-    console.log('selectConcessionType called with type:', type); // Debug log
     currentApplicationType = type;
     showScreen('form');
     document.querySelectorAll('.conditional-fields').forEach(field => field.classList.remove('active'));
@@ -413,14 +407,17 @@ function handleFormSubmission(e) {
         type: formData.get('type'),
         fullName: formData.get('fullName'),
         ic: formData.get('ic'),
+        passportNumber: formData.get('passportNumber'),
         status: 'pending',
         applicationDate: new Date().toISOString()
     };
 
     if (application.type === 'oku') {
         application.okuCardNumber = formData.get('okuCardNumber');
-        application.disability = formData.get('disability');
-        application.passportNumber = formData.get('passportNumber');
+        application.disabilityType = formData.get('disabilityType');
+        if (application.disabilityType === 'other') {
+            application.otherDisability = formData.get('otherDisability');
+        }
     } else if (application.type === 'senior') {
         application.age = parseInt(formData.get('age')) || null;
         application.citizenship = formData.get('citizenship');
@@ -763,22 +760,51 @@ function updateAdminStats() {
 }
 
 function loadApplicationsTable() {
+    const pageSize = 10;
+    const sortedApplications = [...applications].sort((a, b) => new Date(b.applicationDate) - new Date(a.applicationDate));
+    const total = sortedApplications.length;
+    const maxPage = Math.ceil(total / pageSize) - 1;
+    let adminCurrentPage = Math.max(0, Math.min(statusCurrentPage, maxPage));
+
+    const start = adminCurrentPage * pageSize;
+    const end = start + pageSize;
+    const paginatedApps = sortedApplications.slice(start, end);
+
     const tbody = document.querySelector('#applicationsTable tbody');
-    tbody.innerHTML = applications.map(app => `
+    tbody.innerHTML = paginatedApps.map(app => `
         <tr>
             <td>${app.fullName}</td>
             <td><span class="status-badge ${app.type}">${app.type.toUpperCase()}</span></td>
             <td><span class="status-badge ${app.status}">${app.status.toUpperCase()}</td>
-            <td>${new Date(app.applicationDate).toLocaleDateString()}</td>
-            <td>
+            <td>${new Date(app.applicationDate).toLocaleString()}</td>
+            <td class="action-buttons">
                 <button class="action-btn view" onclick="viewApplication('${app.id}')">View</button>
                 ${app.status === 'pending' ? `
                     <button class="action-btn approve" onclick="approveApplication('${app.id}')">Approve</button>
                     <button class="action-btn reject" onclick="rejectApplication('${app.id}')">Reject</button>
-                ` : ''}
+                    <button class="action-btn withdraw hidden" onclick="withdrawApplication('${app.id}')">Withdraw</button>
+                ` : `
+                    <button class="action-btn approve hidden" onclick="approveApplication('${app.id}')">Approve</button>
+                    <button class="action-btn reject hidden" onclick="rejectApplication('${app.id}')">Reject</button>
+                    <button class="action-btn withdraw" onclick="withdrawApplication('${app.id}')">Withdraw</button>
+                `}
             </td>
         </tr>
     `).join('');
+
+    const paginationContainer = document.querySelector('.applications-table .pagination');
+    if (paginationContainer) {
+        paginationContainer.innerHTML = `
+            ${adminCurrentPage > 0 ? `<button class="btn" onclick="changeAdminPage(-1)">← Previous</button>` : ''}
+            <span>Page ${adminCurrentPage + 1} of ${maxPage + 1}</span>
+            ${adminCurrentPage < maxPage ? `<button class="btn" onclick="changeAdminPage(1)">Next →</button>` : ''}
+        `;
+    }
+}
+
+function changeAdminPage(delta) {
+    statusCurrentPage += delta;
+    loadApplicationsTable();
 }
 
 function viewApplication(id) {
@@ -799,13 +825,13 @@ function viewApplication(id) {
             return;
         }
 
-        // Generate table content based on application type
         let detailsTable = `
             <h3>Application Details</h3>
             <table class="details-table">
                 <tr><th>Field</th><th>Value</th></tr>
                 <tr><td>Name</td><td>${app.fullName || '-'}</td></tr>
                 <tr><td>IC Number</td><td>${app.ic || '-'}</td></tr>
+                <tr><td>Passport Number</td><td>${app.passportNumber || '-'}</td></tr>
                 <tr><td>Concession Type</td><td>${app.type.toUpperCase()}</td></tr>
                 <tr><td>Status</td><td>${app.status.toUpperCase()}</td></tr>
                 <tr><td>Date & Time</td><td>${new Date(app.applicationDate).toLocaleString()}</td></tr>
@@ -813,9 +839,9 @@ function viewApplication(id) {
 
         if (app.type === 'oku') {
             detailsTable += `
-                <tr><td>Passport Number</td><td>${app.passportNumber || '-'}</td></tr>
                 <tr><td>OKU Card Number</td><td>${app.okuCardNumber || '-'}</td></tr>
-                <tr><td>Disability Information</td><td>${app.disability || '-'}</td></tr>
+                <tr><td>Disability Type</td><td>${app.disabilityType || '-'}</td></tr>
+                ${app.disabilityType === 'other' ? `<tr><td>Other Disability</td><td>${app.otherDisability || '-'}</td></tr>` : ''}
             `;
         } else if (app.type === 'senior') {
             detailsTable += `
@@ -837,7 +863,6 @@ function viewApplication(id) {
         detailsTable += '</table>';
         modalContent.innerHTML = detailsTable;
         modal.classList.add('active');
-        console.log('Modal opened for application ID:', id); // Debug log
     } catch (error) {
         console.error('Error in viewApplication:', error);
         alert('Failed to display application details');
@@ -858,6 +883,16 @@ function rejectApplication(id) {
     const app = applications.find(a => a.id === id);
     if (app) {
         app.status = 'rejected';
+        localStorage.setItem('concessionApplications', JSON.stringify(applications));
+        updateAdminStats();
+        loadApplicationsTable();
+    }
+}
+
+function withdrawApplication(id) {
+    const app = applications.find(a => a.id === id);
+    if (app) {
+        app.status = 'pending';
         localStorage.setItem('concessionApplications', JSON.stringify(applications));
         updateAdminStats();
         loadApplicationsTable();

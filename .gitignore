@@ -1,6 +1,5 @@
 *.log
+/public/hot
 /node_modules
 /package.json
-.env
-/public/hot
 .env

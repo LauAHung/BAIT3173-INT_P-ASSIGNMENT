@@ -145,8 +145,13 @@
                                         <span class="error-message"></span>
                                     </div>
                                     <div class="form-group">
-                                        <label for="ic">IC Number *</label>
-                                        <input type="text" id="ic" name="ic" maxlength="12" required>
+                                        <label for="ic">IC Number</label>
+                                        <input type="text" id="ic" name="ic" maxlength="12">
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="passportNumber">Passport Number</label>
+                                        <input type="text" id="passportNumber" name="passportNumber">
                                         <span class="error-message"></span>
                                     </div>
                                 </div>
@@ -155,18 +160,26 @@
                                 <div id="okuFields" class="conditional-fields">
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="passportNumber">Passport Number (Optional)</label>
-                                            <input type="text" id="passportNumber" name="passportNumber">
-                                        </div>
-                                        <div class="form-group">
                                             <label for="okuCardNumber">OKU Card Number *</label>
-                                            <input type="text" id="okuCardNumber" name="okuCardNumber">
+                                            <input type="text" id="okuCardNumber" name="okuCardNumber" required>
                                             <span class="error-message"></span>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="disability">Disability Information *</label>
-                                        <textarea id="disability" name="disability" rows="1"></textarea>
+                                        <label for="disabilityType">Disability Type *</label>
+                                        <select id="disabilityType" name="disabilityType" required>
+                                            <option value="">Select Disability Type</option>
+                                            <option value="visual">Visual Impairment</option>
+                                            <option value="hearing">Hearing Impairment</option>
+                                            <option value="mobility">Mobility Impairment</option>
+                                            <option value="cognitive">Cognitive Disability</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group" id="otherDisabilityContainer">
+                                        <label for="otherDisability">Other Disability Information *</label>
+                                        <textarea id="otherDisability" name="otherDisability" rows="1"></textarea>
                                         <span class="error-message"></span>
                                     </div>
                                 </div>

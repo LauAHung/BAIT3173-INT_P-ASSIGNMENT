@@ -161,7 +161,7 @@
               <!-- Refunded Section -->
             <div class="refunded-booking" id="refunded-content" style="display:none;">
                 <div class="booking-heading">
-                    <h2>Refunded Bookings</h2>
+                    <h2>Refunded/Cancelled Bookings</h2>
                 </div>
                 <div class="booking-item-container">
                     @php
@@ -215,21 +215,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('js/BookingPage.js') }}" defer></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tabs = document.querySelectorAll('.sidebar-tab');
-    const contents = document.querySelectorAll('.booking-content > div');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            tabs.forEach(t => t.classList.remove('active'));
-            contents.forEach(c => c.style.display = 'none');
-            this.classList.add('active');
-            const contentId = this.id.replace('-tab', '-content');
-            document.getElementById(contentId).style.display = 'block';
-        });
-    });
-});
-
 function confirmCancel(bookingId) {
     console.log('Confirming cancel for Booking ID:', bookingId); // Debug log
     Swal.fire({

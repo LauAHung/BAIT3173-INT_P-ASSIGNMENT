@@ -71,19 +71,22 @@ class ConcessionCardController extends Controller
             $validated = $request->validate([
                 'type' => 'required|in:oku,senior,student',
                 'fullName' => 'required|string|max:255',
-                'ic' => 'required|string|size:12|regex:/^\d+$/',
+                'ic' => 'nullable|string|size:12|regex:/^\d+$/',
+                'passportNumber' => 'nullable|string',
                 'okuCardNumber' => 'required_if:type,oku|nullable|string|min:8',
-                'disability' => 'required_if:type,oku|nullable|string',
+                'disabilityType' => 'required_if:type,oku|nullable|string|in:visual,hearing,mobility,cognitive,other',
+                'otherDisability' => 'required_if:disabilityType,other|nullable|string',
                 'age' => 'required_if:type,senior|nullable|integer|min:60',
                 'citizenship' => 'required_if:type,senior|nullable|string',
                 'matrixNumber' => 'required_if:type,student|nullable|string|min:4',
                 'schoolName' => 'required_if:type,student|nullable|string',
                 'studentIdPhoto' => 'required_if:type,student|nullable|image|max:2048',
-                'passportNumber' => 'nullable|string',
                 'gender' => 'required_if:type,senior|nullable|string|in:male,female',
                 'dateOfBirth' => 'nullable|date',
                 'studentCitizenship' => 'required_if:type,student|nullable|string',
                 'educationLevel' => 'required_if:type,student|nullable|string|in:primary,secondary,college,university'
+            ], [
+                'ic_or_passport.required' => 'Either IC Number or Passport Number is required.'
             ]);
 
             // Generate unique application ID
