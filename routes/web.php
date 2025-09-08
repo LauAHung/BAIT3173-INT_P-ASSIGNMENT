@@ -209,7 +209,7 @@ Route::get('news-email-publish', function () {
 })->middleware('admin')->name('news-email-publish');
 
 Route::get('card-approval', function () {
-    return view('AdminPage/CardApproval');
+    return view('AdminPage/ConcessionCardApproval');
 })->middleware('admin')->name('card-approval');
 
 Route::get('scan_qr', function () {
@@ -226,6 +226,16 @@ Route::post('/admin/api/newsletter/unsubscribe', [App\Http\Controllers\Newslette
 Route::get('/concession_card',function(){
     return view('ConcessionCardPage');
 })->name('concession_card');
+
+// Concession Card API routes
+Route::prefix('api/concession')->group(function () {
+    Route::get('/applications', [ConcessionCardController::class, 'getApplications'])->name('concession.applications');
+    Route::post('/applications', [ConcessionCardController::class, 'submitApplication'])->name('concession.submit');
+    Route::get('/applications/{id}', [ConcessionCardController::class, 'viewApplication'])->name('concession.view');
+    Route::post('/applications/{id}/approve', [ConcessionCardController::class, 'approveApplication'])->name('concession.approve');
+    Route::post('/applications/{id}/reject', [ConcessionCardController::class, 'rejectApplication'])->name('concession.reject');
+    Route::get('/admin/stats', [ConcessionCardController::class, 'getAdminStats'])->name('concession.stats');
+});
 
 //Discover
 Route::get('/discover', function () {

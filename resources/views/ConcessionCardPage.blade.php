@@ -3,129 +3,135 @@
 @section('title', 'Home Page')
 
 @push('styles')
-    <link href="{{ asset('css/ConcessionCard.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/ConcessionCardSimple.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 @endpush
 
 @section('content')
     <main>
-        <div id="header"></div>
-        <section class="first-section">
-            <div class="background"></div>
-            <div class="particles">
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>
-                <div class="particle"></div>    
-                <div class="particle"></div>
-                <div class="particle"></div>
-            </div>
-            <div class="preface">
-                <h1>Special Benefit</h1><br><br><br>
-                <p>
-                    Exclusive benefits, thoughtful discounts – everyone can enjoy the freedom of travel. <br><br><br>
-                    Benefits designed for students, seniors, and special groups – making travel truly accessible, 
-                    affordable, and inclusive.
-                </p>
-            </div>
-            <div class="img_preface">
-                <img src="{{ asset('images/concession_card.png') }}" alt="Concession Card">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-header">
+                    <h1>Concession Card</h1>
+                    <p class="hero-subtitle">Special discounts for students, seniors, and persons with disabilities</p>
+                </div>
+                
+                <div class="steps-process">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Choose Category</h3>
+                            <p>Select your concession type: OKU, Senior Citizen, or Student</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Fill Application</h3>
+                            <p>Complete the online form with your personal details and documents</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Submit & Wait</h3>
+                            <p>Submit your application and wait for admin approval</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>Get Your Card</h3>
+                            <p>Receive your digital concession card and enjoy 30% discount</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hero-benefits">
+                    <div class="benefit">
+                        <i class="fas fa-percentage"></i>
+                        <span>30% Discount</span>
+                    </div>
+                    <div class="benefit">
+                        <i class="fas fa-clock"></i>
+                        <span>Fast Approval</span>
+                    </div>
+                    <div class="benefit">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Digital Card</span>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="second-section">
+        <!-- Application Section -->
+        <section class="application-section">
             <div class="container">
-                <main class="main-content">
-                    <!-- Main Selection Screen -->
-                    <div id="mainScreen" class="screen active">
-                        <div class="hero-section">
-                            <p class="hero-subtitle">Choose your concession type and enjoy 30% discount on your next purchase</p>
+                <div class="section-header">
+                    <h2>Apply for Concession Card</h2>
+                    <p>Choose your category and start your application</p>
+                </div>
+
+                <!-- Main Selection Screen -->
+                <div id="mainScreen" class="screen active">
+                    <div class="concession-types">
+                        <div class="concession-card" data-type="oku">
+                            <div class="card-icon">
+                                <img src="{{ asset('images/oku_icon.png') }}" alt="OKU Icon">
+                            </div>
+                            <h3>OKU (Orang Kurang Upaya)</h3>
+                            <p>For persons with disabilities holding valid OKU cards</p>
+                            <ul class="requirements">
+                                <li>Valid IC/Passport</li>
+                                <li>Original JKM (OKU) Card</li>
+                                <li>Disability Information</li>
+                            </ul>
+                            <button class="btn btn-primary">Apply Now</button>
                         </div>
 
-                        <div class="card-grid">
-                            <div class="concession-card" data-type="oku">
-                                <div class="card-icon oku">
-                                    <img src="{{ asset('images/oku_icon.png') }}">
-                                </div>
-                                <h3>OKU (Orang Kurang Upaya)</h3>
-                                <p>For persons with disabilities holding valid OKU cards</p>
-                                <ul class="requirements">
-                                    <li>Valid IC/Passport</li>
-                                    <li>Original JKM (OKU) Card</li>
-                                    <li>Disability Information</li>
-                                </ul>
-                                <button class="btn btn-primary" style="margin:auto">Apply Now</button>
+                        <div class="concession-card" data-type="senior">
+                            <div class="card-icon">
+                                <img src="{{ asset('images/senior_icon.png') }}" alt="Senior Citizen Icon">
                             </div>
-
-                            <div class="concession-card" data-type="senior">
-                                <div class="card-icon senior">
-                                    <img src="{{ asset('images/senior_icon.png') }}">
-                                </div>
-                                <h3>Senior Citizen</h3>
-                                <p>For citizens aged 60 and above</p>
-                                <ul class="requirements">
-                                    <li>Age 60+</li>
-                                    <li>Valid IC</li>
-                                    <li>Malaysian Citizenship</li>
-                                </ul>
-                                <button class="btn btn-primary">Apply Now</button>
-                            </div>
-
-                            <div class="concession-card" data-type="student">
-                                <div class="card-icon student">
-                                    <img src="{{ asset('images/student_icon.png') }}">
-                                </div>
-                                <h3>Student</h3>
-                                <p>For current students in educational institutions</p>
-                                <ul class="requirements">
-                                    <li>Valid Student ID</li>
-                                    <li>Matrix Number</li>
-                                    <li>School Verification</li>
-                                </ul>
-                                <button class="btn btn-primary">Apply Now</button>
-                            </div>
+                            <h3>Senior Citizen</h3>
+                            <p>For citizens aged 60 and above</p>
+                            <ul class="requirements">
+                                <li>Age 60+</li>
+                                <li>Valid IC</li>
+                                <li>Malaysian Citizenship</li>
+                            </ul>
+                            <button class="btn btn-primary">Apply Now</button>
                         </div>
 
-                        <div class="benefits-section">
-                            <h3>Benefits of Concession Card</h3>
-                            <div class="benefits-grid">
-                                <div class="benefit">
-                                    <div class="benefit-number">30%</div>
-                                    <p>Discount on purchases</p>
-                                </div>
-                                <div class="benefit">
-                                    <div class="benefit-number">Fast</div>
-                                    <p>Quick approval process</p>
-                                </div>
-                                <div class="benefit">
-                                    <div class="benefit-number">Digital</div>
-                                    <p>No physical card needed</p>
-                                </div>
+                        <div class="concession-card" data-type="student">
+                            <div class="card-icon">
+                                <img src="{{ asset('images/student_icon.png') }}" alt="Student Icon">
                             </div>
+                            <h3>Student</h3>
+                            <p>For current students in educational institutions</p>
+                            <ul class="requirements">
+                                <li>Valid Student ID</li>
+                                <li>Matrix Number</li>
+                                <li>School Verification</li>
+                            </ul>
+                            <button class="btn btn-primary">Apply Now</button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Application Form Screen -->
-                    <div id="formScreen" class="screen">
-                        <div class="form-container">
-                            <div class="form-header">
-                                <button id="backBtn" class="btn btn-ghost">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M19 12H5m7 7-7-7 7-7"/>
-                                    </svg>
-                                    Back
-                                </button>
-                                <div class="form-title">
-                                    <div class="form-icon">
-                                        <img src="{{ asset('images/application_icon.png') }}">
-                                    </div>
-                                    <h2 id="formTitle">Application Form</h2>
-                                </div>
-                            </div>
+            <!-- Application Form Screen -->
+            <div id="formScreen" class="screen">
+                <div class="form-container">
+                    <div class="form-header">
+                        <button id="backBtn" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <h2 id="formTitle">Application Form</h2>
+                    </div>
 
                             <form id="applicationForm" enctype="multipart/form-data">
                                 @csrf
@@ -184,7 +190,10 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="citizenship">Citizenship *</label>
-                                            <input type="text" id="citizenship" name="citizenship">
+                                            <div class="autocomplete-container">
+                                                <input type="text" id="citizenship" name="citizenship" placeholder="Type to search nationality..." autocomplete="off">
+                                                <div id="citizenshipDropdown" class="autocomplete-dropdown"></div>
+                                            </div>
                                             <span class="error-message"></span>
                                         </div>
                                     </div>
@@ -204,7 +213,10 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="studentCitizenship">Citizenship *</label>
-                                            <input type="text" id="studentCitizenship" name="studentCitizenship">
+                                            <div class="autocomplete-container">
+                                                <input type="text" id="studentCitizenship" name="studentCitizenship" placeholder="Type to search nationality..." autocomplete="off">
+                                                <div id="studentCitizenshipDropdown" class="autocomplete-dropdown"></div>
+                                            </div>
                                             <span class="error-message"></span>
                                         </div>
                                     </div>
@@ -215,14 +227,16 @@
                                                 <option value="">Select Education Level</option>
                                                 <option value="primary">Primary School</option>
                                                 <option value="secondary">Secondary School</option>
-                                                <option value="college">College</option>
                                                 <option value="university">University</option>
                                             </select>
                                             <span class="error-message"></span>
                                         </div>
                                         <div class="form-group">
                                             <label for="schoolName">School Name *</label>
-                                            <input type="text" id="schoolName" name="schoolName">
+                                            <div class="autocomplete-container">
+                                                <input type="text" id="schoolName" name="schoolName" placeholder="Type to search university..." autocomplete="off">
+                                                <div id="schoolNameDropdown" class="autocomplete-dropdown"></div>
+                                            </div>
                                             <span class="error-message"></span>
                                         </div>
                                     </div>
@@ -251,125 +265,99 @@
                         </div>
                     </div>
 
-                    <!-- Status Screen -->
-                    <div id="statusScreen" class="screen">
-                        <div class="status-container">
-                            <button id="statusBackBtn" class="btn btn-ghost">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M19 12H5m7 7-7-7 7-7"/>
-                                </svg>
-                                Back to Main Menu
-                            </button>
-                            
-                            <div id="statusContent" class="status-content">
-                                <!-- Status content will be populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Admin Screen -->
-                    <div id="adminScreen" class="screen">
-                        <div class="admin-container">
-                            <div class="admin-header">
-                                <div>
-                                    <h2>Admin Dashboard</h2>
-                                    <p>Review and manage concession card applications</p>
-                                </div>
-                                <button id="adminBackBtn" class="btn btn-secondary">Back to Main</button>
-                            </div>
-
-                            <div class="admin-stats">
-                                <div class="stat-card">
-                                    <div class="stat-icon">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                            <polyline points="14,2 14,8 20,8"/>
-                                            <line x1="16" y1="13" x2="8" y2="13"/>
-                                            <line x1="16" y1="17" x2="8" y2="17"/>
-                                            <polyline points="10,9 9,9 8,9"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p>Total Applications</p>
-                                        <span id="totalApps">0</span>
-                                    </div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-icon pending">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <polyline points="12,6 12,12 16,14"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p>Pending Review</p>
-                                        <span id="pendingApps">0</span>
-                                    </div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-icon approved">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                            <polyline points="22,4 12,14.01 9,11.01"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p>Approved</p>
-                                        <span id="approvedApps">0</span>
-                                    </div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-icon rejected">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <line x1="15" y1="9" x2="9" y2="15"/>
-                                            <line x1="9" y1="9" x2="15" y2="15"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p>Rejected</p>
-                                        <span id="rejectedApps">0</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="applications-table">
-                                <h3>Applications</h3>
-                                <div class="table-container">
-                                    <table id="applicationsTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Applicant</th>
-                                                <th>Type</th>
-                                                <th>Status</th>
-                                                <th>Date</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- Applications will be populated by JavaScript -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
-
-            <!-- Modals -->
-            
-
-            <div id="viewModal" class="modal">
-                <div class="modal-content">
-                    <h3>Application Details</h3>
-                    <div id="applicationDetails"></div>
-                    <div class="modal-actions">
-                        <button id="closeView" class="btn btn-secondary">Close</button>
+            <!-- Status Screen -->
+            <div id="statusScreen" class="screen">
+                <div class="status-container">
+                    <button id="statusBackBtn" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Main Menu
+                    </button>
+                    
+                    <div id="statusContent" class="status-content">
+                        <!-- Status content will be populated by JavaScript -->
                     </div>
                 </div>
             </div>
-        </section>
+
+            <!-- Admin Screen -->
+            <div id="adminScreen" class="screen">
+                <div class="admin-container">
+                    <div class="admin-header">
+                        <h2>Admin Dashboard</h2>
+                        <button id="adminBackBtn" class="btn btn-secondary">Back to Main</button>
+                    </div>
+
+                    <div class="admin-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div>
+                                <p>Total Applications</p>
+                                <span id="totalApps">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon pending">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <p>Pending Review</p>
+                                <span id="pendingApps">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon approved">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                                <p>Approved</p>
+                                <span id="approvedApps">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon rejected">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div>
+                                <p>Rejected</p>
+                                <span id="rejectedApps">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="applications-table">
+                        <h3>Applications</h3>
+                        <div class="table-container">
+                            <table id="applicationsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Applicant</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Applications will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="viewModal" class="modal">
+            <div class="modal-content">
+                <h3>Application Details</h3>
+                <div id="applicationDetails"></div>
+                <div class="modal-actions">
+                    <button id="closeView" class="btn btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
     </main>
 
 <script src="{{ asset('js/ConcessionCard.js') }}" defer></script>

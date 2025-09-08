@@ -7,17 +7,54 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use App\Models\ConcessionApplication;
 
 class ConcessionCardController extends Controller
 {
     public function getApplications(Request $request)
     {
         try {
-            // Load applications from session or storage
-            $applications = session('concessionApplications', []);
+            // Get applications from database
+            $applications = ConcessionApplication::orderBy('created_at', 'desc')->get();
+            
+            // Transform data to match frontend format
+            $transformedApplications = $applications->map(function ($app) {
+                $data = [
+                    'id' => $app->application_id,
+                    'type' => $app->type,
+                    'fullName' => $app->full_name,
+                    'ic' => $app->ic_number,
+                    'status' => $app->status,
+                    'applicationDate' => $app->created_at->toIso8601String()
+                ];
+
+                // Add type-specific data
+                if ($app->type === 'oku') {
+                    $data['okuCardNumber'] = $app->oku_card_number;
+                    $data['disability'] = $app->disability_info;
+                    $data['passportNumber'] = $app->passport_number;
+                } elseif ($app->type === 'senior') {
+                    $data['age'] = $app->age;
+                    $data['citizenship'] = $app->citizenship;
+                    $data['gender'] = $app->gender;
+                    $data['dateOfBirth'] = $app->date_of_birth;
+                } elseif ($app->type === 'student') {
+                    $data['matrixNumber'] = $app->matrix_number;
+                    $data['schoolName'] = $app->school_name;
+                    $data['studentCitizenship'] = $app->citizenship;
+                    $data['educationLevel'] = $app->education_level;
+                    if ($app->student_id_photo_path) {
+                        $data['photoName'] = basename($app->student_id_photo_path);
+                        $data['photoUrl'] = asset('storage/' . $app->student_id_photo_path);
+                    }
+                }
+
+                return $data;
+            });
+
             return response()->json([
                 'success' => true,
-                'applications' => $applications
+                'applications' => $transformedApplications
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching applications: ' . $e->getMessage());
@@ -49,42 +86,79 @@ class ConcessionCardController extends Controller
                 'educationLevel' => 'required_if:type,student|nullable|string|in:primary,secondary,college,university'
             ]);
 
-            $application = [
-                'id' => 'APP' . time(),
+            // Generate unique application ID
+            $applicationId = ConcessionApplication::generateApplicationId();
+
+            // Prepare data for database
+            $applicationData = [
+                'application_id' => $applicationId,
                 'type' => $request->type,
-                'fullName' => $request->fullName,
-                'ic' => $request->ic,
-                'status' => 'pending',
-                'applicationDate' => now()->toIso8601String()
+                'full_name' => $request->fullName,
+                'ic_number' => $request->ic,
+                'status' => 'pending'
             ];
 
+            // Handle file upload for student ID photo
+            if ($request->hasFile('studentIdPhoto')) {
+                $path = $request->file('studentIdPhoto')->store('student_photos', 'public');
+                $applicationData['student_id_photo_path'] = $path;
+            }
+
+            // Add type-specific fields
             if ($request->type === 'oku') {
-                $application['okuCardNumber'] = $request->okuCardNumber;
-                $application['disability'] = $request->disability;
-                $application['passportNumber'] = $request->passportNumber;
+                $applicationData['oku_card_number'] = $request->okuCardNumber;
+                $applicationData['disability_info'] = $request->disability;
+                $applicationData['passport_number'] = $request->passportNumber;
+                $applicationData['citizenship'] = $request->citizenship ?? 'MY';
             } elseif ($request->type === 'senior') {
-                $application['age'] = (int)$request->age;
-                $application['citizenship'] = $request->citizenship;
-                $application['gender'] = $request->gender;
-                $application['dateOfBirth'] = $request->dateOfBirth;
+                $applicationData['age'] = (int)$request->age;
+                $applicationData['citizenship'] = $request->citizenship;
+                $applicationData['gender'] = $request->gender;
+                $applicationData['date_of_birth'] = $request->dateOfBirth;
             } elseif ($request->type === 'student') {
-                $application['matrixNumber'] = $request->matrixNumber;
-                $application['schoolName'] = $request->schoolName;
-                $application['studentCitizenship'] = $request->studentCitizenship;
-                $application['educationLevel'] = $request->educationLevel;
-                if ($request->hasFile('studentIdPhoto')) {
-                    $path = $request->file('studentIdPhoto')->store('student_photos', 'public');
-                    $application['photoName'] = basename($path);
+                $applicationData['matrix_number'] = $request->matrixNumber;
+                $applicationData['school_name'] = $request->schoolName;
+                $applicationData['citizenship'] = $request->studentCitizenship;
+                $applicationData['education_level'] = $request->educationLevel;
+            }
+
+            // Create application in database
+            $application = ConcessionApplication::create($applicationData);
+
+            // Return response in the format expected by frontend
+            $responseData = [
+                'id' => $application->application_id,
+                'type' => $application->type,
+                'fullName' => $application->full_name,
+                'ic' => $application->ic_number,
+                'status' => $application->status,
+                'applicationDate' => $application->created_at->toIso8601String()
+            ];
+
+            // Add type-specific data to response
+            if ($application->type === 'oku') {
+                $responseData['okuCardNumber'] = $application->oku_card_number;
+                $responseData['disability'] = $application->disability_info;
+                $responseData['passportNumber'] = $application->passport_number;
+            } elseif ($application->type === 'senior') {
+                $responseData['age'] = $application->age;
+                $responseData['citizenship'] = $application->citizenship;
+                $responseData['gender'] = $application->gender;
+                $responseData['dateOfBirth'] = $application->date_of_birth;
+            } elseif ($application->type === 'student') {
+                $responseData['matrixNumber'] = $application->matrix_number;
+                $responseData['schoolName'] = $application->school_name;
+                $responseData['studentCitizenship'] = $application->citizenship;
+                $responseData['educationLevel'] = $application->education_level;
+                if ($application->student_id_photo_path) {
+                    $responseData['photoName'] = basename($application->student_id_photo_path);
+                    $responseData['photoUrl'] = asset('storage/' . $application->student_id_photo_path);
                 }
             }
 
-            $applications = session('concessionApplications', []);
-            $applications[] = $application;
-            session(['concessionApplications' => $applications]);
-
             return response()->json([
                 'success' => true,
-                'application' => $application
+                'application' => $responseData
             ]);
         } catch (ValidationException $e) {
             Log::error('Validation failed: ' . $e->getMessage());
@@ -105,8 +179,7 @@ class ConcessionCardController extends Controller
     public function viewApplication(Request $request, $id)
     {
         try {
-            $applications = session('concessionApplications', []);
-            $application = collect($applications)->firstWhere('id', $id);
+            $application = ConcessionApplication::where('application_id', $id)->first();
 
             if (!$application) {
                 return response()->json([
@@ -115,9 +188,40 @@ class ConcessionCardController extends Controller
                 ], 404);
             }
 
+            // Transform data to match frontend format
+            $data = [
+                'id' => $application->application_id,
+                'type' => $application->type,
+                'fullName' => $application->full_name,
+                'ic' => $application->ic_number,
+                'status' => $application->status,
+                'applicationDate' => $application->created_at->toIso8601String()
+            ];
+
+            // Add type-specific data
+            if ($application->type === 'oku') {
+                $data['okuCardNumber'] = $application->oku_card_number;
+                $data['disability'] = $application->disability_info;
+                $data['passportNumber'] = $application->passport_number;
+            } elseif ($application->type === 'senior') {
+                $data['age'] = $application->age;
+                $data['citizenship'] = $application->citizenship;
+                $data['gender'] = $application->gender;
+                $data['dateOfBirth'] = $application->date_of_birth;
+            } elseif ($application->type === 'student') {
+                $data['matrixNumber'] = $application->matrix_number;
+                $data['schoolName'] = $application->school_name;
+                $data['studentCitizenship'] = $application->citizenship;
+                $data['educationLevel'] = $application->education_level;
+                if ($application->student_id_photo_path) {
+                    $data['photoName'] = basename($application->student_id_photo_path);
+                    $data['photoUrl'] = asset('storage/' . $application->student_id_photo_path);
+                }
+            }
+
             return response()->json([
                 'success' => true,
-                'application' => $application
+                'application' => $data
             ]);
         } catch (\Exception $e) {
             Log::error('Error viewing application: ' . $e->getMessage());
@@ -131,24 +235,25 @@ class ConcessionCardController extends Controller
     public function approveApplication(Request $request, $id)
     {
         try {
-            $applications = session('concessionApplications', []);
-            $index = collect($applications)->search(function ($app) use ($id) {
-                return $app['id'] === $id;
-            });
+            $application = ConcessionApplication::where('application_id', $id)->first();
 
-            if ($index === false) {
+            if (!$application) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Application not found'
                 ], 404);
             }
 
-            $applications[$index]['status'] = 'approved';
-            session(['concessionApplications' => $applications]);
+            $application->update([
+                'status' => 'approved',
+                'reviewed_at' => now(),
+                'reviewed_by' => Auth::id(),
+                'admin_notes' => $request->input('notes', '')
+            ]);
 
             return response()->json([
                 'success' => true,
-                'application' => $applications[$index]
+                'message' => 'Application approved successfully'
             ]);
         } catch (\Exception $e) {
             Log::error('Error approving application: ' . $e->getMessage());
@@ -162,24 +267,25 @@ class ConcessionCardController extends Controller
     public function rejectApplication(Request $request, $id)
     {
         try {
-            $applications = session('concessionApplications', []);
-            $index = collect($applications)->search(function ($app) use ($id) {
-                return $app['id'] === $id;
-            });
+            $application = ConcessionApplication::where('application_id', $id)->first();
 
-            if ($index === false) {
+            if (!$application) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Application not found'
                 ], 404);
             }
 
-            $applications[$index]['status'] = 'rejected';
-            session(['concessionApplications' => $applications]);
+            $application->update([
+                'status' => 'rejected',
+                'reviewed_at' => now(),
+                'reviewed_by' => Auth::id(),
+                'admin_notes' => $request->input('notes', '')
+            ]);
 
             return response()->json([
                 'success' => true,
-                'application' => $applications[$index]
+                'message' => 'Application rejected successfully'
             ]);
         } catch (\Exception $e) {
             Log::error('Error rejecting application: ' . $e->getMessage());
@@ -193,12 +299,11 @@ class ConcessionCardController extends Controller
     public function getAdminStats(Request $request)
     {
         try {
-            $applications = session('concessionApplications', []);
             $stats = [
-                'total' => count($applications),
-                'pending' => count(array_filter($applications, fn($app) => $app['status'] === 'pending')),
-                'approved' => count(array_filter($applications, fn($app) => $app['status'] === 'approved')),
-                'rejected' => count(array_filter($applications, fn($app) => $app['status'] === 'rejected'))
+                'total' => ConcessionApplication::count(),
+                'pending' => ConcessionApplication::pending()->count(),
+                'approved' => ConcessionApplication::approved()->count(),
+                'rejected' => ConcessionApplication::rejected()->count()
             ];
 
             return response()->json([
