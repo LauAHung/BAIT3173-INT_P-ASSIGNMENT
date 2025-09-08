@@ -14,8 +14,10 @@ class ConcessionCardController extends Controller
     public function getApplications(Request $request)
     {
         try {
-            // Get applications from database
-            $applications = ConcessionApplication::orderBy('created_at', 'desc')->get();
+            // Get applications from database - only show user's own applications
+            $applications = ConcessionApplication::where('user_id', Auth::id())
+                ->orderBy('created_at', 'desc')
+                ->get();
             
             // Transform data to match frontend format
             $transformedApplications = $applications->map(function ($app) {
@@ -94,6 +96,7 @@ class ConcessionCardController extends Controller
 
             // Prepare data for database
             $applicationData = [
+                'user_id' => Auth::id(),
                 'application_id' => $applicationId,
                 'type' => $request->type,
                 'full_name' => $request->fullName,
@@ -182,12 +185,14 @@ class ConcessionCardController extends Controller
     public function viewApplication(Request $request, $id)
     {
         try {
-            $application = ConcessionApplication::where('application_id', $id)->first();
+            $application = ConcessionApplication::where('application_id', $id)
+                ->where('user_id', Auth::id())
+                ->first();
 
             if (!$application) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Application not found'
+                    'message' => 'Application not found or access denied'
                 ], 404);
             }
 
@@ -238,12 +243,14 @@ class ConcessionCardController extends Controller
     public function approveApplication(Request $request, $id)
     {
         try {
-            $application = ConcessionApplication::where('application_id', $id)->first();
+            $application = ConcessionApplication::where('application_id', $id)
+                ->where('user_id', Auth::id())
+                ->first();
 
             if (!$application) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Application not found'
+                    'message' => 'Application not found or access denied'
                 ], 404);
             }
 
@@ -270,12 +277,14 @@ class ConcessionCardController extends Controller
     public function rejectApplication(Request $request, $id)
     {
         try {
-            $application = ConcessionApplication::where('application_id', $id)->first();
+            $application = ConcessionApplication::where('application_id', $id)
+                ->where('user_id', Auth::id())
+                ->first();
 
             if (!$application) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Application not found'
+                    'message' => 'Application not found or access denied'
                 ], 404);
             }
 
@@ -302,11 +311,12 @@ class ConcessionCardController extends Controller
     public function getAdminStats(Request $request)
     {
         try {
+            $userId = Auth::id();
             $stats = [
-                'total' => ConcessionApplication::count(),
-                'pending' => ConcessionApplication::pending()->count(),
-                'approved' => ConcessionApplication::approved()->count(),
-                'rejected' => ConcessionApplication::rejected()->count()
+                'total' => ConcessionApplication::where('user_id', $userId)->count(),
+                'pending' => ConcessionApplication::where('user_id', $userId)->pending()->count(),
+                'approved' => ConcessionApplication::where('user_id', $userId)->approved()->count(),
+                'rejected' => ConcessionApplication::where('user_id', $userId)->rejected()->count()
             ];
 
             return response()->json([

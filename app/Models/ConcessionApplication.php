@@ -10,6 +10,7 @@ class ConcessionApplication extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'application_id',
         'type',
         'full_name',
@@ -44,6 +45,12 @@ class ConcessionApplication extends Model
         $lastApp = self::orderBy('id', 'desc')->first();
         $nextNumber = $lastApp ? (intval(substr($lastApp->application_id, 3)) + 1) : 1;
         return 'APP' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+    }
+
+    // Relationship with user who submitted the application
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     // Relationship with reviewer (admin user)
