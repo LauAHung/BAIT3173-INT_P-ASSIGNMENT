@@ -152,7 +152,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
             'TicketNo' => $ticketCount,
             'Price' => $this->totalPrice,
             'Status' => 'Pending',
-            'Created_at' => now()->format('d-m-Y'),
+            'Created_at' => now()->format('d-m-Y H:i:s'),
         ]);
         return $this;
     }
@@ -174,7 +174,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
                 'PassportExpiryDate' => $passenger['passport_expiry'] ?? null,
                 'Contactno' => $passenger['contact_no'],
                 'TicketType' => $passenger['ticket_type'],
-                'Created_at' => now()->format('d-m-Y'),
+                'Created_at' => now()->format('d-m-Y H:i:s'),
             ]);
             $this->passengerModels[$index] = $passengerModel;
 
@@ -197,7 +197,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
                         'SeatNo' => $seatNo,
                         'is_available' => 'N',
                         'status' => 'Booked',
-                        'Created_at' => now()->format('d-m-Y'),
+                        'Created_at' => now()->format('d-m-Y H:i:s'),
                     ]);
                 }
                 $seatId = $seat->SeatID;
@@ -211,7 +211,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
                 'PassengerID' => $passengerModel->PassengerID,
                 'Status' => 'Pending',
                 'Price' => $this->ticketPrices[$index],
-                'Created_at' => now()->format('d-m-Y'),
+                'Created_at' => now()->format('d-m-Y H:i:s'),
             ]);
         }
 
@@ -236,7 +236,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
                             'SeatNo' => $seatNo,
                             'is_available' => 'N',
                             'status' => 'Booked',
-                            'Created_at' => now()->format('d-m-Y'),
+                            'Created_at' => now()->format('d-m-Y H:i:s'),
                         ]);
                     }
                     $seatId = $seat->SeatID;
@@ -250,7 +250,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
                     'PassengerID' => $passengerModel->PassengerID,
                     'Status' => 'Pending',
                     'Price' => $this->returnTicketPrices[$index],
-                    'Created_at' => now()->format('d-m-Y'),
+                    'Created_at' => now()->format('d-m-Y H:i:s'),
                 ]);
             }
         }

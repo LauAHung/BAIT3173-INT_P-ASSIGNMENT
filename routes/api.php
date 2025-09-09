@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\BookingApiController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -151,8 +151,6 @@ Route::prefix('user')->group(function () {
     });
 });
 
-Route::prefix('bookings')->group(function () {
-    Route::get('/bookings', [App\Http\Controllers\Api\BookingApiController::class, 'index']);
-    Route::get('/bookings_detail/{id}', [App\Http\Controllers\Api\BookingApiController::class, 'show']);
-    Route::post('/bookings/{id}/cancel', [App\Http\Controllers\Api\BookingApiController::class, 'cancel']);
-});
+Route::get('/bookings/{userId}', [BookingApiController::class, 'index']);
+Route::get('/booking/{bookingId}/{userId}', [BookingApiController::class, 'show']);
+Route::patch('/booking/cancel/{bookingId}/{userId}', [BookingApiController::class, 'cancel']);
