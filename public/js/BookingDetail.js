@@ -24,23 +24,23 @@ document.addEventListener("DOMContentLoaded", async function () {
                     <div class="booking-info">
                         <img src="/images/logo/${booking.journey?.train?.TrainService ?? 'default'}_logo.png" alt="service_type">
                     </div>
-                    <div class="booking-info"><label>Booking ID:</label> <span>${booking.BookingID ?? 'Unknown'}</span></div>
-                    <div class="booking-info"><label>Route:</label> <span>${booking.journey?.FromLocation ?? 'Unknown'} to ${booking.journey?.ToLocation ?? 'Unknown'}</span></div>
+                    <div class="booking-info"><label class="booking-label">Booking ID:</label> <span>${booking.BookingID ?? 'Unknown'}</span></div>
+                    <div class="booking-info"><label class="booking-label">Route:</label> <span>${booking.journey?.FromLocation ?? 'Unknown'} to ${booking.journey?.ToLocation ?? 'Unknown'}</span></div>
                     ${booking.BookingType === 'Return' ? `
-                        <div class="booking-info"><label>Return:</label> <span>${booking.journey2?.FromLocation ?? 'Unknown'} to ${booking.journey2?.ToLocation ?? 'Unknown'}</span></div>
+                        <div class="booking-info"><label class="booking-label">Return:</label> <span>${booking.journey2?.FromLocation ?? 'Unknown'} to ${booking.journey2?.ToLocation ?? 'Unknown'}</span></div>
                     ` : ""}
-                    <div class="booking-info"><label>DepartDate:</label> 
-                        <span>${new Date(booking.journey?.DepartureTime ?? "").toLocaleDateString()}</span> |
+                    <div class="booking-info"><label class="booking-label">DepartDate:</label> 
+                        <span>${new Date(booking.journey?.DepartureTime ?? "").toLocaleDateString("en-US", {month: "short",day: "numeric",year: "numeric"}).replace(",", "")}</span> |
                         <span>${formatTime(booking.journey?.DepartureTime)} - ${formatTime(booking.journey?.ArrivalTime)}</span>
                     </div>
                     ${booking.BookingType === 'Return' ? `
-                        <div class="booking-info"><label>ReturnDate:</label>
-                            <span>${new Date(booking.journey2?.DepartureTime ?? "").toLocaleDateString()}</span> |
+                        <div class="booking-info"><label class="booking-label">ReturnDate:</label>
+                            <span>${new Date(booking.journey2?.DepartureTime ?? "").toLocaleDateString("en-US", {month: "short",day: "numeric",year: "numeric"}).replace(",", "")}</span> |
                             <span>${formatTime(booking.journey2?.DepartureTime)} - ${formatTime(booking.journey2?.ArrivalTime)}</span>
                         </div>
                     ` : ""}
-                    <div class="booking-info"><label>Status:</label> <span>${booking.Status ?? 'Unknown'}</span></div>
-                    <div class="booking-info"><label>Total Price:</label> <span>RM ${booking.Price ? Number(booking.Price).toFixed(2) : 'Unknown'}</span></div>
+                    <div class="booking-info "><label class="booking-label">Status:</label> <span>${booking.Status ?? 'Unknown'}</span></div>
+                    <div class="booking-info"><label class="booking-label">Total Price:</label> <span>RM ${booking.Price ? Number(booking.Price).toFixed(2) : 'Unknown'}</span></div>
                 </div>
             </div>
             <div class="ticket-heading">
