@@ -151,7 +151,7 @@
             @php
             $journeys = $journeys ?? collect(); // Default to empty collection if undefined
             @endphp
-            @if ($journeys->isNotEmpty())
+            @if (!empty($journeys))
                 @foreach ($journeys as $journey)
                     <div class="train-card">
                         <div class="train-col train-name">
@@ -161,31 +161,31 @@
                                 'Komuter' => 'komuter_logo.png',
                                 'Intercity' => 'intercity_logo.png'
                             ];
-                            $trainService = $journey->Train->TrainService ?? 'Unknown';
+                            $trainService = $journey['train']['TrainService'] ?? 'Unknown';
                             $logoFile = $logoMap[$trainService] ?? 'default_logo.png';
                             @endphp
                             <img src="{{ asset('images/logo/' . $logoFile) }}" class="train-logo" alt="Train Logo">
-                            {{ $journey->Train->TrainNo ?? 'Unknown' }}
+                            {{ $journey['train']['TrainNo'] ?? 'Unknown' }}
                         </div>
-                        <div class="train-col train-date">{{ $journey->DepartureTime ? date('d F Y', strtotime($journey->DepartureTime)) : 'Unknown' }}</div>
+                        <div class="train-col train-date">{{ $journey['DepartureTime'] ? date('d F Y', strtotime($journey['DepartureTime'])) : 'Unknown' }}</div>
                         <div class="train-col train-time">
-                            <div><b>{{ date('h:i A', strtotime($journey->DepartureTime)) }}</b> &mdash;
-                                <b>{{ date('h:i A', strtotime($journey->ArrivalTime)) }}</b>
+                            <div><b>{{ date('h:i A', strtotime($journey['DepartureTime'])) }}</b> &mdash;
+                                <b>{{ date('h:i A', strtotime($journey['ArrivalTime'])) }}</b>
                             </div>
-                            <div class="train-desc">({{ $journey->FromLocation ?? 'Unknown' }} to
-                                {{ $journey->ToLocation ?? 'Unknown' }})</div>
+                            <div class="train-desc">({{ $journey['FromLocation'] ?? 'Unknown' }} to
+                                {{ $journey['ToLocation'] ?? 'Unknown' }})</div>
                         </div>
                         <div class="train-col train-capacity">
                             @if ($trainService == 'ETS')
-                                {{ $journey->SeatAvailable }}
+                                {{ $journey['SeatAvailable'] }}
                                 <div class="capacity-desc">(seat left)</div>
                             @else
                                 <span>N/A</span>
                             @endif
                         </div>
                         <div class="train-col train-action">
-                            <span class="train-price">RM{{ $journey->Price }}</span>
-                            <a href="{{ route('passengerinfo', ['passengers' => request()->input('passengers', 1), 'journey_id' => session('selected_journey') ? session('selected_journey.id') : $journey->JourneyID, 'journey_id2' => session('selected_journey') ? $journey->JourneyID : null, 'booking_type' => request()->input('booking_type', 'OneWay')]) }}">
+                            <span class="train-price">RM{{ $journey['Price'] }}</span>
+                            <a href="{{ route('passengerinfo', ['passengers' => request()->input('passengers', 1), 'journey_id' => session('selected_journey') ? session('selected_journey.id') : $journey['JourneyID'], 'journey_id2' => session('selected_journey') ? $journey['JourneyID'] : null, 'booking_type' => request()->input('booking_type', 'OneWay')]) }}">
                                 <button class="btn-select">Select</button>
                             </a>
                         </div>
@@ -204,25 +204,6 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-flatpickr("#depart-date", {
-    minDate: "today",
-    dateFormat: "M d, Y",
-    onChange: function(selectedDates, dateStr, instance) {
-        if (dateStr) {
-            document.getElementById('return-date').disabled = document.querySelector('input[name="booking_type"]').value === 'OneWay';
-            flatpickr("#return-date", {
-                minDate: "today" || dateStr,
-                dateFormat: "M d, Y"
-            });
-        }
-    },
-    disable: [
-        function(date) {
-            // Disable depart-date input for return journey selection
-            return ;
-        }
-    ]
-});
 document.addEventListener('DOMContentLoaded', () => {
     const successMessage = "{{ session('success') }}";
     const infoMessage = "{{ session('info') }}";
@@ -277,4 +258,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+<x-error-modal />
 @endsection
