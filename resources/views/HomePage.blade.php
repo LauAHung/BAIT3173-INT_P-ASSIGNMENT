@@ -22,73 +22,75 @@
             <h1>Search & Book Trains</h1>
             <p>Book & Start your journey now</p>
         </div>
+        <form action="{{ route('train.selection') }}" method="GET">
+            <div class="train-type-toggle">
+                <div class="toggle-container">
+                    <input type="radio" id="return-train" name="booking_type" class="train-option" checked
+                        onclick="handleTrainTypeChange()">
+                    <label for="return-train">Return</label>
 
-        <div class="train-type-toggle">
-            <div class="toggle-container">
-                <input type="radio" id="return-train" name="train-type" class="train-option" checked
-                    onclick="handleTrainTypeChange()">
-                <label for="return-train">Return</label>
+                    <input type="radio" id="one-way-train" name="booking_type" class="train-option"
+                        onclick="handleTrainTypeChange()">
+                    <label for="one-way-train">One Way</label>
 
-                <input type="radio" id="one-way-train" name="train-type" class="train-option"
-                    onclick="handleTrainTypeChange()">
-                <label for="one-way-train">One Way</label>
-
-                <span class="toggle-switch"></span>
+                    <span class="toggle-switch"></span>
+                </div>
             </div>
-        </div>
 
-        <div class="ticket-search-container">
-            <form class="search-form" action="{{ route('train.selection') }}" method="GET" id="searchForm">
-                <div class="form-group">
-                    <label>Depart Location</label>
-                    <input type="text" name="fromlocation" placeholder="Where from?"
-                        value="{{ request()->input('fromlocation') }}">
-                </div>
-
-                <div class="swap-btn-container">
-                    <button type="button" class="swap-btn" onclick="swapLocations()">
-                        <i class="fas fa-exchange-alt"></i>
-                    </button>
-                </div>
-
-                <div class="form-group">
-                    <label>To Location</label>
-                    <input type="text" name="tolocation" placeholder="Where to?"
-                        value="{{ request()->input('tolocation') }}">
-                </div>
-
-                <div class="form-group">
-                    <label>Departure Date</label>
-                    <div class="date-input-container">
-                        <i class="fas fa-calendar-alt date-icon"></i>
-                        <input type="text" id="depart-date" name="journeydate" placeholder="Select date" readonly
-                            value="{{ request()->input('journeydate') }}">
+            <div class="ticket-search-container">
+                <div class="search-form" method="GET" id="searchForm">
+                    <!-- Hidden input for bookingtype -->
+                    <div class="form-group">
+                        <label>Depart Location</label>
+                        <input type="text" name="fromlocation" placeholder="Where from?"
+                            value="{{ request()->input('fromlocation') }}">
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label>Return Date</label>
-                    <div class="date-input-container">
-                        <i class="fas fa-calendar-alt date-icon"></i>
-                        <input type="text" id="return-date" name="returndate" placeholder="Select date" readonly
-                            disabled value="{{ request()->input('returndate') }}">
+                    <div class="swap-btn-container">
+                        <button type="button" class="swap-btn" onclick="swapLocations()">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label>Passengers</label>
-                    <select name="passengers">
-                        <option value="1" {{ request()->input('passengers') == '1' ? 'selected' : '' }}>1 Passenger
-                        </option>
-                        <option value="2" {{ request()->input('passengers') == '2' ? 'selected' : '' }}>2 Passengers
-                        </option>
-                        <option value="3" {{ request()->input('passengers') == '3' ? 'selected' : '' }}>3 Passengers
-                        </option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label>To Location</label>
+                        <input type="text" name="tolocation" placeholder="Where to?"
+                            value="{{ request()->input('tolocation') }}">
+                    </div>
 
-                <button type="submit" class="search-btn">Search</button>
-            </form>
+                    <div class="form-group">
+                        <label>Departure Date</label>
+                        <div class="date-input-container">
+                            <i class="fas fa-calendar-alt date-icon"></i>
+                            <input type="text" id="depart-date" name="journeydate" placeholder="Select date" readonly
+                                value="{{ request()->input('journeydate') }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Return Date</label>
+                        <div class="date-input-container">
+                            <i class="fas fa-calendar-alt date-icon"></i>
+                            <input type="text" id="return-date" name="returndate" placeholder="Select date" readonly
+                                disabled value="{{ request()->input('returndate') }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Passengers</label>
+                        <select name="passengers">
+                            <option value="1" {{ request()->input('passengers') == '1' ? 'selected' : '' }}>1 Passenger
+                            </option>
+                            <option value="2" {{ request()->input('passengers') == '2' ? 'selected' : '' }}>2 Passengers
+                            </option>
+                            <option value="3" {{ request()->input('passengers') == '3' ? 'selected' : '' }}>3 Passengers
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="search-btn">Search</button>
+                </div>
+        </form>
         </div>
     </section>
     <section>
@@ -155,7 +157,7 @@
             <!-- button arrows -->
             <div class="arrows">
                 <button id="prev">
-                    << /button>
+                    < </button>
                         <button id="next">></button>
             </div>
             <!-- thumbnail -->

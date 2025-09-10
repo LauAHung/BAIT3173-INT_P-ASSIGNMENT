@@ -106,6 +106,9 @@ class UserRegistrationService
             if (isset($profileData['email'])) {
                 $user->email = trim(strtolower($profileData['email']));
             }
+            if (isset($profileData['phone'])) {
+                $user->phone = preg_replace('/\s+/', '', $profileData['phone']);
+            }
             if (isset($profileData['gender'])) {
                 $user->gender = $profileData['gender'];
             }
@@ -151,20 +154,18 @@ class UserRegistrationService
             }
 
             $user = User::where('email', trim(strtolower($email)))->first();
-            
             if (!$user) {
                 return false;
             }
 
-            // Generate reset token
-            $token = Str::random(64);
-            $user->password_reset_token = $token;
-            $user->password_reset_expires_at = now()->addHours(24);
+            // Generate 6-digit OTP and expiry (10 minutes)
+            $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $user->password_reset_otp = $otp;
+            $user->password_reset_otp_expires_at = now()->addMinutes(10);
             $user->save();
 
-            // Send reset email
-            $this->sendPasswordResetEmail($user, $token);
-
+            // Send OTP email
+            $this->mailFactoryManager->sendMail('password_reset_otp', $user, ['otp' => $otp]);
             return true;
         } catch (Exception $e) {
             throw new Exception('Forgot password process failed: ' . $e->getMessage());
@@ -201,6 +202,56 @@ class UserRegistrationService
             return true;
         } catch (Exception $e) {
             throw new Exception('Password reset failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send password reset OTP
+     */
+    public function sendPasswordResetOtp(string $email): bool
+    {
+        return $this->handleForgotPassword($email);
+    }
+
+    /**
+     * Verify password reset OTP
+     */
+    public function verifyPasswordResetOtp(string $email, string $otp): bool
+    {
+        try {
+            $user = User::where('email', trim(strtolower($email)))->first();
+            if (!$user) { return false; }
+            if (empty($user->password_reset_otp) || $user->password_reset_otp !== $otp) { return false; }
+            if ($user->password_reset_otp_expires_at && $user->password_reset_otp_expires_at->isPast()) { return false; }
+            // Mark OTP as verified by extending a short window to reset
+            $user->password_reset_otp_expires_at = now()->addMinutes(5);
+            $user->save();
+            return true;
+        } catch (Exception $e) {
+            throw new Exception('OTP verification failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reset password after OTP verification
+     */
+    public function resetPasswordAfterOtp(string $email, string $newPassword): bool
+    {
+        try {
+            $user = User::where('email', trim(strtolower($email)))->first();
+            if (!$user) { return false; }
+            if ($user->password_reset_otp_expires_at && $user->password_reset_otp_expires_at->isPast()) { return false; }
+            if (strlen($newPassword) < 8) {
+                throw new Exception('Password must be at least 8 characters long');
+            }
+            $user->password = Hash::make($newPassword);
+            // clear OTP fields
+            $user->password_reset_otp = null;
+            $user->password_reset_otp_expires_at = null;
+            $user->save();
+            return true;
+        } catch (Exception $e) {
+            throw new Exception('Password reset with OTP failed: ' . $e->getMessage());
         }
     }
 

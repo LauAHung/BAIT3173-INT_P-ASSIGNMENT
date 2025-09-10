@@ -11,6 +11,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingDetailController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ConcessionCardController;
 
 Route::get('/', function () {
     return view('HomePage');
@@ -27,9 +28,11 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Password reset routes
 Route::get('/forgot-password', [LoginController::class, 'showForgotPasswordForm'])->name('password.request');
-Route::post('/forgot-password', [LoginController::class, 'handleForgotPassword'])->name('password.email');
-Route::get('/reset-password/{token}', [LoginController::class, 'showResetPasswordForm'])->name('password.reset');
-Route::post('/reset-password', [LoginController::class, 'handleResetPassword'])->name('password.update');
+Route::post('/forgot-password', [LoginController::class, 'handleForgotPasswordOtp'])->name('password.email');
+Route::get('/verify-otp', [LoginController::class, 'showVerifyOtpForm'])->name('password.verify-otp');
+Route::post('/verify-otp', [LoginController::class, 'verifyOtp'])->name('password.verify-otp.post');
+Route::get('/reset-password', [LoginController::class, 'showResetPasswordOtpForm'])->name('password.reset.otp');
+Route::post('/reset-password', [LoginController::class, 'handleResetPasswordWithOtp'])->name('password.update.otp');
 
 // Email verification
 Route::get('/verify-email/{token}', [LoginController::class, 'verifyEmail'])->name('verification.verify');
@@ -72,14 +75,16 @@ Route::post('/signup', [SignupController::class, 'handleSignup'])
 ->name('signup.handle');
 
 // Profile routes
-Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile');
-Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
-Route::post('/profile/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-Route::get('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'showChangePassword'])->name('profile.change-password');
-Route::post('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'changePassword'])->name('profile.change-password.post');
-Route::post('/profile/email-subscription', [App\Http\Controllers\ProfileController::class, 'updateEmailSubscription'])->name('profile.email-subscription');
-Route::post('/profile/delete-account', [App\Http\Controllers\ProfileController::class, 'deleteAccount'])->name('profile.delete-account');
-Route::get('/profile/activity', [App\Http\Controllers\ProfileController::class, 'activity'])->name('profile.activity');
+Route::middleware('auth.required')->group(function () {
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile');
+    Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::post('/profile/change-password', [App\Http\Controllers\ProfileController::class, 'changePassword'])->name('profile.change-password.post');
+    Route::post('/profile/email-subscription', [App\Http\Controllers\ProfileController::class, 'updateEmailSubscription'])->name('profile.email-subscription');
+    Route::post('/profile/delete-account', [App\Http\Controllers\ProfileController::class, 'deleteAccount'])->name('profile.delete-account');
+    Route::get('/profile/activity', [App\Http\Controllers\ProfileController::class, 'activity'])->name('profile.activity');
+});
 
 // Admin routes
 Route::prefix('admin')->middleware('admin')->group(function () {
@@ -104,6 +109,10 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::delete('/api/trains/{id}', [App\Http\Controllers\AdminController::class, 'deleteTrain']);
     Route::post('/api/qr/scan', [App\Http\Controllers\AdminController::class, 'scanQR']);
     Route::post('/api/qr/generate', [App\Http\Controllers\AdminController::class, 'generateQR']);
+    // Ticket info + status updates for ScanQR page
+    Route::get('/api/tickets/{ticketId}', [App\Http\Controllers\Admin\TicketController::class, 'show']);
+    Route::post('/api/tickets/{ticketId}/checkin', [App\Http\Controllers\Admin\TicketController::class, 'checkIn']);
+    Route::post('/api/tickets/{ticketId}/checkout', [App\Http\Controllers\Admin\TicketController::class, 'checkOut']);
     Route::post('/api/newsletter/send', [App\Http\Controllers\AdminController::class, 'sendNewsletter']);
     Route::post('/api/refunds/process', [App\Http\Controllers\AdminController::class, 'processRefund']);
     Route::get('/api/export', [App\Http\Controllers\AdminController::class, 'exportData']);
@@ -113,6 +122,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
 
 // Booking Module
 Route::get('/train-selection', [TrainSelectionController::class, 'index'])->name('train.selection');
+Route::get('/train-selection/return', [TrainSelectionController::class, 'indexReturn'])->name('train.selection.return');
 Route::get('/passengerinfo', [TrainSelectionController::class, 'showPassengerInfo'])->name('passengerinfo');
 Route::post('/passenger-info/store', [TrainSelectionController::class, 'storePassengerInfo'])->name('store.passengerinfo');
 Route::get('/selectseat/', [TrainSelectionController::class, 'showSelectSeat'])->name('selectseat');
@@ -199,7 +209,7 @@ Route::get('news-email-publish', function () {
 })->middleware('admin')->name('news-email-publish');
 
 Route::get('card-approval', function () {
-    return view('AdminPage/CardApproval');
+    return view('AdminPage/ConcessionCardApproval');
 })->middleware('admin')->name('card-approval');
 
 Route::get('scan_qr', function () {
@@ -217,9 +227,19 @@ Route::get('/concession_card',function(){
     return view('ConcessionCardPage');
 })->name('concession_card');
 
-Route::get('/test',function(){
-    return view('test');
-})->name('concession_card');
+// Concession Card API routes
+Route::prefix('api/concession')->middleware('auth')->group(function () {
+    Route::get('/applications', [ConcessionCardController::class, 'getApplications'])->name('concession.applications');
+    Route::post('/applications', [ConcessionCardController::class, 'submitApplication'])->name('concession.submit');
+    Route::get('/applications/{id}', [ConcessionCardController::class, 'viewApplication'])->name('concession.view');
+    Route::post('/applications/{id}/approve', [ConcessionCardController::class, 'approveApplication'])->name('concession.approve');
+    Route::post('/applications/{id}/reject', [ConcessionCardController::class, 'rejectApplication'])->name('concession.reject');
+    Route::get('/admin/stats', [ConcessionCardController::class, 'getAdminStats'])->name('concession.stats');
+    
+    // Admin routes for all applications (temporarily removed admin middleware for testing)
+    Route::get('/admin/all-applications', [ConcessionCardController::class, 'getAllApplicationsForAdmin'])->name('concession.admin.all-applications');
+    Route::get('/admin/all-stats', [ConcessionCardController::class, 'getAdminAllStats'])->name('concession.admin.all-stats');
+});
 
 //Discover
 Route::get('/discover', function () {
@@ -250,3 +270,18 @@ Route::post('/payment/{bookingId}/complete', [PaymentController::class, 'complet
 //Refund routes
 Route::get('/refund/{bookingId}', [PaymentController::class, 'showRefundPage'])->name('refund.page');
 Route::post('/refund/{bookingId}', [PaymentController::class, 'processRefund'])->name('refund.process');
+
+// Concession Card Application routes
+Route::get('/concession_card', function () {
+    return view('ConcessionCardPage');
+})->name('concession_card');
+
+// Concession Card Application routes
+Route::prefix('concession')->group(function () {
+    Route::get('/applications', [ConcessionCardController::class, 'getApplications'])->name('concession.applications');
+    Route::post('/submit', [ConcessionCardController::class, 'submitApplication'])->name('concession.submit');
+    Route::get('/view/{id}', [ConcessionCardController::class, 'viewApplication'])->name('concession.view');
+    Route::post('/approve/{id}', [ConcessionCardController::class, 'approveApplication'])->name('concession.approve');
+    Route::post('/reject/{id}', [ConcessionCardController::class, 'rejectApplication'])->name('concession.reject');
+    Route::get('/stats', [ConcessionCardController::class, 'getAdminStats'])->name('concession.stats');
+});

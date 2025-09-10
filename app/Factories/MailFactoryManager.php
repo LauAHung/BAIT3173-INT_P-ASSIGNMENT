@@ -13,6 +13,7 @@ class MailFactoryManager
         $this->factories = [
             'email_verification' => new EmailVerificationMailFactory(),
             'password_reset' => new PasswordResetMailFactory(),
+            'password_reset_otp' => new PasswordResetOtpMailFactory(),
         ];
     }
 

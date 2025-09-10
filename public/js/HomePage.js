@@ -17,6 +17,7 @@ function handleTrainTypeChange() {
         returnDateInput.placeholder = 'Select date';
         returnDateInput.style.opacity = '1';
         returnDateInput.style.cursor = 'pointer';
+        returnTrain.value = 'Return';
         initializeDepartDatePicker(true);
     } else if (oneWayTrain.checked) {
         toggleSwitch.style.transform = 'translateX(107%)';
@@ -27,6 +28,7 @@ function handleTrainTypeChange() {
         returnDateInput.placeholder = 'N/A';
         returnDateInput.style.opacity = '0.5';
         returnDateInput.style.cursor = 'not-allowed';
+        oneWayTrain.value = 'OneWay';
         initializeDepartDatePicker(false);
     }
 }
@@ -134,8 +136,11 @@ function swapLocations() {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize date pickers for default state (Return mode)
-    initializeDepartDatePicker(true);
-    initializeReturnDatePicker();
+    const returnTrain = document.getElementById('return-train');
+    const oneWayTrain = document.getElementById('one-way-train');
+
+    oneWayTrain.checked = true;   // mark One Way as default
+    handleTrainTypeChange();      // apply UI + pickers
     
     // Initialize slider functionality
     initializeSlider();
@@ -288,4 +293,19 @@ function showToast(message, type) {
     setTimeout(() => { container.style.display = 'none'; }, 4000);
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    // If neither Return nor OneWay selected → set OneWay as default
+    const returnTrain = document.getElementById('return-train');
+    const oneWayTrain = document.getElementById('one-way-train');
 
+    if (!returnTrain.checked && !oneWayTrain.checked) {
+        oneWayTrain.checked = true;
+        handleTrainTypeChange(); // apply UI + picker setup
+    } else {
+        // If you want Return default, keep this line
+        handleTrainTypeChange();
+    }
+
+    // Initialize slider functionality
+    initializeSlider();
+});

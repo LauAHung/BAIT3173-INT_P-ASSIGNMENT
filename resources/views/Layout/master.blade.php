@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-authenticated" content="{{ auth()->check() ? 'true' : 'false' }}">
     <title>@yield('title', 'TravelFree')</title>
     <link href="{{ asset('css/master.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
@@ -21,7 +22,7 @@
                 <li><a href="{{ route('HomePage') }}">Ticketing</a></li>
                 <li><a href="{{ route('DiscoverPage') }}">Discover</a></li>
                 <li><a href="{{ route('feedback') }}">Feedback</a></li>
-                <li><a href="#">Schedule</a></li>
+                <li><a href="{{ route('concession_card') }}">Card Application</a></li>
             </ul>
         </nav>
         <nav>

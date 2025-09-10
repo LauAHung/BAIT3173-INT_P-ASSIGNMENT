@@ -60,13 +60,21 @@ class LoginController extends Controller
                 // Check if user is allowed (active or admin)
                 if (!in_array($user->account_status, ['active', 'admin'])) {
                     Auth::logout();
+                    
+                    // Provide specific error message for suspended users
+                    if ($user->account_status === 'suspended') {
+                        return back()->withErrors([
+                            'email' => 'Your account is currently suspended. It may be caused by breaking the rules. Please contact administrator for assistance.',
+                        ]);
+                    }
+                    
                     return back()->withErrors([
                         'email' => 'Your account is not active. Please check your email for verification.',
                     ]);
                 }
 
-                // Log the user in
-                Auth::login($user, $request->boolean('remember'));
+                // Log the user in (remember me removed)
+                Auth::login($user, false);
 
                 // Redirect based on role/status
                 if ($user->account_status === 'admin') {
@@ -75,6 +83,16 @@ class LoginController extends Controller
 
                 // Default redirect to homepage after successful login
                 return redirect()->route('HomePage')->with('success', 'Welcome back, ' . $user->first_name . '!');
+            } else {
+                // Authentication failed - get specific error from factory
+                $factory = $this->authFactoryManager->getFactory('email');
+                $errors = $factory->getErrors();
+                
+                if (!empty($errors)) {
+                    return back()->withErrors([
+                        'email' => $errors[0], // Use the first error message
+                    ])->withInput($request->only('email'));
+                }
             }
         } catch (\Exception $e) {
             return back()->withErrors([
@@ -82,7 +100,7 @@ class LoginController extends Controller
             ])->withInput($request->only('email'));
         }
 
-        // Authentication failed
+        // Fallback error message
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->withInput($request->only('email'));
@@ -110,54 +128,86 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle forgot password request
+     * Handle forgot password (OTP) - send OTP to email
      */
-    public function handleForgotPassword(Request $request)
+    public function handleForgotPasswordOtp(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $sent = $this->userRegistrationService->sendPasswordResetOtp($request->email);
+        if ($sent) {
+            return redirect()->route('signin')
+                ->with(['success' => 'We have emailed a 6-digit OTP to you.', 'show_otp_modal' => true, 'otp_email' => $request->email]);
+        }
+        return back()->withErrors(['email' => 'We could not find a user with that email address.']);
+    }
+
+    /** Show OTP verification form */
+    public function showVerifyOtpForm(Request $request)
+    {
+        $email = $request->query('email');
+        return view('auth.verify-otp', compact('email'));
+    }
+
+    /** Verify OTP and redirect to reset form */
+    public function verifyOtp(Request $request)
     {
         $request->validate([
-            'email' => 'required|email'
+            'email' => 'required|email',
+            'otp' => 'required|digits:6'
         ]);
 
-        $success = $this->userRegistrationService->handleForgotPassword($request->email);
+        $valid = $this->userRegistrationService->verifyPasswordResetOtp($request->email, $request->otp);
+        if ($valid) {
+            return redirect()->route('signin')
+                ->with(['success' => 'OTP verified. Please reset your password.', 'show_reset_modal' => true, 'reset_email' => $request->email]);
+        }
+        return redirect()->route('signin')
+            ->withErrors(['otp' => 'Invalid or expired OTP.'])
+            ->with(['show_otp_modal' => true, 'otp_email' => $request->email]);
+    }
 
-        if ($success) {
-            return back()->with('success', 'Password reset link has been sent to your email.');
+    /** Show reset form after OTP verified */
+    public function showResetPasswordOtpForm(Request $request)
+    {
+        $email = $request->query('email');
+        return view('auth.reset-password', compact('email'));
+    }
+
+    /** Handle password reset with OTP verified */
+    public function handleResetPasswordWithOtp(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string|min:8',
+                'password_confirmation' => 'nullable|string|same:password',
+            ]);
+        } catch (ValidationException $e) {
+            // If validation fails (e.g., password mismatch), redirect back to signin with reset modal
+            return redirect()->route('signin')
+                ->withErrors($e->errors())
+                ->with(['show_reset_modal' => true, 'reset_email' => $request->email]);
         }
 
-        return back()->withErrors(['email' => 'We could not find a user with that email address.']);
+        $success = $this->userRegistrationService->resetPasswordAfterOtp($request->email, $request->password);
+        if ($success) {
+            return redirect()->route('signin')->with('success', 'Your password has been reset successfully.');
+        }
+        return redirect()->route('signin')
+            ->withErrors(['password' => 'Password reset failed.'])
+            ->with(['show_reset_modal' => true, 'reset_email' => $request->email]);
     }
 
     /**
      * Show password reset form
      */
-    public function showResetPasswordForm(string $token)
-    {
-        return view('auth.reset-password', compact('token'));
-    }
+    // Deprecated token-based reset views removed in favor of OTP flow
 
     /**
      * Handle password reset
      */
-    public function handleResetPassword(Request $request)
-    {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|string|min:8',
-            'password_confirmation' => 'nullable|string|same:password',
-        ]);
-
-        $success = $this->userRegistrationService->resetPassword(
-            $request->token,
-            $request->password
-        );
-
-        if ($success) {
-            return redirect()->route('signin')->with('success', 'Your password has been reset successfully.');
-        }
-
-        return back()->withErrors(['email' => 'Invalid or expired reset token.']);
-    }
+    // Deprecated token-based reset handler removed in favor of OTP flow
 
     /**
      * Verify email address

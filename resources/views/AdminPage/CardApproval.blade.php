@@ -1,6 +1,7 @@
 @extends('Layout.master_admin')
 
 @section('title', 'Admin - Card Approval')
+@section('page-title', 'Card Approval')
 
 @push('styles')
     <link href="css/AdminPage/CardApproval.css" rel="stylesheet">

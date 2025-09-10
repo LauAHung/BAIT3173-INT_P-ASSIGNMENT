@@ -93,9 +93,8 @@
       margin-bottom: 15px;
     }
 
-    .form-group input {
-      flex: 1;
-    }
+    .form-group .field { flex: 1; display: flex; flex-direction: column; }
+    .form-group .field .error { margin-left: 2px; }
 
     input[type="text"],
     input[type="email"],
@@ -108,6 +107,18 @@
       width: 100%;
       color: aliceblue;
       font-size: 15px;
+    }
+
+    /* Inline validation styles */
+    .error {
+      color: #ff6b6b;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    input.input-error {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.45);
+      background-color: #4b3949;
     }
 
     .form-group input:focus {

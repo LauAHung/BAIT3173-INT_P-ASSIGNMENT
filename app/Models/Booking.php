@@ -13,7 +13,7 @@ class Booking extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'BookingID', 'UserID', 'TrainID', 'JourneyID', 'BookingType', 'PaymentType', 'TicketNo','Price', 'Status', 'Created_at',
+        'BookingID', 'UserID', 'TrainID', 'JourneyID','JourneyID2', 'BookingType', 'PaymentType', 'TicketNo','Price', 'Status', 'Created_at',
     ];
 
     protected $casts = [
@@ -23,6 +23,11 @@ class Booking extends Model
     public function journey()
     {
         return $this->belongsTo(Journey::class, 'JourneyID', 'JourneyID');
+    }
+
+    public function journey2()
+    {
+        return $this->belongsTo(Journey::class, 'JourneyID2', 'JourneyID');
     }
 
     public function user()

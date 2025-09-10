@@ -2,6 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AdminWebServiceController;
+use App\Http\Controllers\Api\UserWebServiceController;
+use App\Http\Controllers\Api\ConcessionCardWebServiceController;
+use App\Http\Controllers\Api\BookingApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,139 +18,62 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-// Admin Module Web Services API Routes
-Route::prefix('admin')->group(function () {
-    // Dashboard
-    Route::get('/dashboard/stats', [App\Http\Controllers\Api\AdminApiController::class, 'getDashboardStats']);
-    
-    // Users
-    Route::get('/users', [App\Http\Controllers\Api\AdminApiController::class, 'getUsers']);
-    Route::get('/users/{id}', [App\Http\Controllers\Api\AdminApiController::class, 'getUserById']);
-    Route::put('/users/{id}/status', [App\Http\Controllers\Api\AdminApiController::class, 'updateUserStatus']);
-    Route::get('/users/stats', [App\Http\Controllers\Api\AdminApiController::class, 'getUserStats']);
-    
-    // Trains
-    Route::get('/trains', [App\Http\Controllers\Api\AdminApiController::class, 'getTrains']);
-    Route::post('/trains', [App\Http\Controllers\Api\AdminApiController::class, 'addTrain']);
-    
-    // QR Operations
-    Route::post('/qr/scan', [App\Http\Controllers\Api\AdminApiController::class, 'scanQR']);
-    Route::post('/qr/generate', [App\Http\Controllers\Api\AdminApiController::class, 'generateQR']);
-    
-    // Newsletter
-    Route::post('/newsletter/send', [App\Http\Controllers\Api\AdminApiController::class, 'sendNewsletter']);
-    Route::get('/newsletter/stats', [App\Http\Controllers\Api\AdminApiController::class, 'getNewsletterStats']);
-    
-    // Refunds
-    Route::post('/refunds/process', [App\Http\Controllers\Api\AdminApiController::class, 'processRefund']);
-    
-    // System
-    Route::get('/system/info', [App\Http\Controllers\Api\AdminApiController::class, 'getSystemInfo']);
-    Route::get('/health', [App\Http\Controllers\Api\AdminApiController::class, 'healthCheck']);
-});
-
-// User Module Web Services API Routes (for other modules to consume)
+// User Module Web Services
 Route::prefix('user')->group(function () {
-    // User management endpoints that other modules can consume
-    Route::get('/stats', function () {
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'total_users' => \App\Models\User::count(),
-                'active_users' => \App\Models\User::where('account_status', 'active')->count(),
-                'social_users' => \App\Models\User::whereNotNull('social_provider')->count(),
-            ],
-            'message' => 'User statistics retrieved successfully',
-            'timestamp' => now()->toISOString()
-        ]);
-    });
+    // Authentication endpoints
+    Route::post('/login', [UserWebServiceController::class, 'login']);
+    Route::post('/register', [UserWebServiceController::class, 'register']);
+    Route::post('/forgot-password', [UserWebServiceController::class, 'forgotPassword']);
+    Route::post('/reset-password', [UserWebServiceController::class, 'resetPassword']);
     
-    Route::get('/list', function (Request $request) {
-        $page = $request->get('page', 1);
-        $perPage = $request->get('per_page', 10);
-        $search = $request->get('search');
-        
-        $query = \App\Models\User::query();
-        
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-        
-        $users = $query->paginate($perPage, ['*'], 'page', $page);
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => $users->items(),
-            'pagination' => [
-                'current_page' => $users->currentPage(),
-                'per_page' => $users->perPage(),
-                'total' => $users->total(),
-                'last_page' => $users->lastPage()
-            ],
-            'message' => 'Users retrieved successfully',
-            'timestamp' => now()->toISOString()
-        ]);
-    });
+    // Profile endpoints
+    Route::get('/profile/{userId}', [UserWebServiceController::class, 'getProfile']);
+    Route::put('/profile/{userId}', [UserWebServiceController::class, 'updateProfile']);
+});
+
+// Admin Module Web Services
+Route::prefix('admin')->group(function () {
+    // User management
+    Route::get('/user/{userId}', [AdminWebServiceController::class, 'getUserInfo']);
     
-    Route::get('/{id}', function ($id) {
-        $user = \App\Models\User::find($id);
-        
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not found',
-                'timestamp' => now()->toISOString()
-            ], 404);
-        }
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => $user,
-            'message' => 'User retrieved successfully',
-            'timestamp' => now()->toISOString()
-        ]);
-    });
+    // Concession card management
+    Route::get('/concession/{applicationId}', [AdminWebServiceController::class, 'getConcessionApplication']);
     
-    Route::put('/{id}/status', function (Request $request, $id) {
-        $request->validate([
-            'status' => 'required|string|in:active,inactive,suspended,pending_verification'
-        ]);
-        
-        $user = \App\Models\User::find($id);
-        
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not found',
-                'timestamp' => now()->toISOString()
-            ], 404);
-        }
-        
-        $user->account_status = $request->status;
-        $user->save();
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => $user,
-            'message' => 'User status updated successfully',
-            'timestamp' => now()->toISOString()
-        ]);
-    });
+    // Train management
+    Route::get('/train/{trainId}', [AdminWebServiceController::class, 'getTrainInfo']);
     
-    Route::get('/health', function () {
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User API is healthy',
-            'timestamp' => now()->toISOString(),
-            'version' => '1.0.0'
-        ]);
-    });
-}); 
+    // Admin logs
+    Route::get('/logs', [AdminWebServiceController::class, 'getAdminLogs']);
+    
+    // Newsletter management
+    Route::get('/newsletter/subscribers', [AdminWebServiceController::class, 'getNewsletterSubscribers']);
+});
+
+// Concession Card Module Web Services
+Route::prefix('concession')->group(function () {
+    // User applications
+    Route::get('/user/{userId}', [ConcessionCardWebServiceController::class, 'getUserApplications']);
+    
+    // Application management
+    Route::get('/application/{applicationId}', [ConcessionCardWebServiceController::class, 'getApplicationDetails']);
+    Route::post('/application', [ConcessionCardWebServiceController::class, 'submitApplication']);
+    
+    // Statistics
+    Route::get('/statistics', [ConcessionCardWebServiceController::class, 'getStatistics']);
+});
+
+// Friend's Booking Module Web Services
+Route::prefix('bookings')->group(function () {
+    Route::get('/bookings', [BookingApiController::class, 'index']);
+    Route::get('/bookings_detail/{id}', [BookingApiController::class, 'show']);
+    Route::post('/bookings/{id}/cancel', [BookingApiController::class, 'cancel']);
+});
+
+// Health check endpoint
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'API is running',
+        'timestamp' => now()->toISOString()
+    ]);
+});
