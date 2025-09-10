@@ -228,13 +228,17 @@ Route::get('/concession_card',function(){
 })->name('concession_card');
 
 // Concession Card API routes
-Route::prefix('api/concession')->group(function () {
+Route::prefix('api/concession')->middleware('auth')->group(function () {
     Route::get('/applications', [ConcessionCardController::class, 'getApplications'])->name('concession.applications');
     Route::post('/applications', [ConcessionCardController::class, 'submitApplication'])->name('concession.submit');
     Route::get('/applications/{id}', [ConcessionCardController::class, 'viewApplication'])->name('concession.view');
     Route::post('/applications/{id}/approve', [ConcessionCardController::class, 'approveApplication'])->name('concession.approve');
     Route::post('/applications/{id}/reject', [ConcessionCardController::class, 'rejectApplication'])->name('concession.reject');
     Route::get('/admin/stats', [ConcessionCardController::class, 'getAdminStats'])->name('concession.stats');
+    
+    // Admin routes for all applications (temporarily removed admin middleware for testing)
+    Route::get('/admin/all-applications', [ConcessionCardController::class, 'getAllApplicationsForAdmin'])->name('concession.admin.all-applications');
+    Route::get('/admin/all-stats', [ConcessionCardController::class, 'getAdminAllStats'])->name('concession.admin.all-stats');
 });
 
 //Discover

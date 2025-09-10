@@ -156,6 +156,9 @@ class OKUApplicationHandler extends ApplicationHandler {
         if (!application.fullName) {
             return { valid: false, message: 'Full name is required' };
         }
+        if (!application.ic || application.ic.length !== 12) {
+            return { valid: false, message: 'IC number must be 12 digits' };
+        }
         if (!application.okuCardNumber || application.okuCardNumber.length < 8) {
             return { valid: false, message: 'OKU Card Number must be at least 8 characters' };
         }
@@ -175,17 +178,14 @@ class SeniorCitizenApplicationHandler extends ApplicationHandler {
         if (!application.fullName) {
             return { valid: false, message: 'Full name is required' };
         }
+        if (!application.ic || application.ic.length !== 12) {
+            return { valid: false, message: 'IC number must be 12 digits' };
+        }
         if (!application.age || application.age < 60) {
             return { valid: false, message: 'Age must be 60 or above' };
         }
-        if (!application.citizenship) {
-            return { valid: false, message: 'Citizenship is required' };
-        }
         if (!application.gender) {
             return { valid: false, message: 'Gender is required' };
-        }
-        if (!application.ic || application.ic.length !== 12) {
-            return { valid: false, message: 'IC number must be 12 digits' };
         }
         return { valid: true };
     }
@@ -197,20 +197,28 @@ class StudentApplicationHandler extends ApplicationHandler {
         if (!application.fullName) {
             return { valid: false, message: 'Full name is required' };
         }
-        if (!application.matrixNumber || application.matrixNumber.length < 4) {
-            return { valid: false, message: 'Matrix number must be at least 4 characters' };
-        }
-        if (!application.schoolName) {
-            return { valid: false, message: 'School name is required' };
-        }
         if (!application.studentCitizenship) {
             return { valid: false, message: 'Citizenship is required' };
         }
         if (!application.educationLevel) {
             return { valid: false, message: 'Education level is required' };
         }
-        if (!application.ic || application.ic.length !== 12) {
-            return { valid: false, message: 'IC number must be 12 digits' };
+        if (!application.schoolName) {
+            return { valid: false, message: 'School name is required' };
+        }
+        if (!application.matrixNumber || application.matrixNumber.length < 4) {
+            return { valid: false, message: 'Matrix number must be at least 4 characters' };
+        }
+        // Check IC or Passport based on citizenship
+        const isMalaysian = application.studentCitizenship.toLowerCase() === 'malaysia';
+        if (isMalaysian) {
+            if (!application.ic || application.ic.length !== 12) {
+                return { valid: false, message: 'IC number must be 12 digits for Malaysian citizens' };
+            }
+        } else {
+            if (!application.passportNumber || application.passportNumber.length < 6) {
+                return { valid: false, message: 'Passport number is required for non-Malaysian citizens' };
+            }
         }
         // Check if photo is uploaded
         const photoInput = document.getElementById('studentIdPhoto');
@@ -238,17 +246,85 @@ function showScreen(screenName) {
     screens[screenName].classList.add('active');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM loaded, initializing...'); // Debug log
+    
+    // Check if user is logged in
+    const isLoggedIn = document.querySelector('meta[name="user-authenticated"]')?.getAttribute('content') === 'true';
+
+    // Fallback: event delegation to ensure Apply buttons always work
+    document.addEventListener('click', (event) => {
+        const applyBtn = event.target.closest('.concession-card .btn-primary');
+        if (!applyBtn) return;
+        event.preventDefault();
+
+        if (!isLoggedIn) {
+            Swal.fire({
+                title: 'Login Required',
+                text: 'You need to be logged in to apply for a concession card.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Login',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/signin';
+                }
+            });
+            return;
+        }
+
+        const card = applyBtn.closest('.concession-card');
+        if (card && card.dataset.type) {
+            selectConcessionType(card.dataset.type);
+        }
+    });
+    
+    // Debug: Check if elements exist
+    console.log('Student citizenship input:', document.getElementById('studentCitizenship'));
+    console.log('Student citizenship dropdown:', document.getElementById('studentCitizenshipDropdown'));
+    console.log('School name input:', document.getElementById('schoolName'));
+    console.log('School name dropdown:', document.getElementById('schoolNameDropdown'));
+    
+    // Debug: Check file upload elements
+    console.log('Student file upload container:', document.getElementById('studentFileUpload'));
+    console.log('Student file input:', document.getElementById('studentIdPhoto'));
+    console.log('Senior file upload container:', document.getElementById('seniorFileUpload'));
+    console.log('Senior file input:', document.getElementById('seniorIcPhoto'));
+    console.log('OKU file upload container:', document.getElementById('okuFileUpload'));
+    console.log('OKU file input:', document.getElementById('okuCardPhoto'));
     
     // Attach event listener to "Apply Now" buttons (only for main screen cards)
     document.querySelectorAll('.concession-card .btn-primary').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
+            
+            // Check if user is logged in
+            if (!isLoggedIn) {
+                Swal.fire({
+                    title: 'Login Required',
+                    text: 'You need to be logged in to apply for a concession card.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Login',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/signin';
+                    }
+                });
+                return;
+            }
+            
             const card = button.closest('.concession-card');
             selectConcessionType(card.dataset.type);
         });
     });
+
+    // If the page has the "My Applications" section, load data
+    if (document.getElementById('userApplicationsContent') && isLoggedIn) {
+        loadUserApplications();
+    }
 
     document.getElementById('adminBackBtn').addEventListener('click', () => showScreen('main'));
     document.getElementById('backBtn').addEventListener('click', () => showScreen('main'));
@@ -263,15 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Application form not found!'); // Debug log
     }
 
-    const fileInput = document.getElementById('studentIdPhoto');
-    const fileUpload = document.getElementById('fileUpload');
-    if (fileInput && fileUpload) {
-        fileInput.addEventListener('change', () => {
-            fileUpload.querySelector('p').textContent = fileInput.files.length > 0
-                ? `Uploaded: ${fileInput.files[0].name}`
-                : 'Click to upload student ID photo';
-        });
-    }
+    // Initialize file upload handlers
+    initializeFileUploads();
 
     const closeViewBtn = document.getElementById('closeView');
     if (closeViewBtn) {
@@ -296,11 +365,24 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSchoolData();
     
     // Initialize nationality autocomplete
-    new Autocomplete('citizenship', 'citizenshipDropdown', nationalityData);
-    new Autocomplete('studentCitizenship', 'studentCitizenshipDropdown', nationalityData);
+    const studentCitizenshipInput = document.getElementById('studentCitizenship');
+    const studentCitizenshipDropdown = document.getElementById('studentCitizenshipDropdown');
+    if (studentCitizenshipInput && studentCitizenshipDropdown) {
+        window.studentCitizenshipAutocomplete = new Autocomplete('studentCitizenship', 'studentCitizenshipDropdown', nationalityData);
+        console.log('Student citizenship autocomplete initialized');
+    } else {
+        console.error('Student citizenship elements not found');
+    }
     
     // Initialize school autocomplete
-    window.schoolAutocomplete = new Autocomplete('schoolName', 'schoolNameDropdown', schoolData.university);
+    const schoolNameInput = document.getElementById('schoolName');
+    const schoolNameDropdown = document.getElementById('schoolNameDropdown');
+    if (schoolNameInput && schoolNameDropdown) {
+        window.schoolAutocomplete = new Autocomplete('schoolName', 'schoolNameDropdown', schoolData.university);
+        console.log('School autocomplete initialized');
+    } else {
+        console.error('School elements not found');
+    }
     
     // Add event listener for education level change
     const educationLevelSelect = document.getElementById('educationLevel');
@@ -308,9 +390,234 @@ document.addEventListener('DOMContentLoaded', () => {
         educationLevelSelect.addEventListener('change', updateSchoolAutocomplete);
     }
 
-    updateAdminStats();
-    loadApplicationsTable();
+    // Add event listener for disability type change (OKU)
+    const disabilityTypeSelect = document.getElementById('disabilityType');
+    if (disabilityTypeSelect) {
+        disabilityTypeSelect.addEventListener('change', toggleOtherDisabilityField);
+    }
+
+    // Add event listener for citizenship change (Student)
+    const studentCitizenshipInputElement = document.getElementById('studentCitizenship');
+    if (studentCitizenshipInputElement) {
+        studentCitizenshipInputElement.addEventListener('change', toggleStudentIdFields);
+    }
+
+    // Add event listener for IC number change (Senior)
+    const seniorIcInput = document.getElementById('seniorIc');
+    if (seniorIcInput) {
+        seniorIcInput.addEventListener('input', calculateAgeAndGender);
+    }
+
+    // Load all applications for admin if on admin page FIRST
+    if (window.location.pathname.includes('card-approval')) {
+        console.log('Admin page detected, loading all applications...');
+        // Clear local storage first to ensure fresh data
+        localStorage.removeItem('concessionApplications');
+        applications = [];
+        await loadAllApplicationsForAdmin();
+    } else {
+        updateAdminStats();
+        loadApplicationsTable();
+        
+        // Load user applications if logged in
+        if (isLoggedIn) {
+            loadUserApplications();
+        }
+    }
 });
+
+function initializeFileUploads() {
+    console.log('Initializing file uploads...');
+    
+    // Student ID Photo
+    const studentInput = document.getElementById('studentIdPhoto');
+    const studentContainer = document.getElementById('studentFileUpload');
+    console.log('Student input element:', studentInput);
+    console.log('Student container element:', studentContainer);
+    
+    if (studentInput && studentContainer) {
+        console.log('Setting up student file upload');
+        
+        // Remove any existing event listeners
+        studentContainer.onclick = null;
+        studentInput.onchange = null;
+        
+        studentContainer.onclick = function(e) {
+            console.log('Student file upload clicked');
+            console.log('Attempting to trigger file input click...');
+            
+            // Create a new file input element
+            const newFileInput = document.createElement('input');
+            newFileInput.type = 'file';
+            newFileInput.accept = 'image/*';
+            newFileInput.style.display = 'none';
+            document.body.appendChild(newFileInput);
+            
+            newFileInput.onchange = function(event) {
+                console.log('File selected via new input:', event.target.files[0]);
+                if (event.target.files.length > 0) {
+                    // Copy the file to the original input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(event.target.files[0]);
+                    studentInput.files = dataTransfer.files;
+                    
+                    // Update the display text
+                    const p = studentContainer.querySelector('p');
+                    if (p) {
+                        p.textContent = `Uploaded: ${event.target.files[0].name}`;
+                    }
+                    
+                    // Trigger change event on original input
+                    studentInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                
+                // Clean up
+                document.body.removeChild(newFileInput);
+            };
+            
+            // Trigger the file selection
+            newFileInput.click();
+        };
+        
+        studentInput.onchange = function(e) {
+            console.log('Student file selected:', e.target.files[0]);
+            const p = studentContainer.querySelector('p');
+            if (p) {
+                p.textContent = e.target.files.length > 0 
+                    ? `Uploaded: ${e.target.files[0].name}`
+                    : 'Click to upload student ID photo';
+            }
+        };
+    } else {
+        console.log('Student file upload elements not found');
+    }
+    
+    // Senior IC Photo
+    const seniorInput = document.getElementById('seniorIcPhoto');
+    const seniorContainer = document.getElementById('seniorFileUpload');
+    console.log('Senior input element:', seniorInput);
+    console.log('Senior container element:', seniorContainer);
+    
+    if (seniorInput && seniorContainer) {
+        console.log('Setting up senior file upload');
+        
+        // Remove any existing event listeners
+        seniorContainer.onclick = null;
+        seniorInput.onchange = null;
+        
+        seniorContainer.onclick = function(e) {
+            console.log('Senior file upload clicked');
+            console.log('Attempting to trigger file input click...');
+            
+            // Create a new file input element
+            const newFileInput = document.createElement('input');
+            newFileInput.type = 'file';
+            newFileInput.accept = 'image/*';
+            newFileInput.style.display = 'none';
+            document.body.appendChild(newFileInput);
+            
+            newFileInput.onchange = function(event) {
+                console.log('File selected via new input:', event.target.files[0]);
+                if (event.target.files.length > 0) {
+                    // Copy the file to the original input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(event.target.files[0]);
+                    seniorInput.files = dataTransfer.files;
+                    
+                    // Update the display text
+                    const p = seniorContainer.querySelector('p');
+                    if (p) {
+                        p.textContent = `Uploaded: ${event.target.files[0].name}`;
+                    }
+                    
+                    // Trigger change event on original input
+                    seniorInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                
+                // Clean up
+                document.body.removeChild(newFileInput);
+            };
+            
+            // Trigger the file selection
+            newFileInput.click();
+        };
+        
+        seniorInput.onchange = function(e) {
+            console.log('Senior file selected:', e.target.files[0]);
+            const p = seniorContainer.querySelector('p');
+            if (p) {
+                p.textContent = e.target.files.length > 0 
+                    ? `Uploaded: ${e.target.files[0].name}`
+                    : 'Click to upload IC photo';
+            }
+        };
+    } else {
+        console.log('Senior file upload elements not found');
+    }
+    
+    // OKU Card Photo
+    const okuInput = document.getElementById('okuCardPhoto');
+    const okuContainer = document.getElementById('okuFileUpload');
+    console.log('OKU input element:', okuInput);
+    console.log('OKU container element:', okuContainer);
+    
+    if (okuInput && okuContainer) {
+        console.log('Setting up OKU file upload');
+        
+        // Remove any existing event listeners
+        okuContainer.onclick = null;
+        okuInput.onchange = null;
+        
+        okuContainer.onclick = function(e) {
+            console.log('OKU file upload clicked');
+            console.log('Attempting to trigger file input click...');
+            
+            // Create a new file input element
+            const newFileInput = document.createElement('input');
+            newFileInput.type = 'file';
+            newFileInput.accept = 'image/*';
+            newFileInput.style.display = 'none';
+            document.body.appendChild(newFileInput);
+            
+            newFileInput.onchange = function(event) {
+                console.log('File selected via new input:', event.target.files[0]);
+                if (event.target.files.length > 0) {
+                    // Copy the file to the original input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(event.target.files[0]);
+                    okuInput.files = dataTransfer.files;
+                    
+                    // Update the display text
+                    const p = okuContainer.querySelector('p');
+                    if (p) {
+                        p.textContent = `Uploaded: ${event.target.files[0].name}`;
+                    }
+                    
+                    // Trigger change event on original input
+                    okuInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                
+                // Clean up
+                document.body.removeChild(newFileInput);
+            };
+            
+            // Trigger the file selection
+            newFileInput.click();
+        };
+        
+        okuInput.onchange = function(e) {
+            console.log('OKU file selected:', e.target.files[0]);
+            const p = okuContainer.querySelector('p');
+            if (p) {
+                p.textContent = e.target.files.length > 0 
+                    ? `Uploaded: ${e.target.files[0].name}`
+                    : 'Click to upload OKU card photo';
+            }
+        };
+    } else {
+        console.log('OKU file upload elements not found');
+    }
+}
 
 function selectConcessionType(type) {
     currentApplicationType = type;
@@ -321,36 +628,165 @@ function selectConcessionType(type) {
     document.getElementById('applicationType').value = type;
     document.getElementById('applicationForm').reset();
     
+    // Reset conditional fields
+    resetConditionalFields();
+    
     // Set required attributes based on type
     setRequiredFields(type);
+    
+    // Reinitialize autocomplete for student form
+    if (type === 'student') {
+        setTimeout(() => {
+            // Reinitialize school autocomplete
+            if (window.schoolAutocomplete) {
+                window.schoolAutocomplete.destroy();
+            }
+            const schoolNameInput = document.getElementById('schoolName');
+            const schoolNameDropdown = document.getElementById('schoolNameDropdown');
+            if (schoolNameInput && schoolNameDropdown) {
+                window.schoolAutocomplete = new Autocomplete('schoolName', 'schoolNameDropdown', schoolData.university);
+                console.log('School autocomplete reinitialized');
+            }
+            
+            // Reinitialize citizenship autocomplete
+            if (window.studentCitizenshipAutocomplete) {
+                window.studentCitizenshipAutocomplete.destroy();
+            }
+            const studentCitizenshipInput = document.getElementById('studentCitizenship');
+            const studentCitizenshipDropdown = document.getElementById('studentCitizenshipDropdown');
+            if (studentCitizenshipInput && studentCitizenshipDropdown) {
+                window.studentCitizenshipAutocomplete = new Autocomplete('studentCitizenship', 'studentCitizenshipDropdown', nationalityData);
+                console.log('Student citizenship autocomplete reinitialized');
+            }
+        }, 100);
+    }
+    
+    // Reinitialize file upload handlers after form is shown
+    setTimeout(() => {
+        initializeFileUploads();
+    }, 200);
+}
+
+function resetConditionalFields() {
+    // Reset OKU other disability field
+    const otherDisabilityContainer = document.getElementById('otherDisabilityContainer');
+    if (otherDisabilityContainer) {
+        otherDisabilityContainer.classList.remove('show');
+    }
+    
+    // Reset student ID fields
+    const studentIcContainer = document.getElementById('studentIcContainer');
+    const studentPassportContainer = document.getElementById('studentPassportContainer');
+    if (studentIcContainer) {
+        studentIcContainer.style.display = 'block';
+    }
+    if (studentPassportContainer) {
+        studentPassportContainer.style.display = 'none';
+    }
+}
+
+function toggleOtherDisabilityField() {
+    const disabilityType = document.getElementById('disabilityType').value;
+    const otherDisabilityContainer = document.getElementById('otherDisabilityContainer');
+    const otherDisabilityInput = document.getElementById('otherDisability');
+    
+    if (disabilityType === 'other') {
+        otherDisabilityContainer.classList.add('show');
+        otherDisabilityInput.setAttribute('required', 'required');
+    } else {
+        otherDisabilityContainer.classList.remove('show');
+        otherDisabilityInput.removeAttribute('required');
+        otherDisabilityInput.value = '';
+    }
+}
+
+function toggleStudentIdFields() {
+    const citizenship = document.getElementById('studentCitizenship').value.toLowerCase();
+    const studentIcContainer = document.getElementById('studentIcContainer');
+    const studentPassportContainer = document.getElementById('studentPassportContainer');
+    const studentIcInput = document.getElementById('studentIc');
+    const studentPassportInput = document.getElementById('studentPassport');
+    
+    if (citizenship === 'malaysia') {
+        studentIcContainer.style.display = 'block';
+        studentPassportContainer.style.display = 'none';
+        studentIcInput.setAttribute('required', 'required');
+        studentPassportInput.removeAttribute('required');
+        studentPassportInput.value = '';
+    } else {
+        studentIcContainer.style.display = 'none';
+        studentPassportContainer.style.display = 'block';
+        studentIcInput.removeAttribute('required');
+        studentIcInput.value = '';
+        studentPassportInput.setAttribute('required', 'required');
+    }
+}
+
+function calculateAgeAndGender() {
+    const icNumber = document.getElementById('seniorIc').value;
+    const ageInput = document.getElementById('seniorAge');
+    const genderInput = document.getElementById('seniorGender');
+    
+    if (icNumber.length === 12 && /^\d{12}$/.test(icNumber)) {
+        // Extract birth date from IC (YYMMDD format)
+        const year = parseInt(icNumber.substring(0, 2));
+        const month = parseInt(icNumber.substring(2, 4));
+        const day = parseInt(icNumber.substring(4, 6));
+        
+        // Determine century (assume 00-30 is 2000s, 31-99 is 1900s)
+        const fullYear = year <= 30 ? 2000 + year : 1900 + year;
+        
+        // Calculate age
+        const today = new Date();
+        const birthDate = new Date(fullYear, month - 1, day);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        
+        // Determine gender (last digit: even = female, odd = male)
+        const lastDigit = parseInt(icNumber.charAt(11));
+        const gender = lastDigit % 2 === 0 ? 'female' : 'male';
+        
+        // Update hidden fields
+        ageInput.value = age;
+        genderInput.value = gender;
+        
+        // Show calculated values to user (optional)
+        console.log(`Calculated age: ${age}, gender: ${gender}`);
+    } else {
+        ageInput.value = '';
+        genderInput.value = '';
+    }
 }
 
 function setRequiredFields(type) {
     // Clear all required attributes first
-    document.querySelectorAll('input[required], select[required]').forEach(field => {
+    document.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
         field.removeAttribute('required');
     });
     
     // Set required attributes based on type
     if (type === 'oku') {
+        document.getElementById('okuIc').setAttribute('required', 'required');
         document.getElementById('okuCardNumber').setAttribute('required', 'required');
-        document.getElementById('disability').setAttribute('required', 'required');
-        document.getElementById('citizenship').setAttribute('required', 'required');
+        document.getElementById('disabilityType').setAttribute('required', 'required');
+        document.getElementById('okuCardPhoto').setAttribute('required', 'required');
     } else if (type === 'senior') {
-        document.getElementById('age').setAttribute('required', 'required');
-        document.getElementById('citizenship').setAttribute('required', 'required');
-        document.getElementById('gender').setAttribute('required', 'required');
+        document.getElementById('seniorIc').setAttribute('required', 'required');
+        document.getElementById('seniorIcPhoto').setAttribute('required', 'required');
     } else if (type === 'student') {
-        document.getElementById('matrixNumber').setAttribute('required', 'required');
         document.getElementById('studentCitizenship').setAttribute('required', 'required');
         document.getElementById('educationLevel').setAttribute('required', 'required');
         document.getElementById('schoolName').setAttribute('required', 'required');
+        document.getElementById('matrixNumber').setAttribute('required', 'required');
         document.getElementById('studentIdPhoto').setAttribute('required', 'required');
     }
     
     // Always required fields
     document.getElementById('fullName').setAttribute('required', 'required');
-    document.getElementById('ic').setAttribute('required', 'required');
 }
 
 function handleFormSubmission(e) {
@@ -365,9 +801,9 @@ function handleFormSubmission(e) {
     // Get required fields for current type
     let requiredFields = [];
     if (currentType === 'oku') {
-        requiredFields = ['citizenship'];
+        requiredFields = [];
     } else if (currentType === 'senior') {
-        requiredFields = ['citizenship'];
+        requiredFields = [];
     } else if (currentType === 'student') {
         requiredFields = ['studentCitizenship', 'schoolName'];
     }
@@ -399,35 +835,73 @@ function handleFormSubmission(e) {
         ic: formData.get('ic'),
         citizenship: formData.get('citizenship'),
         studentCitizenship: formData.get('studentCitizenship'),
-        schoolName: formData.get('schoolName')
+        schoolName: formData.get('schoolName'),
+        studentIc: formData.get('studentIc'),
+        passportNumber: formData.get('passportNumber')
     }); // Debug log
+    
+    // Additional debug for student form
+    if (currentType === 'student') {
+        console.log('Student form debug:');
+        console.log('- studentCitizenship value:', formData.get('studentCitizenship'));
+        console.log('- studentIc value from formData:', formData.get('studentIc'));
+        console.log('- passportNumber value from formData:', formData.get('passportNumber'));
+        
+        // Check actual DOM elements
+        const studentIcElement = document.getElementById('studentIc');
+        const studentPassportElement = document.getElementById('studentPassport');
+        console.log('- studentIc DOM value:', studentIcElement ? studentIcElement.value : 'element not found');
+        console.log('- studentPassport DOM value:', studentPassportElement ? studentPassportElement.value : 'element not found');
+        
+        // Check if citizenship is Malaysia to determine which field should be used
+        const citizenship = formData.get('studentCitizenship');
+        console.log('- Citizenship check:', citizenship);
+        console.log('- Is Malaysian?', citizenship && citizenship.toLowerCase() === 'malaysia');
+    }
+    
+    // Additional debug for senior form
+    if (currentType === 'senior') {
+        console.log('Senior form debug:');
+        console.log('- seniorIc value from formData:', formData.get('seniorIc'));
+        console.log('- age value from formData:', formData.get('age'));
+        console.log('- gender value from formData:', formData.get('gender'));
+        
+        // Check actual DOM elements
+        const seniorIcElement = document.getElementById('seniorIc');
+        console.log('- seniorIc DOM value:', seniorIcElement ? seniorIcElement.value : 'element not found');
+    }
     
     const application = {
         id: 'APP' + Date.now(),
         type: formData.get('type'),
         fullName: formData.get('fullName'),
-        ic: formData.get('ic'),
-        passportNumber: formData.get('passportNumber'),
         status: 'pending',
         applicationDate: new Date().toISOString()
     };
 
     if (application.type === 'oku') {
+        application.ic = formData.get('ic');
         application.okuCardNumber = formData.get('okuCardNumber');
         application.disabilityType = formData.get('disabilityType');
         if (application.disabilityType === 'other') {
             application.otherDisability = formData.get('otherDisability');
         }
+        const photo = formData.get('okuCardPhoto');
+        if (photo && photo.size > 0) application.photoName = photo.name;
     } else if (application.type === 'senior') {
+        application.ic = formData.get('seniorIc');
         application.age = parseInt(formData.get('age')) || null;
-        application.citizenship = formData.get('citizenship');
         application.gender = formData.get('gender');
-        application.dateOfBirth = formData.get('dateOfBirth');
+        const photo = formData.get('seniorIcPhoto');
+        if (photo && photo.size > 0) application.photoName = photo.name;
     } else if (application.type === 'student') {
-        application.matrixNumber = formData.get('matrixNumber');
-        application.schoolName = formData.get('schoolName');
         application.studentCitizenship = formData.get('studentCitizenship');
+        // For student form, use the specific field name
+        application.ic = formData.get('studentIc');
+        application.passportNumber = formData.get('passportNumber');
         application.educationLevel = formData.get('educationLevel');
+        application.schoolName = formData.get('schoolName');
+        application.matrixNumber = formData.get('matrixNumber');
         const photo = formData.get('studentIdPhoto');
         if (photo && photo.size > 0) application.photoName = photo.name;
     }
@@ -458,14 +932,37 @@ function handleFormSubmission(e) {
                 console.log('Application submitted successfully'); // Debug log
                 applications.push(data.application);
                 localStorage.setItem('concessionApplications', JSON.stringify(applications));
-                showApplicationStatus(data.application);
+                
+                // Show success notification with Sweet Alert
+                Swal.fire({
+                    title: 'Application Submitted!',
+                    text: 'Your concession card application has been submitted successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'View Status'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showApplicationStatus(data.application);
+                    } else {
+                        showScreen('main');
+                    }
+                });
+                
+                // Reload user applications
+                loadUserApplications();
             } else {
                 let errorMsg = data.message || 'Submission failed';
                 if (data.errors) {
                     errorMsg = Object.values(data.errors).flat().join('\n');
                 }
                 console.log('Submission failed:', errorMsg); // Debug log
-                alert(errorMsg);
+                
+                // Show error notification with Sweet Alert
+                Swal.fire({
+                    title: 'Submission Failed',
+                    text: errorMsg,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         })
         .catch(error => {
@@ -550,22 +1047,26 @@ class Autocomplete {
     }
     
     init() {
-        this.input.addEventListener('input', (e) => this.handleInput(e));
-        this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
-        
-        // Use a small delay for blur to allow mousedown events to fire first
-        this.input.addEventListener('blur', () => {
+        // Bind methods to preserve context
+        this.handleInput = this.handleInput.bind(this);
+        this.handleKeydown = this.handleKeydown.bind(this);
+        this.handleBlur = () => {
             setTimeout(() => this.hideDropdown(), 200);
-        });
-        
-        this.input.addEventListener('focus', () => this.showDropdown());
-        
-        // Hide dropdown when clicking outside
-        document.addEventListener('click', (e) => {
+        };
+        this.handleFocus = () => this.showDropdown();
+        this.handleClickOutside = (e) => {
             if (!this.input.contains(e.target) && !this.dropdown.contains(e.target)) {
                 this.hideDropdown();
             }
-        });
+        };
+        
+        this.input.addEventListener('input', this.handleInput);
+        this.input.addEventListener('keydown', this.handleKeydown);
+        this.input.addEventListener('blur', this.handleBlur);
+        this.input.addEventListener('focus', this.handleFocus);
+        
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', this.handleClickOutside);
     }
     
     handleInput(e) {
@@ -683,6 +1184,17 @@ class Autocomplete {
         this.dropdown.style.display = 'none';
         this.selectedIndex = -1;
     }
+    
+    destroy() {
+        // Remove event listeners
+        if (this.input) {
+            this.input.removeEventListener('input', this.handleInput);
+            this.input.removeEventListener('keydown', this.handleKeydown);
+            this.input.removeEventListener('blur', this.handleBlur);
+            this.input.removeEventListener('focus', this.handleFocus);
+        }
+        document.removeEventListener('click', this.handleClickOutside);
+    }
 }
 
 // Function to get school data based on education level
@@ -753,18 +1265,22 @@ async function loadSchoolData() {
 // Autocomplete initialization moved to main DOMContentLoaded event
 
 function updateAdminStats() {
+    console.log('Updating admin stats with applications:', applications.length);
     document.getElementById('totalApps').textContent = applications.length;
     document.getElementById('pendingApps').textContent = applications.filter(a => a.status === 'pending').length;
     document.getElementById('approvedApps').textContent = applications.filter(a => a.status === 'approved').length;
     document.getElementById('rejectedApps').textContent = applications.filter(a => a.status === 'rejected').length;
+    console.log('Stats updated - Total:', applications.length, 'Pending:', applications.filter(a => a.status === 'pending').length);
 }
 
 function loadApplicationsTable() {
+    console.log('Loading applications table with applications:', applications.length);
     const pageSize = 10;
     const sortedApplications = [...applications].sort((a, b) => new Date(b.applicationDate) - new Date(a.applicationDate));
     const total = sortedApplications.length;
     const maxPage = Math.ceil(total / pageSize) - 1;
     let adminCurrentPage = Math.max(0, Math.min(statusCurrentPage, maxPage));
+    console.log('Total applications for table:', total);
 
     const start = adminCurrentPage * pageSize;
     const end = start + pageSize;
@@ -839,23 +1355,27 @@ function viewApplication(id) {
 
         if (app.type === 'oku') {
             detailsTable += `
+                <tr><td>IC Number</td><td>${app.ic || '-'}</td></tr>
                 <tr><td>OKU Card Number</td><td>${app.okuCardNumber || '-'}</td></tr>
                 <tr><td>Disability Type</td><td>${app.disabilityType || '-'}</td></tr>
                 ${app.disabilityType === 'other' ? `<tr><td>Other Disability</td><td>${app.otherDisability || '-'}</td></tr>` : ''}
+                <tr><td>OKU Card Photo</td><td>${app.photoName || '-'}</td></tr>
             `;
         } else if (app.type === 'senior') {
             detailsTable += `
+                <tr><td>IC Number</td><td>${app.ic || '-'}</td></tr>
                 <tr><td>Age</td><td>${app.age || '-'}</td></tr>
-                <tr><td>Citizenship</td><td>${app.citizenship || '-'}</td></tr>
                 <tr><td>Gender</td><td>${app.gender || '-'}</td></tr>
-                <tr><td>Date of Birth</td><td>${app.dateOfBirth || '-'}</td></tr>
+                <tr><td>IC Photo</td><td>${app.photoName || '-'}</td></tr>
             `;
         } else if (app.type === 'student') {
             detailsTable += `
-                <tr><td>Matrix Number</td><td>${app.matrixNumber || '-'}</td></tr>
-                <tr><td>School Name</td><td>${app.schoolName || '-'}</td></tr>
                 <tr><td>Citizenship</td><td>${app.studentCitizenship || '-'}</td></tr>
+                <tr><td>IC Number</td><td>${app.ic || '-'}</td></tr>
+                <tr><td>Passport Number</td><td>${app.passportNumber || '-'}</td></tr>
                 <tr><td>Education Level</td><td>${app.educationLevel || '-'}</td></tr>
+                <tr><td>School Name</td><td>${app.schoolName || '-'}</td></tr>
+                <tr><td>Matrix Number</td><td>${app.matrixNumber || '-'}</td></tr>
                 <tr><td>Student ID Photo</td><td>${app.photoName || '-'}</td></tr>
             `;
         }
@@ -869,23 +1389,97 @@ function viewApplication(id) {
     }
 }
 
-function approveApplication(id) {
-    const app = applications.find(a => a.id === id);
-    if (app) {
-        app.status = 'approved';
-        localStorage.setItem('concessionApplications', JSON.stringify(applications));
-        updateAdminStats();
-        loadApplicationsTable();
+async function approveApplication(id) {
+    if (!confirm('Are you sure you want to approve this application?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/concession/applications/${id}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                notes: prompt('Add approval notes (optional):') || ''
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showMessage('Application approved successfully', 'success');
+            
+            // Update local data
+            const app = applications.find(a => a.id === id);
+            if (app) {
+                app.status = 'approved';
+                app.reviewedBy = 'Current Admin'; // You might want to get actual admin name
+                app.reviewedAt = new Date().toISOString();
+                localStorage.setItem('concessionApplications', JSON.stringify(applications));
+            }
+            
+            // Reload data from server to ensure consistency
+            if (window.location.pathname.includes('card-approval')) {
+                await loadAllApplicationsForAdmin();
+            } else {
+                updateAdminStats();
+                loadApplicationsTable();
+            }
+        } else {
+            showMessage(data.message || 'Failed to approve application', 'error');
+        }
+    } catch (error) {
+        console.error('Error approving application:', error);
+        showMessage('Error approving application', 'error');
     }
 }
 
-function rejectApplication(id) {
-    const app = applications.find(a => a.id === id);
-    if (app) {
-        app.status = 'rejected';
-        localStorage.setItem('concessionApplications', JSON.stringify(applications));
-        updateAdminStats();
-        loadApplicationsTable();
+async function rejectApplication(id) {
+    if (!confirm('Are you sure you want to reject this application?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/concession/applications/${id}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                notes: prompt('Add rejection notes (optional):') || ''
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showMessage('Application rejected successfully', 'success');
+            
+            // Update local data
+            const app = applications.find(a => a.id === id);
+            if (app) {
+                app.status = 'rejected';
+                app.reviewedBy = 'Current Admin'; // You might want to get actual admin name
+                app.reviewedAt = new Date().toISOString();
+                localStorage.setItem('concessionApplications', JSON.stringify(applications));
+            }
+            
+            // Reload data from server to ensure consistency
+            if (window.location.pathname.includes('card-approval')) {
+                await loadAllApplicationsForAdmin();
+            } else {
+                updateAdminStats();
+                loadApplicationsTable();
+            }
+        } else {
+            showMessage(data.message || 'Failed to reject application', 'error');
+        }
+    } catch (error) {
+        console.error('Error rejecting application:', error);
+        showMessage('Error rejecting application', 'error');
     }
 }
 
@@ -896,5 +1490,255 @@ function withdrawApplication(id) {
         localStorage.setItem('concessionApplications', JSON.stringify(applications));
         updateAdminStats();
         loadApplicationsTable();
+    }
+}
+
+// Helper functions for UI
+function showMessage(message, type = 'info') {
+    // You can implement a proper notification system here
+    console.log(`${type.toUpperCase()}: ${message}`);
+    alert(message); // Simple alert for now
+}
+
+function showLoading() {
+    // You can implement a loading spinner here
+    console.log('Loading...');
+}
+
+function hideLoading() {
+    // Hide loading spinner
+    console.log('Loading complete');
+}
+
+// Load all applications for admin approval page
+async function loadAllApplicationsForAdmin() {
+    try {
+        showLoading();
+        console.log('Loading all applications for admin...');
+        console.log('Current URL:', window.location.href);
+        console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
+        
+        const response = await fetch('/api/concession/admin/all-applications', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (data.success) {
+            // Replace local storage data with server data
+            applications = data.applications;
+            localStorage.setItem('concessionApplications', JSON.stringify(applications));
+            
+            // Update admin stats from server data
+            updateAdminStats();
+            
+            // Reload the applications table
+            loadApplicationsTable();
+            
+            console.log('Loaded ' + applications.length + ' applications for admin review');
+            showMessage(`Successfully loaded ${applications.length} applications`, 'success');
+        } else {
+            console.error('Failed to load applications:', data.message);
+            showMessage('Failed to load applications: ' + data.message, 'error');
+            
+            // If admin API fails, try to load user's own applications as fallback
+            console.log('Trying to load user applications as fallback...');
+            await loadUserApplications();
+        }
+    } catch (error) {
+        console.error('Error loading applications:', error);
+        showMessage('Error loading applications: ' + error.message, 'error');
+        
+        // If admin API fails, try to load user's own applications as fallback
+        console.log('Trying to load user applications as fallback...');
+        await loadUserApplications();
+    } finally {
+        hideLoading();
+    }
+}
+
+// Load admin statistics for all applications
+async function loadAdminAllStats() {
+    try {
+        const response = await fetch('/api/concession/admin/all-stats', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update the stats display
+            document.getElementById('totalApps').textContent = data.stats.total;
+            document.getElementById('pendingApps').textContent = data.stats.pending;
+            document.getElementById('approvedApps').textContent = data.stats.approved;
+            document.getElementById('rejectedApps').textContent = data.stats.rejected;
+        }
+    } catch (error) {
+        console.error('Error loading admin stats:', error);
+    }
+}
+
+// Load user applications for the status section
+async function loadUserApplications() {
+    console.log('Loading user applications...');
+    try {
+        const response = await fetch('/api/concession/applications');
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (data.success) {
+            console.log('Applications loaded:', data.applications);
+            renderUserApplications(data.applications);
+        } else {
+            console.error('Failed to load user applications:', data.message);
+        }
+    } catch (error) {
+        console.error('Error loading user applications:', error);
+    }
+}
+
+function renderUserApplications(userApplications) {
+    console.log('Rendering user applications:', userApplications);
+    const content = document.getElementById('userApplicationsContent');
+    console.log('Content element:', content);
+    
+    if (!content) {
+        console.error('userApplicationsContent element not found');
+        return;
+    }
+    
+    if (userApplications.length === 0) {
+        console.log('No applications found, showing empty state');
+        content.innerHTML = `
+            <div class="no-applications">
+                <i class="fas fa-file-alt"></i>
+                <h3>No Applications Yet</h3>
+                <p>You haven't submitted any concession card applications yet.</p>
+                <button class="btn btn-primary" onclick="showScreen('main')">Apply Now</button>
+            </div>
+        `;
+        return;
+    }
+    
+    // Sort applications by date (newest first)
+    const sortedApplications = userApplications.sort((a, b) => new Date(b.applicationDate) - new Date(a.applicationDate));
+    
+    content.innerHTML = `
+        <div class="applications-grid">
+            ${sortedApplications.map(app => `
+                <div class="application-card ${app.status}">
+                    <div class="application-header">
+                        <div class="application-type">
+                            <span class="type-badge ${app.type}">${getTypeLabel(app.type)}</span>
+                        </div>
+                        <div class="application-status">
+                            <span class="status-badge ${app.status}">${getStatusLabel(app.status)}</span>
+                        </div>
+                    </div>
+                    <div class="application-body">
+                        <h4>${app.fullName}</h4>
+                        <p class="application-id">ID: ${app.id}</p>
+                        <p class="application-date">Applied: ${formatDate(app.applicationDate)}</p>
+                        <div class="application-ic">
+                            <strong>IC:</strong> ${getIcNumber(app) || 'N/A'}
+                        </div>
+                    </div>
+                    <div class="application-footer">
+                        <button class="btn btn-sm btn-info" onclick="viewUserApplication('${app.id}')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function viewUserApplication(applicationId) {
+    // Find the application in the current applications array
+    const app = applications.find(a => a.id === applicationId);
+    if (app) {
+        viewApplication(applicationId);
+    } else {
+        // If not found locally, fetch from server
+        fetch(`/api/concession/applications/${applicationId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    viewApplication(applicationId);
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Application not found',
+                        icon: 'error'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching application:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to load application details',
+                    icon: 'error'
+                });
+            });
+    }
+}
+
+// Helper functions for user applications display
+function getTypeLabel(type) {
+    const labels = {
+        'oku': 'OKU',
+        'senior': 'Senior Citizen',
+        'student': 'Student'
+    };
+    return labels[type] || type;
+}
+
+function getStatusLabel(status) {
+    const labels = {
+        'pending': 'Pending',
+        'approved': 'Approved',
+        'rejected': 'Rejected'
+    };
+    return labels[status] || status;
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function getIcNumber(application) {
+    // Get IC number based on application type
+    if (application.type === 'student') {
+        return application.studentIc || application.ic;
+    } else if (application.type === 'senior') {
+        return application.seniorIc || application.ic;
+    } else {
+        return application.ic;
     }
 }

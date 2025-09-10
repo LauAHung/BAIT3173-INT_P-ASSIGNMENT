@@ -5,6 +5,7 @@
 @push('styles')
     <link href="{{ asset('css/ConcessionCardSimple.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 
 @section('content')
@@ -138,32 +139,23 @@
                                 <input type="hidden" id="applicationType" name="type">
                                 
                                 <!-- Common Fields -->
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="fullName">Full Name *</label>
-                                        <input type="text" id="fullName" name="fullName" required>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="ic">IC Number</label>
-                                        <input type="text" id="ic" name="ic" maxlength="12">
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="passportNumber">Passport Number</label>
-                                        <input type="text" id="passportNumber" name="passportNumber">
-                                        <span class="error-message"></span>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="fullName">Full Name *</label>
+                                    <input type="text" id="fullName" name="fullName" required>
+                                    <span class="error-message"></span>
                                 </div>
 
                                 <!-- OKU Specific Fields -->
                                 <div id="okuFields" class="conditional-fields">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="okuCardNumber">OKU Card Number *</label>
-                                            <input type="text" id="okuCardNumber" name="okuCardNumber" required>
-                                            <span class="error-message"></span>
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="okuIc">IC Number *</label>
+                                        <input type="text" id="okuIc" name="ic" maxlength="12" required>
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="okuCardNumber">OKU Card Number *</label>
+                                        <input type="text" id="okuCardNumber" name="okuCardNumber" required>
+                                        <span class="error-message"></span>
                                     </div>
                                     <div class="form-group">
                                         <label for="disabilityType">Disability Type *</label>
@@ -179,84 +171,100 @@
                                     </div>
                                     <div class="form-group" id="otherDisabilityContainer">
                                         <label for="otherDisability">Other Disability Information *</label>
-                                        <textarea id="otherDisability" name="otherDisability" rows="1"></textarea>
+                                        <textarea id="otherDisability" name="otherDisability" rows="3"></textarea>
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="okuCardPhoto">OKU Card Photo *</label>
+                                        <div class="file-upload" id="okuFileUpload" onclick="document.getElementById('okuCardPhoto').click()">
+                                            <input type="file" id="okuCardPhoto" name="okuCardPhoto" accept="image/*" required>
+                                            <div class="file-upload-content">
+                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="7,10 12,15 17,10"/>
+                                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                                </svg>
+                                                <p>Click to upload OKU card photo</p>
+                                            </div>
+                                        </div>
                                         <span class="error-message"></span>
                                     </div>
                                 </div>
 
                                 <!-- Senior Citizen Specific Fields -->
                                 <div id="seniorFields" class="conditional-fields">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="age">Age *</label>
-                                            <input type="number" id="age" name="age" min="60">
-                                            <span class="error-message"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="gender">Gender *</label>
-                                            <select id="gender" name="gender">
-                                                <option value="">Select Gender</option>
-                                                <option value="male">Male</option>
-                                                <option value="female">Female</option>
-                                            </select>
-                                            <span class="error-message"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="citizenship">Citizenship *</label>
-                                            <div class="autocomplete-container">
-                                                <input type="text" id="citizenship" name="citizenship" placeholder="Type to search nationality..." autocomplete="off">
-                                                <div id="citizenshipDropdown" class="autocomplete-dropdown"></div>
-                                            </div>
-                                            <span class="error-message"></span>
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="seniorIc">IC Number *</label>
+                                        <input type="text" id="seniorIc" name="seniorIc" maxlength="12" required>
+                                        <span class="error-message"></span>
                                     </div>
                                     <div class="form-group">
-                                        <label for="dateOfBirth">Date of Birth</label>
-                                        <input type="date" id="dateOfBirth" name="dateOfBirth">
+                                        <label for="seniorIcPhoto">IC Photo *</label>
+                                        <div class="file-upload" id="seniorFileUpload" onclick="document.getElementById('seniorIcPhoto').click()">
+                                            <input type="file" id="seniorIcPhoto" name="seniorIcPhoto" accept="image/*" required>
+                                            <div class="file-upload-content">
+                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                    <polyline points="7,10 12,15 17,10"/>
+                                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                                </svg>
+                                                <p>Click to upload IC photo</p>
+                                            </div>
+                                        </div>
+                                        <span class="error-message"></span>
                                     </div>
+                                    <!-- Auto-calculated fields (hidden) -->
+                                    <input type="hidden" id="seniorAge" name="age">
+                                    <input type="hidden" id="seniorGender" name="gender">
                                 </div>
 
                                 <!-- Student Specific Fields -->
                                 <div id="studentFields" class="conditional-fields">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="matrixNumber">Matrix Number *</label>
-                                            <input type="text" id="matrixNumber" name="matrixNumber">
-                                            <span class="error-message"></span>
+                                    <div class="form-group">
+                                        <label for="studentCitizenship">Citizenship *</label>
+                                        <div class="autocomplete-container">
+                                            <input type="text" id="studentCitizenship" name="studentCitizenship" placeholder="Type to search nationality..." autocomplete="off" required>
+                                            <div id="studentCitizenshipDropdown" class="autocomplete-dropdown"></div>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="studentCitizenship">Citizenship *</label>
-                                            <div class="autocomplete-container">
-                                                <input type="text" id="studentCitizenship" name="studentCitizenship" placeholder="Type to search nationality..." autocomplete="off">
-                                                <div id="studentCitizenshipDropdown" class="autocomplete-dropdown"></div>
-                                            </div>
-                                            <span class="error-message"></span>
-                                        </div>
+                                        <span class="error-message"></span>
                                     </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="educationLevel">Education Level *</label>
-                                            <select id="educationLevel" name="educationLevel">
-                                                <option value="">Select Education Level</option>
-                                                <option value="primary">Primary School</option>
-                                                <option value="secondary">Secondary School</option>
-                                                <option value="university">University</option>
-                                            </select>
-                                            <span class="error-message"></span>
+                                    <div class="form-group" id="studentIcContainer">
+                                        <label for="studentIc">IC Number *</label>
+                                        <input type="text" id="studentIc" name="studentIc" maxlength="12">
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group" id="studentPassportContainer" style="display: none;">
+                                        <label for="studentPassport">Passport Number *</label>
+                                        <input type="text" id="studentPassport" name="passportNumber">
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="educationLevel">Education Level *</label>
+                                        <select id="educationLevel" name="educationLevel" required>
+                                            <option value="">Select Education Level</option>
+                                            <option value="primary">Primary School</option>
+                                            <option value="secondary">Secondary School</option>
+                                            <option value="university">University</option>
+                                        </select>
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="schoolName">School Name *</label>
+                                        <div class="autocomplete-container">
+                                            <input type="text" id="schoolName" name="schoolName" placeholder="Type to search school..." autocomplete="off" required>
+                                            <div id="schoolNameDropdown" class="autocomplete-dropdown"></div>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="schoolName">School Name *</label>
-                                            <div class="autocomplete-container">
-                                                <input type="text" id="schoolName" name="schoolName" placeholder="Type to search university..." autocomplete="off">
-                                                <div id="schoolNameDropdown" class="autocomplete-dropdown"></div>
-                                            </div>
-                                            <span class="error-message"></span>
-                                        </div>
+                                        <span class="error-message"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="matrixNumber">Matrix Number *</label>
+                                        <input type="text" id="matrixNumber" name="matrixNumber" required>
+                                        <span class="error-message"></span>
                                     </div>
                                     <div class="form-group">
                                         <label for="studentIdPhoto">Student ID Photo *</label>
-                                        <div class="file-upload" id="fileUpload">
-                                            <input type="file" id="studentIdPhoto" name="studentIdPhoto" accept="image/*">
+                                        <div class="file-upload" id="studentFileUpload" onclick="document.getElementById('studentIdPhoto').click()">
+                                            <input type="file" id="studentIdPhoto" name="studentIdPhoto" accept="image/*" required>
                                             <div class="file-upload-content">
                                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -360,6 +368,24 @@
                 </div>
             </div>
         </div>
+
+        <!-- User Applications Status Section -->
+        @auth
+        <section class="user-applications-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>My Applications</h2>
+                    <p>Track the status of your concession card applications</p>
+                </div>
+                
+                <div class="applications-status">
+                    <div id="userApplicationsContent">
+                        <!-- User applications will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        @endauth
 
         <!-- Modals -->
         <div id="viewModal" class="modal">

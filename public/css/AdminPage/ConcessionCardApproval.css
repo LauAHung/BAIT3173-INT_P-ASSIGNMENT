@@ -18,6 +18,13 @@
   background: #555;
 }
 
+/* Not Applicable styling */
+.not-applicable {
+  color: #888;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
 /* Card Actions */
 .card-actions {
   display: flex;

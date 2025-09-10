@@ -35,6 +35,12 @@ return new class extends Migration
             $table->string('school_name')->nullable();
             $table->string('student_id_photo_path')->nullable();
             
+            // OKU specific fields
+            $table->string('oku_card_photo_path')->nullable();
+            
+            // Senior citizen specific fields
+            $table->string('senior_ic_photo_path')->nullable();
+            
             // Application status
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('admin_notes')->nullable();

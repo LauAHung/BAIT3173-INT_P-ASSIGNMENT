@@ -86,7 +86,7 @@
         <!-- Filters -->
         <div class="filters-section">
             <div class="filter-group">
-                <input type="text" id="search-applicant" placeholder="Search by name or IC" class="filter-input">
+                <input type="text" id="search-applicant" placeholder="Search by name, IC, or passport" class="filter-input">
                 <select id="filter-type" class="filter-select">
                     <option value="">All Types</option>
                     <option value="oku">OKU</option>
@@ -119,6 +119,7 @@
                         <th>Applicant Name</th>
                         <th>Type</th>
                         <th>IC Number</th>
+                        <th>Passport Number</th>
                         <th>Status</th>
                         <th>Applied Date</th>
                         <th>Actions</th>
@@ -180,19 +181,33 @@
 let applications = [];
 let filteredApplications = [];
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadApplications();
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadApplications();
 });
 
 async function loadApplications() {
     try {
         showLoading();
-        const response = await fetch('/api/concession/applications');
+        // Use admin endpoint so ALL admins see ALL applications
+        const response = await fetch('/api/concession/admin/all-applications');
         const data = await response.json();
         
         if (data.success) {
             applications = data.applications;
             filteredApplications = [...applications];
+            
+            // Debug: Log application data to see photo URLs
+            console.log('Loaded applications:', applications);
+            applications.forEach(app => {
+                if (app.type === 'oku' || app.type === 'senior') {
+                    console.log(`${app.type} app ${app.id}:`, {
+                        photoUrl: app.photoUrl,
+                        photoName: app.photoName,
+                        photoPath: app[`${app.type === 'oku' ? 'oku_card' : 'senior_ic'}_photo_path`]
+                    });
+                }
+            });
+            
             renderApplications();
             updateStats();
         } else {
@@ -223,9 +238,10 @@ function renderApplications() {
             <td><span class="id-value">${app.id}</span></td>
             <td>${app.fullName}</td>
             <td>
-                <span class="type-badge ${app.type}">${getTypeLabel(app.type)}</span>
+                <span class="type-badge ${app.type}" style="white-space: nowrap;">${getTypeLabel(app.type)}</span>
             </td>
-            <td>${app.ic}</td>
+            <td>${formatIdOrPassport(getIcNumber(app))}</td>
+            <td>${formatIdOrPassport(app.passportNumber)}</td>
             <td>
                 <span class="status-badge ${app.status}">${getStatusLabel(app.status)}</span>
             </td>
@@ -269,8 +285,10 @@ function filterApplications() {
     const statusFilter = document.getElementById('filter-status').value;
     
     filteredApplications = applications.filter(app => {
+        const icNumber = getIcNumber(app);
         const matchesSearch = app.fullName.toLowerCase().includes(searchTerm) || 
-                            app.ic.includes(searchTerm);
+                            (icNumber && icNumber.includes(searchTerm)) ||
+                            (app.passportNumber && app.passportNumber.includes(searchTerm));
         const matchesType = !typeFilter || app.type === typeFilter;
         const matchesStatus = !statusFilter || app.status === statusFilter;
         
@@ -323,7 +341,11 @@ function showApplicationModal(application) {
                     </div>
                     <div class="detail-item">
                         <label>IC Number:</label>
-                        <span>${application.ic}</span>
+                        <span>${formatIdOrPassport(getIcNumber(application))}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Passport Number:</label>
+                        <span>${formatIdOrPassport(application.passportNumber)}</span>
                     </div>
                     <div class="detail-item">
                         <label>Application Type:</label>
@@ -440,7 +462,7 @@ function exportApplications() {
 function getTypeLabel(type) {
     const labels = {
         'oku': 'OKU',
-        'senior': 'Senior Citizen',
+        'senior': 'Senior',
         'student': 'Student'
     };
     return labels[type] || type;
@@ -465,6 +487,25 @@ function formatDate(dateString) {
     });
 }
 
+function formatIdOrPassport(value) {
+    if (!value || value === 'null' || value === null) {
+        return '<span class="not-applicable">Not Applicable</span>';
+    }
+    return value;
+}
+
+function getIcNumber(application) {
+    // Return the correct IC number based on application type
+    if (application.type === 'student') {
+        return application.studentIc || application.ic;
+    } else if (application.type === 'senior') {
+        return application.seniorIc || application.ic;
+    } else {
+        // OKU uses the standard ic field
+        return application.ic;
+    }
+}
+
 function getTypeSpecificDetails(application) {
     let details = '';
     
@@ -481,37 +522,73 @@ function getTypeSpecificDetails(application) {
                         <label>Disability Info:</label>
                         <span>${application.disability || 'N/A'}</span>
                     </div>
-                    <div class="detail-item">
-                        <label>Passport Number:</label>
-                        <span>${application.passportNumber || 'N/A'}</span>
-                    </div>
+                    ${application.photoUrl ? `
+                        <div class="detail-item">
+                            <label>OKU Card Photo:</label>
+                            <div class="photo-container">
+                                <img src="${application.photoUrl}" alt="OKU Card Photo" class="student-photo" onclick="showPhotoModal('${application.photoUrl}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <span style="display:none;">Photo not available</span>
+                            </div>
+                            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                Debug: photoUrl = ${application.photoUrl || 'undefined'}, 
+                                oku_card_photo_path = ${application.oku_card_photo_path || 'undefined'}
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="detail-item">
+                            <label>OKU Card Photo:</label>
+                            <span style="color: #999; font-style: italic;">No photo uploaded</span>
+                            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                Debug: photoUrl = ${application.photoUrl || 'undefined'}, 
+                                oku_card_photo_path = ${application.oku_card_photo_path || 'undefined'}
+                            </div>
+                        </div>
+                    `}
                 </div>
             </div>
         `;
-    } else if (application.type === 'senior') {
-        details = `
-            <div class="detail-section">
-                <h4>Senior Citizen Details</h4>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Age:</label>
-                        <span>${application.age || 'N/A'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Gender:</label>
-                        <span>${application.gender || 'N/A'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Citizenship:</label>
-                        <span>${application.citizenship || 'N/A'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Date of Birth:</label>
-                        <span>${application.dateOfBirth || 'N/A'}</span>
+        } else if (application.type === 'senior') {
+            details = `
+                <div class="detail-section">
+                    <h4>Senior Citizen Details</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Age:</label>
+                            <span>${application.age || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Gender:</label>
+                            <span>${application.gender || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Citizenship:</label>
+                            <span>${application.citizenship || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Date of Birth:</label>
+                            <span>${application.dateOfBirth || 'N/A'}</span>
+                        </div>
+                        ${application.photoUrl ? `
+                            <div class="detail-item">
+                                <label>IC Photo:</label>
+                                <div class="photo-container">
+                                    <img src="${application.photoUrl}" alt="IC Photo" class="student-photo" onclick="showPhotoModal('${application.photoUrl}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                    <span style="display:none;">Photo not available</span>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="detail-item">
+                                <label>IC Photo:</label>
+                                <span style="color: #999; font-style: italic;">No photo uploaded</span>
+                                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                    Debug: photoUrl = ${application.photoUrl || 'undefined'}, 
+                                    senior_ic_photo_path = ${application.senior_ic_photo_path || 'undefined'}
+                                </div>
+                            </div>
+                        `}
                     </div>
                 </div>
-            </div>
-        `;
+            `;
     } else if (application.type === 'student') {
         details = `
             <div class="detail-section">
