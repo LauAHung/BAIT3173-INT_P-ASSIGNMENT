@@ -35,19 +35,42 @@ class GoogleAuthController extends Controller
     {
         try {
             // Get user info from Google
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $googleUser = Socialite::driver('google')->user();
 
-            // Check if the user already exists in your database
-            $user = User::where('email', $googleUser->getEmail())->first();
+            // Normalize incoming data
+            $fullName = $googleUser->getName() ?? '';
+            $firstName = $googleUser->user['given_name'] ?? (string) Str::of($fullName)->beforeLast(' ');
+            $lastName = $googleUser->user['family_name'] ?? (string) Str::of($fullName)->afterLast(' ');
+            if (trim($lastName) === '' && trim($firstName) === '' && $fullName !== '') {
+                $firstName = $fullName;
+                $lastName = '';
+            }
+
+            $email = $googleUser->getEmail();
+
+            // Try to find by social id first
+            $user = User::where('social_provider', 'google')
+                ->where('social_provider_id', (string) $googleUser->getId())
+                ->first();
+
+            // Fallback: find by email if available
+            if (!$user) {
+                $user = $email ? User::where('email', $email)->first() : null;
+            }
 
             if (!$user) {
                 // Create new user using the Factory pattern
+                if (!$email) {
+                    // If Google doesn't provide email, synthesize an internal-only placeholder
+                    $email = 'google_' . (string) $googleUser->getId() . '@google.local';
+                }
+
                 $socialData = [
-                    'first_name' => $googleUser->user['given_name'] ?? '',
-                    'last_name'  => $googleUser->user['family_name'] ?? '',
-                    'email'      => $googleUser->getEmail(),
-                    'provider_id' => $googleUser->getId(),
-                    'provider_data' => $googleUser->user,
+                    'first_name' => $firstName,
+                    'last_name'  => $lastName,
+                    'email'      => $email,
+                    'provider_id' => (string) $googleUser->getId(),
+                    'provider_data' => $googleUser->user ?? [],
                     'profile_picture' => $googleUser->getAvatar() ?? ''
                 ];
 

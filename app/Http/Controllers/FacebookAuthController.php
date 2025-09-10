@@ -28,24 +28,50 @@ class FacebookAuthController extends Controller
 
     public function redirectToFacebook()
     {
-        return Socialite::driver('facebook')->redirect();
+        // Request email scope and keep stateful flow
+        return Socialite::driver('facebook')
+            ->scopes(['email'])
+            ->redirect();
     }
 
     public function handleFacebookCallback()
     {
         try {
-            $facebookUser = Socialite::driver('facebook')->stateless()->user();
+            $facebookUser = Socialite::driver('facebook')->user();
 
-            $user = User::where('email', $facebookUser->getEmail())->first();
+            // Normalize incoming data
+            $fullName = $facebookUser->getName() ?? '';
+            $firstName = $facebookUser->user['first_name'] ?? (string) Str::of($fullName)->beforeLast(' ');
+            $lastName = $facebookUser->user['last_name'] ?? (string) Str::of($fullName)->afterLast(' ');
+            if (trim($lastName) === '' && trim($firstName) === '' && $fullName !== '') {
+                $firstName = $fullName;
+                $lastName = '';
+            }
+
+            $email = $facebookUser->getEmail();
+
+            // If Facebook doesn't return email, try to find by social id first
+            $user = User::where('social_provider', 'facebook')
+                ->where('social_provider_id', (string) $facebookUser->getId())
+                ->first();
+
+            if (!$user) {
+                $user = $email ? User::where('email', $email)->first() : null;
+            }
 
             if (!$user) {
                 // Create new user using the Factory pattern
+                // If email is missing, synthesize a placeholder that's unique and internal-only
+                if (!$email) {
+                    $email = 'fb_' . (string) $facebookUser->getId() . '@facebook.local';
+                }
+
                 $socialData = [
-                    'first_name' => $facebookUser->user['first_name'] ?? '',
-                    'last_name'  => $facebookUser->user['last_name'] ?? '',
-                    'email'      => $facebookUser->getEmail(),
-                    'provider_id' => $facebookUser->getId(),
-                    'provider_data' => $facebookUser->user,
+                    'first_name' => $firstName,
+                    'last_name'  => $lastName,
+                    'email'      => $email,
+                    'provider_id' => (string) $facebookUser->getId(),
+                    'provider_data' => $facebookUser->user ?? [],
                     'profile_picture' => $facebookUser->getAvatar() ?? ''
                 ];
 
@@ -68,7 +94,7 @@ class FacebookAuthController extends Controller
                 $user = $this->userRegistrationService->handleUserLogin($user);
             }
 
-            Auth::login($user);
+            Auth::login($user, true);
 
             return redirect()->route('HomePage')->with('success', 'Facebook login successful');
         } catch (\Exception $e) {

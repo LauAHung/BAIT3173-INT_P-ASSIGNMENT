@@ -31,6 +31,7 @@ Route::prefix('user')->group(function () {
     Route::put('/profile/{userId}', [UserWebServiceController::class, 'updateProfile']);
 });
 
+
 // Admin Module Web Services
 Route::prefix('admin')->group(function () {
     // User management
@@ -67,7 +68,13 @@ Route::prefix('bookings')->group(function () {
     Route::get('/bookings', [BookingApiController::class, 'index']);
     Route::get('/bookings_detail/{id}', [BookingApiController::class, 'show']);
     Route::post('/bookings/{id}/cancel', [BookingApiController::class, 'cancel']);
+    
 });
+
+// Normalized Booking APIs (explicit user and booking params)
+Route::get('/bookings/{userId}', [BookingApiController::class, 'index']);
+Route::get('/booking/{bookingId}/{userId}', [BookingApiController::class, 'show']);
+Route::patch('/booking/cancel/{bookingId}/{userId}', [BookingApiController::class, 'cancel']);
 
 // Health check endpoint
 Route::get('/health', function () {

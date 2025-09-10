@@ -106,9 +106,10 @@ abstract class UserFactory
      */
     protected function setSocialMediaInfo(string $provider, string $providerId, array $providerData = []): void
     {
-        $this->data['auth_provider'] = $provider;
-        $this->data['provider_id'] = $providerId;
-        $this->data['provider_data'] = json_encode($providerData);
+        // Align keys with User model fillable fields
+        $this->data['social_provider'] = $provider;
+        $this->data['social_provider_id'] = $providerId;
+        $this->data['social_provider_data'] = $providerData; // Model casts array
     }
 
     /**

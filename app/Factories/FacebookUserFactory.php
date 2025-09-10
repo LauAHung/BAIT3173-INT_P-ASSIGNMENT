@@ -48,9 +48,9 @@ class FacebookUserFactory extends UserFactory
             }
         }
 
-        // Check if Facebook user already exists
-        if (isset($data['provider_id']) && User::where('provider_id', $data['provider_id'])
-            ->where('auth_provider', 'facebook')->exists()) {
+        // Check if Facebook user already exists (use social_* columns)
+        if (isset($data['provider_id']) && User::where('social_provider_id', $data['provider_id'])
+            ->where('social_provider', 'facebook')->exists()) {
             $this->errors[] = 'Facebook account already exists';
         }
 

@@ -17,8 +17,8 @@ class SocialAuthFactory extends AuthFactory
             return null;
         }
 
-        $user = User::where('provider_id', $credentials['provider_id'])
-            ->where('auth_provider', $credentials['provider'])
+        $user = User::where('social_provider_id', $credentials['provider_id'])
+            ->where('social_provider', $credentials['provider'])
             ->first();
 
         if (!$user) {

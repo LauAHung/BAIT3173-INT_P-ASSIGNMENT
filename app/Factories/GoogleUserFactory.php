@@ -48,9 +48,9 @@ class GoogleUserFactory extends UserFactory
             }
         }
 
-        // Check if Google user already exists
-        if (isset($data['provider_id']) && User::where('provider_id', $data['provider_id'])
-            ->where('auth_provider', 'google')->exists()) {
+        // Check if Google user already exists (use social_* columns)
+        if (isset($data['provider_id']) && User::where('social_provider_id', $data['provider_id'])
+            ->where('social_provider', 'google')->exists()) {
             $this->errors[] = 'Google account already exists';
         }
 
