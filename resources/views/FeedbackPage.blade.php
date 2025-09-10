@@ -9,31 +9,25 @@
 @section('content')
 <div class="page-container">
     <div class="card-container">
-
         <!-- Rate Card -->
-        <div class="card">
-            <!-- Link wraps the icon -->
-            <a href="{{ route('selectrating') }}">
+        <a href="{{ route('selectrating') }}" class="card-link">
+            <div class="card">
                 <div class="icon-placeholder">🚂</div>
-            </a>
-            <div class="card-content">
-                <h3 class="card-title">Rate</h3>
+                <div class="card-content">
+                    <h3 class="card-title">Rate</h3>
+                </div>
             </div>
-        </div>
+        </a>
 
         <!-- View Feedback Card -->
-        <div class="card">
-            <!-- Link wraps the icon -->
-            <a href="{{ route('viewfeedback') }}">
+        <a href="{{ route('viewfeedback') }}" class="card-link">
+            <div class="card">
                 <div class="icon-placeholder">📋</div>
-            </a>
-            <div class="card-content">
-                <h3 class="card-title">View Feedback</h3>
+                <div class="card-content">
+                    <h3 class="card-title">View Feedback</h3>
+                </div>
             </div>
-        </div>
-
+        </a>
     </div>
 </div>
-
-
 @endsection

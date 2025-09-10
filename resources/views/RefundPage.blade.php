@@ -41,12 +41,40 @@
             <button type="submit" class="confirm-button">Confirm Refund</button>
             <a href="{{ route('booking') }}" class="cancel-link">Cancel</a>
         </form>
-
+        
         <!-- Footnote Refund Policy -->
         <p class="refund-warning">
             *The refund amount will be credited to account wallet.
-</p>
         </p>
     </div>
 </div>
+
+<!-- SweetAlert for error/success -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Refund Blocked',
+                text: '{{ session("error") }}',
+                confirmButtonColor: '#d33'
+            }).then(() => {
+                window.location.href = "{{ route('booking') }}"; // redirect after OK
+            });
+        @endif
+
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '{{ session("success") }}',
+                confirmButtonColor: '#3085d6'
+            }).then(() => {
+                window.location.href = "{{ route('booking') }}"; // redirect after OK
+            });
+        @endif
+    });
+</script>
+
 @endsection

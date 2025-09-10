@@ -4,84 +4,109 @@
 
 @push('styles')
     <link href="{{ asset('css/Viewfeedback.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 @endpush
 
 @section('content')
-<div class="feedback-page">
-    <div class="tab-container">
-        <div class="tab-item active" onclick="showFeedback('my')">My Feedback</div>
-        <div class="tab-item" onclick="showFeedback('other')">Other Feedback</div>
-    </div>
+<section>
+    <div class="feedback-main-layout">
+        <!-- Sidebar -->
+        <aside class="feedback-sidebar">
+            <ul>
+                <li class="feedback-tab active" id="my-tab">My Feedback</li>
+                <li class="feedback-tab" id="other-tab">Other Feedback</li>
+            </ul>
+        </aside>
 
-    <div class="feedback-content">
-        <div id="my-feedback" class="feedback-section">
-            <h2>My Feedback</h2>
-            <p>You have submitted the following feedbacks:</p>
-            <!-- Example Feedback -->
-            <div class="feedback-box">
-                <p><strong>Train:</strong> KTM 123</p>
-                <p><strong>Date:</strong> 20 July 2025</p>
-                <p><strong>Feedback:</strong> Very clean and punctual!</p>
+        <!-- Main Content -->
+        <div class="feedback-content">
+            <!-- My Feedback -->
+            <div id="my-content" class="feedback-section">
+                <div class="feedback-heading">
+                    <h2>My Feedback</h2>
+                </div>
+                <div class="feedback-item-container">
+                    @if ($myFeedback && $myFeedback->count() > 0)
+                        @foreach($myFeedback as $feedback)
+                            <div class="feedback-item">
+                                <div class="feedback-flex-row">
+                                    <div class="feedback-col feedback-col-left">
+                                        <i class="fas fa-user-circle feedback-icon"></i>
+                                        <div><strong>{{ $feedback->last_name }} {{ $feedback->first_name }}</strong></div>
+                                    </div>
+                                    <div class="feedback-col feedback-col-middle">
+                                        <div class="star-rating">
+                                            @for ($i = 0; $i < $feedback->rating_value; $i++) ★ @endfor
+                                            @for ($i = $feedback->rating_value; $i < 5; $i++) ☆ @endfor
+                                        </div>
+                                        <p class="feedback-text">{{ $feedback->feedback_text }}</p>
+                                        <p class="feedback-date"><strong>Date:</strong> {{ $feedback->feedback_time }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="feedback-item">
+                            <p>No feedback submitted yet.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Other Feedback -->
+            <div id="other-content" class="feedback-section" style="display:none;">
+                <div class="feedback-heading">
+                    <h2>Other Users' Feedback</h2>
+                </div>
+                <div class="feedback-item-container">
+                    @if (isset($otherFeedback))
+                        @forelse($otherFeedback as $feedback)
+                            <div class="feedback-item">
+                                <div class="feedback-flex-row">
+                                    <div class="feedback-col feedback-col-left">
+                                        <i class="fas fa-user-circle feedback-icon"></i>
+                                        <div><strong>{{ $feedback->last_name }} {{ $feedback->first_name }}</strong></div>
+                                    </div>
+                                    <div class="feedback-col feedback-col-middle">
+                                        <div class="star-rating">
+                                            @for ($i = 0; $i < $feedback->rating_value; $i++) ★ @endfor
+                                            @for ($i = $feedback->rating_value; $i < 5; $i++) ☆ @endfor
+                                        </div>
+                                        <p class="feedback-text">{{ $feedback->feedback_text }}</p>
+                                        <p class="feedback-date"><strong>Date:</strong> {{ $feedback->feedback_time }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="feedback-item">
+                                <p>No feedback from other users yet.</p>
+                            </div>
+                        @endforelse
+                    @else
+                        <div class="feedback-item">
+                            <p>Unable to load other users' feedback. Please try again later.</p>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
-
-        <div id="other-feedback" class="feedback-section hidden">
-            <h2>Other Users' Feedback</h2>
-            <p>See what others are saying:</p>
-            <div class="feedback-box">
-                <p><strong>User:</strong> John</p>
-                <p><strong>Train:</strong> ETS 456</p>
-                <p><strong>Date:</strong> 19 July 2025</p>
-                <p><strong>Feedback:</strong> Comfortable seats and smooth ride.</p>
-            </div>
-            <div class="feedback-box">
-                <p><strong>User:</strong> John</p>
-                <p><strong>Train:</strong> ETS 456</p>
-                <p><strong>Date:</strong> 19 July 2025</p>
-                <p><strong>Feedback:</strong> Comfortable seats and smooth ride.</p>
-            </div>
-            <div class="feedback-box">
-                <p><strong>User:</strong> John</p>
-                <p><strong>Train:</strong> ETS 456</p>
-                <p><strong>Date:</strong> 19 July 2025</p>
-                <p><strong>Feedback:</strong> Comfortable seats and smooth ride.</p>
-            </div><div class="feedback-box">
-                <p><strong>User:</strong> John</p>
-                <p><strong>Train:</strong> ETS 456</p>
-                <p><strong>Date:</strong> 19 July 2025</p>
-                <p><strong>Feedback:</strong> Comfortable seats and smooth ride.</p>
-            </div><div class="feedback-box">
-                <p><strong>User:</strong> John</p>
-                <p><strong>Train:</strong> ETS 456</p>
-                <p><strong>Date:</strong> 19 July 2025</p>
-                <p><strong>Feedback:</strong> Comfortable seats and smooth ride.</p>
-            </div><div class="feedback-box">
-                <p><strong>User:</strong> John</p>
-                <p><strong>Train:</strong> ETS 456</p>
-                <p><strong>Date:</strong> 19 July 2025</p>
-                <p><strong>Feedback:</strong> Comfortable seats and smooth ride.</p>
-            </div><div class="feedback-box">
-                <p><strong>User:</strong> John</p>
-                <p><strong>Train:</strong> ETS 456</p>
-                <p><strong>Date:</strong> 19 July 2025</p>
-                <p><strong>Feedback:</strong> Comfortable seats and smooth ride.</p>
-            </div>
-        </div>
     </div>
-</div>
+</section>
 
 <script>
-    function showFeedback(type) {
-        document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.feedback-section').forEach(section => section.classList.add('hidden'));
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.feedback-tab');
+    const contents = document.querySelectorAll('.feedback-section');
 
-        if (type === 'my') {
-            document.querySelector('.tab-item:nth-child(1)').classList.add('active');
-            document.getElementById('my-feedback').classList.remove('hidden');
-        } else {
-            document.querySelector('.tab-item:nth-child(2)').classList.add('active');
-            document.getElementById('other-feedback').classList.remove('hidden');
-        }
-    }
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.style.display = 'none');
+            this.classList.add('active');
+            const contentId = this.id.replace('-tab', '-content');
+            document.getElementById(contentId).style.display = 'block';
+        });
+    });
+});
 </script>
 @endsection
