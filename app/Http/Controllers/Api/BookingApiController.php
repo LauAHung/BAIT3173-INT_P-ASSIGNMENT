@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -6,30 +7,28 @@ use App\Models\Booking;
 use App\Models\Ticket;
 use App\Models\Seat;
 use App\Models\Journey;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\JsonResponse;
 
 class BookingApiController extends Controller
 {
-    public function index(Request $request)
+    public function index($userId)
     {
-        $userId = Auth::id();
-
         $ongoing = Booking::with(['journey', 'journey.train'])
             ->where('UserID', $userId)
             ->whereIn('Status', ['Booked', 'Pending'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $past = Booking::with(['journey', 'journey.train'])
             ->where('UserID', $userId)
             ->where('Status', 'Completed')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $refunded = Booking::with(['journey', 'journey.train'])
             ->where('UserID', $userId)
             ->whereIn('Status', ['Refunded', 'Cancelled'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([
@@ -39,17 +38,15 @@ class BookingApiController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show($bookingId, $userId)
     {
-        $userId = Auth::id();
-
-        $booking = Booking::with(['journey', 'journey.train'])
-            ->where('BookingID', $id)
+        $booking = Booking::with(['journey', 'journey2','journey.train'])
+            ->where('BookingID', $bookingId)
             ->where('UserID', $userId)
             ->firstOrFail();
 
-        $tickets = Ticket::with(['journey', 'seat', 'passenger'])
-            ->where('BookingID', $id)
+        $tickets = Ticket::with(['journey','journey', 'seat', 'passenger'])
+            ->where('BookingID', $bookingId)
             ->get();
 
         return response()->json([
@@ -58,11 +55,9 @@ class BookingApiController extends Controller
         ]);
     }
 
-    public function cancel($id)
+    public function cancel($bookingId, $userId)
     {
-        $userId = Auth::id();
-
-        $booking = Booking::where('BookingID', $id)
+        $booking = Booking::where('BookingID', $bookingId)
             ->where('UserID', $userId)
             ->where('Status', 'Pending')
             ->firstOrFail();
@@ -72,7 +67,7 @@ class BookingApiController extends Controller
 
             $booking->update(['Status' => 'Cancelled']);
 
-            $tickets = Ticket::where('BookingID', $id)->get();
+            $tickets = Ticket::where('BookingID', $bookingId)->get();
             foreach ($tickets as $ticket) {
                 $ticket->update(['Status' => 'Cancelled']);
                 Seat::where('SeatID', $ticket->SeatID)
@@ -85,10 +80,11 @@ class BookingApiController extends Controller
             }
 
             DB::commit();
+
             return response()->json(['message' => 'Booking cancelled successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Cancellation failed', 'details' => $e->getMessage()], 500);
         }
     }
 }

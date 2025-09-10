@@ -157,7 +157,7 @@
             <!-- button arrows -->
             <div class="arrows">
                 <button id="prev">
-                    << /button>
+                    < </button>
                         <button id="next">></button>
             </div>
             <!-- thumbnail -->
