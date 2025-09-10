@@ -1,42 +1,31 @@
 @extends('Layout.master')
 
-@section('title', 'Rate Your Completed Rides')
+@section('title', 'Feedback Page')
 
 @push('styles')
-    <link href="{{ asset('css/selectrating.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/FeedbackPage.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
-<div class="rate-container">
-    <h1>Completed Journeys Available for Rating</h1>
-    <br>
-    <p>These journeys were completed at least 1 day ago. Please rate your experience.</p>
-<br>
-<br>
-    <!-- Ride 1 -->
-    <div class="ride-card">
-        <div class="ride-content">
-            <div class="ride-details">
-                <div class="ride-header">Train Number: KTM123</div>
-                Date: 2025-07-10<br>
-                Time: 09:30 AM<br>
-                Train Type: KTM
+<div class="feedback-container">
+    <!-- Rate Card -->
+    <a href="{{ route('selectrating') }}" class="card-link">
+        <div class="card full-card">
+            <div class="icon-placeholder">🚂</div>
+            <div class="card-content">
+                <h3 class="card-title">Rate</h3>
             </div>
         </div>
-        <button class="rate-button">Rate This Ride</button>
-    </div>
+    </a>
 
-    <!-- Ride 2 -->
-    <div class="ride-card">
-        <div class="ride-content">
-            <div class="ride-details">
-                <div class="ride-header">Train Number: ETS456</div>
-                Date: 2025-07-08<br>
-                Time: 03:15 PM<br>
-                Train Type: ETS
+    <!-- View Feedback Card -->
+    <a href="{{ route('viewfeedback') }}" class="card-link">
+        <div class="card full-card">
+            <div class="icon-placeholder">📋</div>
+            <div class="card-content">
+                <h3 class="card-title">View Feedback</h3>
             </div>
         </div>
-        <button class="rate-button">Rate This Ride</button>
-    </div>
+    </a>
 </div>
 @endsection
