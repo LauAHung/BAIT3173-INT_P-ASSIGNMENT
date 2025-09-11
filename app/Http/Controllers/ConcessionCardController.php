@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Models\ConcessionApplication;
+use SplFileObject;
 
 class ConcessionCardController extends Controller
 {
@@ -525,6 +526,144 @@ class ConcessionCardController extends Controller
         } else {
             // OKU uses the standard ic field
             return $request->ic;
+        }
+    }
+
+    /**
+     * Serve schools data (primary and secondary) parsed from CSV.
+     */
+    public function schoolsData()
+    {
+        try {
+            $csvPath = base_path('SenaraiSekolah.csv');
+            if (!file_exists($csvPath)) {
+                return response()->json([
+                    'primary' => [],
+                    'secondary' => []
+                ]);
+            }
+
+            $file = new SplFileObject($csvPath);
+            $file->setFlags(SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE);
+            $file->setCsvControl(',');
+
+            $headers = [];
+            $normalizedHeaders = [];
+            $primary = [];
+            $secondary = [];
+
+            foreach ($file as $index => $row) {
+                if ($row === [null] || $row === false) {
+                    continue;
+                }
+                if ($index === 0) {
+                    $headers = $row ?: [];
+                    // Normalize headers: trim, remove BOM, uppercase
+                    $normalizedHeaders = array_map(function ($h) {
+                        $h = (string) $h;
+                        $h = preg_replace('/^\xEF\xBB\xBF/u', '', $h) ?? $h; // strip UTF-8 BOM
+                        return strtoupper(trim($h));
+                    }, $headers);
+                    continue;
+                }
+
+                // Map row to associative array by headers
+                $record = [];
+                foreach ($normalizedHeaders as $i => $key) {
+                    if ($key === null || $key === '') continue;
+                    $record[$key] = isset($row[$i]) ? (string) $row[$i] : '';
+                }
+
+                $level = $record['PERINGKAT'] ?? '';
+                $typeLabel = $record['JENIS/LABEL'] ?? ($record['JENIS'] ?? '');
+                $nameField = $record['NAMASEKOLAH'] ?? '';
+
+                // Normalize state and district
+                $state = $record['NEGERI'] ?? '';
+                $district = $record['PPD'] ?? '';
+                $code = $record['KODSEKOLAH'] ?? '';
+                $name = $nameField;
+
+                $school = [
+                    'code' => (string) $code,
+                    'name' => (string) $name,
+                    'state' => (string) $state,
+                    'district' => (string) $district
+                ];
+
+                // Normalize fields for robust matching
+                $levelNorm = strtoupper(trim((string) $level));
+                $typeNorm = strtoupper(trim((string) $typeLabel));
+                $typeCompact = preg_replace('/[^A-Z0-9]/', '', $typeNorm);
+                $nameNorm = strtoupper(trim((string) $name));
+                $nameCompact = preg_replace('/[^A-Z0-9]/', '', $nameNorm);
+
+                // Primary schools: PERINGKAT contains 'RENDAH'
+                if (strpos($levelNorm, 'RENDAH') !== false) {
+                    $primary[] = $school;
+                    continue;
+                }
+
+                // Secondary schools: PERINGKAT contains 'MENENGAH'
+                if (strpos($levelNorm, 'MENENGAH') !== false) {
+                    $secondary[] = $school;
+                    continue;
+                }
+
+                // Fallback: classify by JENIS/LABEL variants
+                $isSecondary = false;
+                $isPrimary = false;
+
+                // Secondary indicators
+                $secondaryIndicators = [
+                    'SMK','SMKA','SMA','SMJK','SBP','SBPI','MRSM','KV','KPV','SMV','SM SAINS','SEKOLAH MENENGAH','SEK MEN','MENENGAH'
+                ];
+                foreach ($secondaryIndicators as $ind) {
+                    if (strpos($typeNorm, $ind) !== false || strpos($typeCompact, preg_replace('/[^A-Z0-9]/','', $ind)) !== false || strpos($nameNorm, $ind) !== false || strpos($nameCompact, preg_replace('/[^A-Z0-9]/','', $ind)) !== false) {
+                        $isSecondary = true;
+                        break;
+                    }
+                }
+
+                // Primary indicators
+                $primaryIndicators = [
+                    'SK','SJKC','SJK T','SJKT','SJK (C)','SJK (T)','SJK','SRK','SRJK','SEKOLAH KEBANGSAAN','SEK KEBANGSAAN','SEKOLAH JENIS','K9','RENDAH','SKM'
+                ];
+                foreach ($primaryIndicators as $ind) {
+                    if (strpos($typeNorm, $ind) !== false || strpos($typeCompact, preg_replace('/[^A-Z0-9]/','', $ind)) !== false || strpos($nameNorm, $ind) !== false || strpos($nameCompact, preg_replace('/[^A-Z0-9]/','', $ind)) !== false) {
+                        $isPrimary = true;
+                        break;
+                    }
+                }
+
+                if ($isSecondary && !$isPrimary) {
+                    $secondary[] = $school;
+                    continue;
+                }
+
+                if ($isPrimary && !$isSecondary) {
+                    $primary[] = $school;
+                    continue;
+                }
+
+                // If ambiguous, prefer primary for SK/SJK patterns, else ignore
+                if ($isPrimary) {
+                    $primary[] = $school;
+                } elseif ($isSecondary) {
+                    $secondary[] = $school;
+                }
+            }
+
+            return response()->json([
+                'primary' => $primary,
+                'secondary' => $secondary
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to load schools data: ' . $e->getMessage());
+            return response()->json([
+                'primary' => [],
+                'secondary' => []
+            ], 500);
         }
     }
 }
