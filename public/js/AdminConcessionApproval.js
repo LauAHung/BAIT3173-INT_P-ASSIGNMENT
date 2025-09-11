@@ -309,3 +309,4 @@ function closePhotoModal() { document.getElementById('photo-modal').style.displa
 document.addEventListener('click', function(e) { const photoModal = document.getElementById('photo-modal'); if (e.target === photoModal) { closePhotoModal(); } });
 
 
+
