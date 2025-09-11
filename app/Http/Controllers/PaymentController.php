@@ -16,13 +16,13 @@ class PaymentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth'); // Require authentication for all methods
+        $this->middleware('auth'); // Require authentication
     }
 
-    // ----------- STRIPE TOP-UP ----------
+    // ---------------- STRIPE TOP-UP ----------------
     public function showPaymentForm()
     {
-        return view('payment'); // payment.blade.php (Stripe)
+        return view('payment'); // Stripe top-up page
     }
 
     public function processPayment(Request $request)
@@ -38,7 +38,7 @@ class PaymentController extends Controller
             $amount = floatval($request->amount);
 
             \Stripe\Charge::create([
-                'amount' => (int)($amount * 100), // Stripe requires integer (cents)
+                'amount' => (int)($amount * 100), // cents
                 'currency' => 'myr',
                 'source' => $request->stripeToken,
                 'description' => 'Wallet Top-up',
@@ -50,69 +50,58 @@ class PaymentController extends Controller
         }
     }
 
-    // ----------- BOOKING PAYMENT ----------
+    // ---------------- BOOKING PAYMENT ----------------
     public function showPaymentPage($bookingId)
     {
         $user = Auth::user();
-
         if (!$user) {
-            Log::warning('Unauthenticated access attempted to showPaymentPage', ['bookingId' => $bookingId]);
-            return redirect()->route('login')->with('error', 'Please log in to proceed with payment.');
+            Log::warning('Unauthenticated access to showPaymentPage', ['bookingId' => $bookingId]);
+            return redirect()->route('signin')->with('error', 'Please log in to proceed with payment.');
         }
 
-        $booking = Booking::find($bookingId);
+        $booking = Booking::findOrFail($bookingId);
+        $tickets = $booking->tickets; // eager load tickets
 
-        if (!$booking) {
-            Log::error('Booking not found in showPaymentPage', ['bookingId' => $bookingId]);
-            return redirect()->route('booking')->with('error', 'Booking not found.');
-        }
-
-        return view('PaymentPage', compact('user', 'booking'));
+        return view('PaymentPage', compact('user', 'booking', 'tickets'));
     }
 
     public function completePayment(Request $request, $bookingId)
     {
         $user = Auth::user();
-
         if (!$user) {
-            Log::warning('Unauthenticated access attempted to completePayment', ['bookingId' => $bookingId]);
-            return redirect()->route('login')->with('error', 'Please log in to complete payment.');
+            Log::warning('Unauthenticated access to completePayment', ['bookingId' => $bookingId]);
+            return redirect()->route('signin')->with('error', 'Please log in to complete payment.');
         }
 
-        $booking = Booking::find($bookingId);
-
-        if (!$booking) {
-            Log::error('Booking not found in completePayment', ['bookingId' => $bookingId]);
-            return redirect()->route('booking')->with('error', 'Booking not found.');
-        }
-
+        $booking = Booking::findOrFail($bookingId);
         $bookingPrice = floatval($booking->Price);
 
         DB::beginTransaction();
         try {
-            if ($request->method === 'Wallet') {
-                if ($user->wallet_balance < $bookingPrice) {
-                    Log::info('Insufficient wallet balance', [
-                        'user_id' => $user->id,
-                        'wallet_balance' => $user->wallet_balance,
-                        'booking_price' => $bookingPrice
-                    ]);
+            switch ($request->method) {
+                case 'Wallet':
+                    if ($user->wallet_balance < $bookingPrice) {
+                        return view('PaymentPage', [
+                            'user' => $user,
+                            'booking' => $booking,
+                            'insufficientBalance' => true
+                        ]);
+                    }
+                    $user->wallet_balance -= $bookingPrice;
+                    $user->save();
+                    $booking->PaymentType = 'Wallet';
+                    break;
 
-                    return view('PaymentPage', [
-                        'user' => $user,
-                        'booking' => $booking,
-                        'insufficientBalance' => true
-                    ]);
-                }
+                case 'Credit Card':
+                    $booking->PaymentType = 'Credit Card';
+                    break;
 
-                $user->wallet_balance -= $bookingPrice;
-                $user->save();
-                $booking->PaymentType = 'Wallet';
-            } elseif ($request->method === 'Credit Card') {
-                $booking->PaymentType = 'Credit Card';
-            } elseif ($request->method === 'EWallet') {
-                // Touch 'n Go eWallet
-                $booking->PaymentType = 'TouchNGo';
+                case 'EWallet':
+                    $booking->PaymentType = 'TouchNGo';
+                    break;
+
+                default:
+                    throw new \Exception('Invalid payment method.');
             }
 
             $booking->Status = 'Booked';
@@ -120,15 +109,7 @@ class PaymentController extends Controller
 
             DB::commit();
 
-            Log::info('Payment completed successfully', [
-                'bookingId' => $bookingId,
-                'paymentType' => $booking->PaymentType
-            ]);
-
-            // Friendlier message for users
-            $displayType = $booking->PaymentType === 'TouchNGo'
-                ? "Touch 'n Go eWallet"
-                : $booking->PaymentType;
+            $displayType = $booking->PaymentType === 'TouchNGo' ? "Touch 'n Go eWallet" : $booking->PaymentType;
 
             return back()->with('success', "Payment completed via {$displayType}!");
         } catch (\Exception $e) {
@@ -142,15 +123,11 @@ class PaymentController extends Controller
         }
     }
 
-    // ----------- REFUND ----------
+    // ---------------- REFUND ----------------
     public function showRefundPage($bookingId)
     {
         $user = Auth::user();
-        $booking = Booking::find($bookingId);
-
-        if (!$booking) {
-            return redirect()->route('booking')->with('error', 'Booking not found.');
-        }
+        $booking = Booking::findOrFail($bookingId);
 
         return view('RefundPage', compact('user', 'booking'));
     }
@@ -158,23 +135,9 @@ class PaymentController extends Controller
     public function processRefund(Request $request, $bookingId)
     {
         $user = Auth::user();
+        $booking = Booking::findOrFail($bookingId);
 
-        Log::info('Starting refund process', [
-            'bookingId' => $bookingId,
-            'userId' => $user->id
-        ]);
-
-        $booking = Booking::find($bookingId);
-        if (!$booking) {
-            return redirect()->route('booking')->with('error', 'Booking not found.');
-        }
-
-        // Check Journey departure time
-        $journey = Journey::find($booking->JourneyID);
-        if (!$journey) {
-            return redirect()->route('booking')->with('error', 'Journey not found.');
-        }
-
+        $journey = Journey::findOrFail($booking->JourneyID);
         $departureDate = Carbon::parse($journey->DepartureTime);
         $now = Carbon::now();
 
@@ -183,66 +146,30 @@ class PaymentController extends Controller
                 ->with('error', 'Refund is not allowed within 3 days of departure.');
         }
 
-        $refundAmount = $booking->Price * 0.8; // Deduct 20% charge
-
-        Log::info('Calculated refund amount', [
-            'bookingId' => $bookingId,
-            'originalPrice' => $booking->Price,
-            'refundAmount' => $refundAmount
-        ]);
+        $refundAmount = $booking->Price * 0.8; // Deduct 20%
 
         DB::beginTransaction();
         try {
-            // 1. Refund money to wallet
+            // Refund to wallet
             $user->wallet_balance += $refundAmount;
             $user->save();
 
-            Log::info('Wallet balance updated', [
-                'userId' => $user->id,
-                'newBalance' => $user->wallet_balance
-            ]);
-
-            // 2. Update booking status
+            // Update booking status
             $booking->Status = 'Refunded';
             $booking->save();
 
-            Log::info('Booking status updated to Refunded', ['bookingId' => $bookingId]);
-
-            // 3. Update tickets and free seats
+            // Update tickets & free seats
             $tickets = Ticket::where('BookingID', $bookingId)->get();
-
-            Log::info('Found tickets', [
-                'bookingId' => $bookingId,
-                'ticketCount' => $tickets->count()
-            ]);
-
             foreach ($tickets as $ticket) {
                 $ticket->update(['Status' => 'Refunded']);
                 Seat::where('SeatID', $ticket->SeatID)
                     ->update(['is_available' => 'Y', 'status' => 'Refunded']);
-
-                Log::info('Ticket and seat updated', [
-                    'ticketId' => $ticket->id,
-                    'seatId' => $ticket->SeatID
-                ]);
             }
 
-            // 4. Update Journey seat availability
-            $journey = Journey::find($booking->JourneyID);
-            if ($journey) {
-                $journey->increment('SeatAvailable', $booking->TicketNo);
-
-                Log::info('Journey seat availability updated', [
-                    'journeyId' => $booking->JourneyID,
-                    'seatsAdded' => $booking->TicketNo
-                ]);
-            } else {
-                Log::warning('Journey not found', ['journeyId' => $booking->JourneyID]);
-            }
+            // Update Journey seat availability
+            $journey->increment('SeatAvailable', $booking->TicketNo);
 
             DB::commit();
-
-            Log::info('Refund process completed successfully', ['bookingId' => $bookingId]);
 
             return redirect()->route('booking')->with([
                 'success' => "Refund successful! RM " . number_format($refundAmount, 2) . " returned to your wallet.",
@@ -250,11 +177,9 @@ class PaymentController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-
             Log::error('Refund failed', [
                 'bookingId' => $bookingId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error' => $e->getMessage()
             ]);
 
             return redirect()->route('booking')->with('error', 'Refund failed: ' . $e->getMessage());

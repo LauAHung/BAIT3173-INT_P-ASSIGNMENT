@@ -94,9 +94,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </a>`;
                 }
                 if (booking.Status === 'Pending') {
-                    buttons += `<a href="/proceedPayment/${booking.BookingID}">
-                                    <button type="button" class="btn-payment">Proceed Payment</button>
-                                </a>`;
+                    buttons += `<a href="/payment/${booking.BookingID}">
+                         <button type="button" class="btn-payment">Proceed Payment</button>
+                            </a>`;
                     buttons += `<button type="button" class="btn-cancel" onclick="confirmCancel('${booking.BookingID}')">Cancel</button>`;
                 }
             }
@@ -105,9 +105,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 buttons += `<a href="/bookingdetail/${booking.BookingID}">
                                 <button type="button" class="btn-view">View QR Code</button>
                             </a>`;
-                buttons += `<a href="/rateTrip/${booking.BookingID}">
-                                <button type="button" class="btn-rate">Rate Trip</button>
-                            </a>`;
+                 if (booking.showRateTrip) {
+                    buttons += `<a href="/ratingsection/${booking.BookingID}">
+                                    <button type="button" class="btn-rate">Rate Trip</button>
+                                </a>`;
+                } else if (booking.hasFeedback) {
+                    buttons += `<button type="button" class="btn-rated" disabled>Rated</button>`;
+    }
             }
 
             return `

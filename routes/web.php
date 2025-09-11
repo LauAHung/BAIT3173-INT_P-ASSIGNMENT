@@ -12,6 +12,7 @@ use App\Http\Controllers\BookingDetailController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ConcessionCardController;
+use App\Http\Controllers\FeedbackController;
 
 Route::get('/', function () {
     return view('HomePage');
@@ -151,9 +152,7 @@ Route::get('/feedback', function () {
     return view('FeedbackPage');
 })->name('feedback');
 
-Route::get('/selectrating', function () {
-    return view('SelectRatingPage');
-})->name('selectrating');
+Route::get('/selectrating', function () { return view('SelectRatingPage'); })->name('selectrating');
 
 Route::get('/ratingsection', function () {
     return view('RatingSectionPage');
@@ -271,6 +270,11 @@ Route::post('/payment/{bookingId}/complete', [PaymentController::class, 'complet
 Route::get('/refund/{bookingId}', [PaymentController::class, 'showRefundPage'])->name('refund.page');
 Route::post('/refund/{bookingId}', [PaymentController::class, 'processRefund'])->name('refund.process');
 
+Route::get('/ratingsection/{bookingId}', [FeedbackController::class, 'create'])->name('ratingsection');
+Route::post('/ratingsection/{bookingId}', [FeedbackController::class, 'store'])->name('rating.store');
+
+Route::get('/feedback/view', [FeedbackController::class, 'viewFeedback'])->name('viewfeedback');
+Route::get('/viewfeedback', [FeedbackController::class, 'viewFeedback'])->name('viewfeedback');
 // Concession Card Application routes
 Route::get('/concession_card', function () {
     return view('ConcessionCardPage');

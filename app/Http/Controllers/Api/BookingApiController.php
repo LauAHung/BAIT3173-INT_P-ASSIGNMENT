@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Ticket;
 use App\Models\Seat;
 use App\Models\Journey;
+use App\Models\Feedback;
 use Illuminate\Support\Facades\DB;
 
 class BookingApiController extends Controller
@@ -19,11 +20,20 @@ class BookingApiController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $past = Booking::with(['journey', 'journey.train'])
+       $past = Booking::with(['journey', 'journey.train'])
             ->where('UserID', $userId)
             ->where('Status', 'Completed')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($booking) {
+                // Check if this booking already has feedback
+                $booking->hasFeedback = Feedback::where('BookingID', $booking->BookingID)->exists();
+
+                // Only show "Rate Trip" if completed and no feedback yet
+                $booking->showRateTrip = $booking->Status === 'Completed' && !$booking->hasFeedback;
+
+                return $booking;
+            });
 
         $refunded = Booking::with(['journey', 'journey.train'])
             ->where('UserID', $userId)
