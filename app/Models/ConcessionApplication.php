@@ -26,6 +26,8 @@ class ConcessionApplication extends Model
         'education_level',
         'school_name',
         'student_id_photo_path',
+        'oku_card_photo_path',
+        'senior_ic_photo_path',
         'status',
         'admin_notes',
         'reviewed_at',

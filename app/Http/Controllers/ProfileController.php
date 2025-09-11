@@ -8,6 +8,7 @@ use App\Factories\MailFactoryManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -91,6 +92,11 @@ class ProfileController extends Controller
 
         // Handle profile picture upload
         if ($request->hasFile('profile_picture')) {
+            // Delete old avatar if exists
+            if (!empty($user->profile_picture)) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
+
             $path = $request->file('profile_picture')->store('profile-pictures', 'public');
             $validated['profile_picture'] = $path;
         }

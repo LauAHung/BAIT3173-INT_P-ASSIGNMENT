@@ -280,6 +280,9 @@ Route::get('/concession_card', function () {
     return view('ConcessionCardPage');
 })->name('concession_card');
 
+// Schools data endpoint for concession card form
+Route::get('/schools_data.json', [ConcessionCardController::class, 'schoolsData'])->name('schools.data');
+
 // Concession Card Application routes
 Route::prefix('concession')->group(function () {
     Route::get('/applications', [ConcessionCardController::class, 'getApplications'])->name('concession.applications');

@@ -408,8 +408,13 @@ class UserRegistrationService
         }
 
         if (isset($profileData['profile_picture']) && !empty($profileData['profile_picture'])) {
-            if (!filter_var($profileData['profile_picture'], FILTER_VALIDATE_URL) && 
-                !preg_match('/^\/[^\/].*/', $profileData['profile_picture'])) {
+            $picturePath = $profileData['profile_picture'];
+            $isUrl = filter_var($picturePath, FILTER_VALIDATE_URL) !== false;
+            $isAbsolutePath = (bool)preg_match('/^\//', $picturePath);
+            // Allow storage-relative paths like "profile-pictures/abc.jpg"
+            $isStorageRelativePath = (bool)preg_match('/^[A-Za-z0-9_\-\/\.]+$/', $picturePath);
+
+            if (!$isUrl && !$isAbsolutePath && !$isStorageRelativePath) {
                 throw new Exception('Profile picture must be a valid URL or file path');
             }
         }

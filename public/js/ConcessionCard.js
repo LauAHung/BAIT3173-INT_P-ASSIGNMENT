@@ -408,21 +408,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         seniorIcInput.addEventListener('input', calculateAgeAndGender);
     }
 
-    // Load all applications for admin if on admin page FIRST
-    if (window.location.pathname.includes('card-approval')) {
-        console.log('Admin page detected, loading all applications...');
-        // Clear local storage first to ensure fresh data
-        localStorage.removeItem('concessionApplications');
-        applications = [];
-        await loadAllApplicationsForAdmin();
-    } else {
-        updateAdminStats();
-        loadApplicationsTable();
-        
-        // Load user applications if logged in
-        if (isLoggedIn) {
-            loadUserApplications();
-        }
+    // Load user applications if logged in
+    if (isLoggedIn) {
+        loadUserApplications();
     }
 });
 
@@ -1264,64 +1252,9 @@ async function loadSchoolData() {
 
 // Autocomplete initialization moved to main DOMContentLoaded event
 
-function updateAdminStats() {
-    console.log('Updating admin stats with applications:', applications.length);
-    document.getElementById('totalApps').textContent = applications.length;
-    document.getElementById('pendingApps').textContent = applications.filter(a => a.status === 'pending').length;
-    document.getElementById('approvedApps').textContent = applications.filter(a => a.status === 'approved').length;
-    document.getElementById('rejectedApps').textContent = applications.filter(a => a.status === 'rejected').length;
-    console.log('Stats updated - Total:', applications.length, 'Pending:', applications.filter(a => a.status === 'pending').length);
-}
+// Removed admin stats UI updater from user script
 
-function loadApplicationsTable() {
-    console.log('Loading applications table with applications:', applications.length);
-    const pageSize = 10;
-    const sortedApplications = [...applications].sort((a, b) => new Date(b.applicationDate) - new Date(a.applicationDate));
-    const total = sortedApplications.length;
-    const maxPage = Math.ceil(total / pageSize) - 1;
-    let adminCurrentPage = Math.max(0, Math.min(statusCurrentPage, maxPage));
-    console.log('Total applications for table:', total);
-
-    const start = adminCurrentPage * pageSize;
-    const end = start + pageSize;
-    const paginatedApps = sortedApplications.slice(start, end);
-
-    const tbody = document.querySelector('#applicationsTable tbody');
-    tbody.innerHTML = paginatedApps.map(app => `
-        <tr>
-            <td>${app.fullName}</td>
-            <td><span class="status-badge ${app.type}">${app.type.toUpperCase()}</span></td>
-            <td><span class="status-badge ${app.status}">${app.status.toUpperCase()}</td>
-            <td>${new Date(app.applicationDate).toLocaleString()}</td>
-            <td class="action-buttons">
-                <button class="action-btn view" onclick="viewApplication('${app.id}')">View</button>
-                ${app.status === 'pending' ? `
-                    <button class="action-btn approve" onclick="approveApplication('${app.id}')">Approve</button>
-                    <button class="action-btn reject" onclick="rejectApplication('${app.id}')">Reject</button>
-                    <button class="action-btn withdraw hidden" onclick="withdrawApplication('${app.id}')">Withdraw</button>
-                ` : `
-                    <button class="action-btn approve hidden" onclick="approveApplication('${app.id}')">Approve</button>
-                    <button class="action-btn reject hidden" onclick="rejectApplication('${app.id}')">Reject</button>
-                    <button class="action-btn withdraw" onclick="withdrawApplication('${app.id}')">Withdraw</button>
-                `}
-            </td>
-        </tr>
-    `).join('');
-
-    const paginationContainer = document.querySelector('.applications-table .pagination');
-    if (paginationContainer) {
-        paginationContainer.innerHTML = `
-            ${adminCurrentPage > 0 ? `<button class="btn" onclick="changeAdminPage(-1)">← Previous</button>` : ''}
-            <span>Page ${adminCurrentPage + 1} of ${maxPage + 1}</span>
-            ${adminCurrentPage < maxPage ? `<button class="btn" onclick="changeAdminPage(1)">Next →</button>` : ''}
-        `;
-    }
-}
-
-function changeAdminPage(delta) {
-    statusCurrentPage += delta;
-    loadApplicationsTable();
-}
+// Removed admin table rendering from user script
 
 function viewApplication(id) {
     try {
@@ -1389,7 +1322,8 @@ function viewApplication(id) {
     }
 }
 
-async function approveApplication(id) {
+// Admin-only function removed from user script
+/* async function approveApplication(id) {
     if (!confirm('Are you sure you want to approve this application?')) {
         return;
     }
@@ -1409,7 +1343,7 @@ async function approveApplication(id) {
         const data = await response.json();
         
         if (data.success) {
-            showMessage('Application approved successfully', 'success');
+            // Admin-only status messaging removed in user script
             
             // Update local data
             const app = applications.find(a => a.id === id);
@@ -1424,19 +1358,18 @@ async function approveApplication(id) {
             if (window.location.pathname.includes('card-approval')) {
                 await loadAllApplicationsForAdmin();
             } else {
-                updateAdminStats();
-                loadApplicationsTable();
+                // Admin-only UI refresh removed in user script
             }
         } else {
-            showMessage(data.message || 'Failed to approve application', 'error');
+            // Admin-only messaging removed
         }
     } catch (error) {
         console.error('Error approving application:', error);
-        showMessage('Error approving application', 'error');
+        // Admin-only messaging removed
     }
-}
+} */
 
-async function rejectApplication(id) {
+/* async function rejectApplication(id) {
     if (!confirm('Are you sure you want to reject this application?')) {
         return;
     }
@@ -1456,7 +1389,7 @@ async function rejectApplication(id) {
         const data = await response.json();
         
         if (data.success) {
-            showMessage('Application rejected successfully', 'success');
+            // Admin-only messaging removed
             
             // Update local data
             const app = applications.find(a => a.id === id);
@@ -1471,103 +1404,35 @@ async function rejectApplication(id) {
             if (window.location.pathname.includes('card-approval')) {
                 await loadAllApplicationsForAdmin();
             } else {
-                updateAdminStats();
-                loadApplicationsTable();
+                // Admin-only UI refresh removed in user script
             }
         } else {
-            showMessage(data.message || 'Failed to reject application', 'error');
+            // Admin-only messaging removed
         }
     } catch (error) {
         console.error('Error rejecting application:', error);
-        showMessage('Error rejecting application', 'error');
+        // Admin-only messaging removed
     }
-}
+} */
 
-function withdrawApplication(id) {
+/* function withdrawApplication(id) {
     const app = applications.find(a => a.id === id);
     if (app) {
         app.status = 'pending';
         localStorage.setItem('concessionApplications', JSON.stringify(applications));
-        updateAdminStats();
-        loadApplicationsTable();
+        // Admin-only UI refresh removed in user script
     }
-}
+} */
 
 // Helper functions for UI
-function showMessage(message, type = 'info') {
-    // You can implement a proper notification system here
-    console.log(`${type.toUpperCase()}: ${message}`);
-    alert(message); // Simple alert for now
-}
+// Removed admin message helpers from user script
 
-function showLoading() {
-    // You can implement a loading spinner here
-    console.log('Loading...');
-}
+// Removed admin loading helpers from user script
 
-function hideLoading() {
-    // Hide loading spinner
-    console.log('Loading complete');
-}
+// Removed admin loading helpers from user script
 
 // Load all applications for admin approval page
-async function loadAllApplicationsForAdmin() {
-    try {
-        showLoading();
-        console.log('Loading all applications for admin...');
-        console.log('Current URL:', window.location.href);
-        console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
-        
-        const response = await fetch('/api/concession/admin/all-applications', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        console.log('Response data:', data);
-        
-        if (data.success) {
-            // Replace local storage data with server data
-            applications = data.applications;
-            localStorage.setItem('concessionApplications', JSON.stringify(applications));
-            
-            // Update admin stats from server data
-            updateAdminStats();
-            
-            // Reload the applications table
-            loadApplicationsTable();
-            
-            console.log('Loaded ' + applications.length + ' applications for admin review');
-            showMessage(`Successfully loaded ${applications.length} applications`, 'success');
-        } else {
-            console.error('Failed to load applications:', data.message);
-            showMessage('Failed to load applications: ' + data.message, 'error');
-            
-            // If admin API fails, try to load user's own applications as fallback
-            console.log('Trying to load user applications as fallback...');
-            await loadUserApplications();
-        }
-    } catch (error) {
-        console.error('Error loading applications:', error);
-        showMessage('Error loading applications: ' + error.message, 'error');
-        
-        // If admin API fails, try to load user's own applications as fallback
-        console.log('Trying to load user applications as fallback...');
-        await loadUserApplications();
-    } finally {
-        hideLoading();
-    }
-}
+// Removed admin loader from user script
 
 // Load admin statistics for all applications
 async function loadAdminAllStats() {
