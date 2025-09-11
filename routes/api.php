@@ -77,8 +77,8 @@ Route::get('/bookings/{userId}', [BookingApiController::class, 'index']);
 Route::get('/booking/{bookingId}/{userId}', [BookingApiController::class, 'show']);
 Route::patch('/booking/cancel/{bookingId}/{userId}', [BookingApiController::class, 'cancel']);
 
-Route::get('/journeys', [TrainApiController::class, 'index']);
-Route::get('/journeys/return', [TrainApiController::class, 'indexReturn']);
+Route::get('/journeys', [TrainApiController::class, 'getJourney']);
+Route::get('/journeys/return', [TrainApiController::class, 'getJourneyReturn']);
 Route::post('/journeys/passenger-info', [TrainApiController::class, 'showPassengerInfo']);
 Route::post('/journeys/passenger-info/store', [TrainApiController::class, 'storePassengerInfo']);
 Route::post('/bookings', [TrainApiController::class, 'storeBooking']);

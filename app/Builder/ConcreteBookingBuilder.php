@@ -57,7 +57,10 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
 
     public function applyDiscounts(): self
     {
-        $basePrice = $this->journey['price'] ?? Journey::find($this->journey['id'])->Price;
+        // Always fetch base price from DB, ignoring any 'price' in input array
+        $journeyModel = Journey::findOrFail($this->journey['id']); // use findorfail for existence check
+        $basePrice = $journeyModel->Price;
+
         foreach ($this->passengers as $index => $passenger) {
             $ticketPrice = $basePrice;
             if ($passenger['ticket_type'] === 'Pelajar/Student') {
@@ -102,6 +105,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
         $unavailableCount = Seat::where('JourneyID', $this->journey['id'])
             ->whereIn('SeatNo', $this->selectedSeats)
             ->where('is_available', 'N')
+            ->lockForUpdate()  // Locks rows until transaction commits or rolls back
             ->count();
 
         if ($unavailableCount > 0) {

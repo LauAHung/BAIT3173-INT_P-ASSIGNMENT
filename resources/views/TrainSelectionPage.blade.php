@@ -259,5 +259,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<x-error-modal />
 @endsection
