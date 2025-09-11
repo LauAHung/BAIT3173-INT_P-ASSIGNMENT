@@ -18,8 +18,8 @@
     @endif
     <form action="{{ route('store.passengerinfo') }}" method="POST" data-selectseat-url="{{ route('selectseat') }}">
         @csrf
-        <input type="hidden" name="journey_id" value="{{ $journey->JourneyID }}">
-        <input type="hidden" name="journey_id2" value="{{ $journey2->JourneyID ?? '' }}">
+        <input type="hidden" name="journey_id" value="{{ $journey['id'] }}">
+        <input type="hidden" name="journey_id2" value="{{ $journey2['id'] ?? '' }}">
         <input type="hidden" name="booking_type" value="{{ $bookingType ?? 'OneWay' }}">
         <div class="passenger-main-layout">
             <div class="passenger-info-panel">
@@ -104,22 +104,22 @@
             <div class="passenger-side-info">
                 <div class="side-card">
                     <div class="side-title">Total price:</div>
-                    <div class="side-price">MYR {{ number_format(($journey->Price + ($journey2 ? $journey2->Price : 0)) * $passengers, 2) }}</div>
+                    <div class="side-price">MYR {{ number_format(($journey['price'] + ($journey2 ? $journey2['price'] : 0)) * $passengers, 2) }}</div>
                 </div>
                 <div class="side-card">
                     <div class="side-title">Trip Summary</div>
                     <div class="side-summary">
-                        <div>Depart on {{ date('l, d F Y', strtotime($journey->DepartureTime)) }}</div>
+                        <div>Depart on {{ date('l, d F Y', strtotime($journey['departure_time'])) }}</div>
                         <div class="side-flight">
-                            <span>{{ date('h:i A', strtotime($journey->DepartureTime)) }}</span>
+                            <span>{{ date('h:i A', strtotime($journey['departure_time'])) }}</span>
                             <span class="side-plane"><i class="fas fa-train"></i></span>
-                            <span>{{ date('h:i A', strtotime($journey->ArrivalTime)) }}</span>
+                            <span>{{ date('h:i A', strtotime($journey['arrival_time'])) }}</span>
                         </div>
-                        <div>{{ $journey->FromLocation}} → {{ $journey->ToLocation}}</div>
+                        <div>{{ $journey['from_location']}} → {{ $journey['to_location']}}</div>
                         <div>
                             <?php
-                                $departure = new DateTime($journey->DepartureTime);
-                                $arrival = new DateTime($journey->ArrivalTime);
+                                $departure = new DateTime($journey['departure_time']);
+                                $arrival = new DateTime($journey['arrival_time']);
                                 $interval = $departure->diff($arrival);
                                 $duration = $interval->format('%hh %imin');
                             ?>
@@ -129,17 +129,17 @@
                     <br>
                     @if ($bookingType == 'Return' && $journey2)
                     <div class="side-summary">
-                        <div>Return on {{ date('l, d F Y', strtotime($journey2->DepartureTime)) }}</div>
+                        <div>Return on {{ date('l, d F Y', strtotime($journey2['departure_time'])) }}</div>
                         <div class="side-flight">
-                            <span>{{ date('h:i A', strtotime($journey2->DepartureTime)) }}</span>
+                            <span>{{ date('h:i A', strtotime($journey2['departure_time'])) }}</span>
                             <span class="side-plane"><i class="fas fa-train"></i></span>
-                            <span>{{ date('h:i A', strtotime($journey2->ArrivalTime)) }}</span>
+                            <span>{{ date('h:i A', strtotime($journey2['arrival_time'])) }}</span>
                         </div>
-                        <div>{{ $journey2->FromLocation}} → {{ $journey2->ToLocation}}</div>
+                        <div>{{ $journey2['from_location']}} → {{ $journey2['to_location']}}</div>
                         <div>
                             <?php
-                                $departure2 = new DateTime($journey2->DepartureTime);
-                                $arrival2 = new DateTime($journey2->ArrivalTime);
+                                $departure2 = new DateTime($journey2['departure_time']);
+                                $arrival2 = new DateTime($journey2['arrival_time']);
                                 $interval2 = $departure2->diff($arrival2);
                                 $duration2 = $interval2->format('%hh %imin');
                             ?>
@@ -290,4 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+<x-error-modal />
 @endsection

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AdminWebServiceController;
 use App\Http\Controllers\Api\UserWebServiceController;
 use App\Http\Controllers\Api\ConcessionCardWebServiceController;
 use App\Http\Controllers\Api\BookingApiController;
+use App\Http\Controllers\Api\TrainApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +76,12 @@ Route::prefix('bookings')->group(function () {
 Route::get('/bookings/{userId}', [BookingApiController::class, 'index']);
 Route::get('/booking/{bookingId}/{userId}', [BookingApiController::class, 'show']);
 Route::patch('/booking/cancel/{bookingId}/{userId}', [BookingApiController::class, 'cancel']);
+
+Route::get('/journeys', [TrainApiController::class, 'index']);
+Route::get('/journeys/return', [TrainApiController::class, 'indexReturn']);
+Route::post('/journeys/passenger-info', [TrainApiController::class, 'showPassengerInfo']);
+Route::post('/journeys/passenger-info/store', [TrainApiController::class, 'storePassengerInfo']);
+Route::post('/bookings', [TrainApiController::class, 'storeBooking']);
 
 // Health check endpoint
 Route::get('/health', function () {
