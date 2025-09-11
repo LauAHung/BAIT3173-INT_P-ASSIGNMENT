@@ -210,7 +210,7 @@ class TrainApiController extends Controller
         $bookingType = $request->input('booking_type', 'OneWay');
         $passengers = $request->input('passengers', 1);
 
-        // Authorize journey access
+        // for authorize journey access use
         try {
             $journey = $this->authorizeJourneyAccess($journeyId);
         } catch (Exception $e) {
@@ -398,7 +398,7 @@ class TrainApiController extends Controller
                 'message' => 'Booking created successfully. Proceed to payment.',
                 'booking' => $booking
             ], 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Booking creation failed: ' . $e->getMessage()); //debug use
             return response()->json(['error' => 'Failed to create booking, Please try again later.'], 500);

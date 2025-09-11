@@ -41,7 +41,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
     {
         $this->returnJourney = $journey2;
         $this->bookingType = 'Return';
-        // Validate reverse route
+        // validate reverse route for return use
         if ($this->journey['to_location'] !== $journey2['from_location'] || 
             $this->journey['from_location'] !== $journey2['to_location']) {
             throw new Exception('Return journey must be the reverse route of the outbound journey.');
@@ -57,7 +57,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
 
     public function applyDiscounts(): self
     {
-        // Always fetch base price from DB, ignoring any 'price' in input array
+        // always fetch base price from DB not array
         $journeyModel = Journey::findOrFail($this->journey['id']); // use findorfail for existence check
         $basePrice = $journeyModel->Price;
 
@@ -105,7 +105,7 @@ class ConcreteBookingBuilder implements BookingBuilderInterface
         $unavailableCount = Seat::where('JourneyID', $this->journey['id'])
             ->whereIn('SeatNo', $this->selectedSeats)
             ->where('is_available', 'N')
-            ->lockForUpdate()  // Locks rows until transaction commits or rolls back
+            ->lockForUpdate()  // lock rows until transaction commit
             ->count();
 
         if ($unavailableCount > 0) {
