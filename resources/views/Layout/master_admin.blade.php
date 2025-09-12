@@ -14,6 +14,7 @@
 <body>
     <div class="main-layout">
         <!-- Sidebar -->
+        @if (!request()->routeIs('admin.2fa.*'))
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2 class="sidebar-title">ADMIN</h2>
@@ -66,13 +67,16 @@
                 </ul>
             </nav>
         </aside>
+        @endif
 
         <!-- Main Content -->
         <main class="main-content">
             <!-- Header -->
             <header class="content-header">
                 <div class="header-left">
-                    <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
+                    @if (!request()->routeIs('admin.2fa.*'))
+                      <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
+                    @endif
                 </div>
                 
             </header>

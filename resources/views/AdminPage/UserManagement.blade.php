@@ -215,7 +215,7 @@ function updateUserStatus(userId, status) {
         showMessage('CSRF token not found. Please refresh the page.', 'error');
         return;
     }
-    fetch(`/admin/api/users/${userId}/status`, {
+    fetch(`/api/admin/users/${userId}/status`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -263,13 +263,39 @@ function closeMessage() {
     document.getElementById('message-container').style.display = 'none';
 }
 
-function exportUsers() {
-    const search = document.getElementById('search-username').value;
-    const status = document.getElementById('filter-status').value;
-    let url = '/admin/api/users/export?';
-    if (search) url += `search=${encodeURIComponent(search)}&`;
-    if (status) url += `status=${encodeURIComponent(status)}&`;
-    window.location.href = url;
+async function exportUsers() {
+    try {
+        showMessage('Preparing export...', 'success');
+        // Step 1: issue token via AdminController export endpoint
+        const issueRes = await fetch('/api/admin/export?type=users&format=csv');
+        const issueData = await issueRes.json().catch(() => ({}));
+        if (!issueRes.ok || !issueData.success) {
+            const msg = (issueData && issueData.message) ? issueData.message : `Export failed (HTTP ${issueRes.status})`;
+            showMessage(msg, 'error');
+            return;
+        }
+        if (!issueData.success) {
+            showMessage(issueData.message || 'Failed to issue export token', 'error');
+            return;
+        }
+        const token = issueData.download_token;
+        // Step 2: download via token (JSON payload -> Blob)
+        const dlRes = await fetch(`/api/admin/export/download?token=${encodeURIComponent(token)}`);
+        const dlData = await dlRes.json().catch(() => ({}));
+        if (!dlRes.ok || !dlData.success) {
+            const msg = (dlData && dlData.message) ? dlData.message : `Download failed (HTTP ${dlRes.status})`;
+            showMessage(msg, 'error');
+            return;
+        }
+        const filename = dlData.filename || 'users_export.csv';
+        const blob = new Blob([dlData.content], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        showMessage('Export completed', 'success');
+    } catch (e) {
+        showMessage('Export error: ' + (e && e.message ? e.message : 'Unknown'), 'error');
+    }
 }
 </script>
 @endpush

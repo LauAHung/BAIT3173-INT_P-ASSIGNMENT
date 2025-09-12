@@ -79,8 +79,17 @@ class UserController extends Controller
                 ], 404);
             }
 
+            $prev = $user->account_status;
             $user->account_status = $request->status;
             $user->save();
+
+            // If promoted to admin, force 2FA setup next login
+            if ($prev !== 'admin' && $user->account_status === 'admin') {
+                $user->two_factor_enabled = false;
+                $user->two_factor_secret = null;
+                $user->two_factor_confirmed_at = null;
+                $user->save();
+            }
 
             app(\App\Services\AdminActivityLogger::class)->log('change_user_status', [
                 'target_user_id' => $user->user_id,
@@ -140,6 +149,23 @@ class UserController extends Controller
     public function export(Request $request)
     {
         try {
+            // Session-based per-minute limit (2 per minute per session)
+            $nowMinute = date('YmdHi');
+            $minuteKey = 'ux.min.' . $nowMinute;
+            $currentCount = (int) $request->session()->get($minuteKey, 0);
+            if ($currentCount >= 2) {
+                return response()->json(['success' => false, 'message' => 'Export rate limit exceeded. Try again later.'], 429);
+            }
+            $request->session()->put($minuteKey, $currentCount + 1);
+
+            // Cooldown 30s to avoid repeated export spamming
+            $coolKey = 'ux.cool.users';
+            $lastTs = (int) $request->session()->get($coolKey, 0);
+            if (time() - $lastTs < 30) {
+                return response()->json(['success' => false, 'message' => 'Please wait before exporting users again.'], 429);
+            }
+            $request->session()->put($coolKey, time());
+
             $search = $request->get('search');
             $status = $request->get('status');
 

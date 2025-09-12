@@ -1,0 +1,46 @@
+.admin-2fa-page {
+  background: radial-gradient(1200px 800px at 50% 0%, #121826 0%, #0b1020 60%, #0b1020 100%);
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* Typography tweaks to match admin look */
+.admin-2fa-page .twofa-head,
+.admin-2fa-page .set-head {
+  font-family: inherit;
+  letter-spacing: .2px;
+}
+
+/* Card surface */
+.admin-2fa-page .twofa-card,
+.admin-2fa-page .set-card {
+  background: #ffffff;
+  border: none;
+  outline: none;
+}
+
+/* Inputs and buttons share admin accent */
+.admin-2fa-page .twofa-input,
+.admin-2fa-page .set-input {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+}
+
+.admin-2fa-page .twofa-btn,
+.admin-2fa-page .set-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(118,75,162,0.25);
+}
+
+/* Bubble toasts */
+.admin-2fa-page .bubble-content { color: #fff; }
+.admin-2fa-page .bubble-success { background: #06b6d4; }
+.admin-2fa-page .bubble-error { background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%); }
+
+/* Fix input alignment inside narrow card */
+.twofa-body form, .set-body .set-form { width: 100%; }
+.twofa-input { width: 100%; display:block; }
+
+

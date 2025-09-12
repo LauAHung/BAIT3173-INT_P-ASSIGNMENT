@@ -228,7 +228,43 @@ function closeModal() {
 }
 
 function refreshApplications() { loadApplications(); }
-function exportApplications() { showMessage('Export functionality coming soon', 'info'); }
+async function exportApplications() {
+    try {
+        showMessage('Preparing export...', 'info');
+        // Step 1: issue token (requires admin.recent + throttle)
+        const issueRes = await fetch('/admin/api/concession/export/token');
+        const issueData = await issueRes.json();
+        if (!issueData.success) {
+            showMessage(issueData.message || 'Failed to issue export token', 'error');
+            return;
+        }
+        const token = issueData.download_token;
+        // Step 2: download using token
+        const dlRes = await fetch(`/admin/api/concession/export/download?token=${encodeURIComponent(token)}`);
+        const dlData = await dlRes.json();
+        if (!dlData.success) {
+            showMessage(dlData.message || 'Export failed', 'error');
+            return;
+        }
+        // Create a download file in browser
+        const filename = dlData.filename || 'concession_export.csv';
+        if (dlData.format === 'json') {
+            const blob = new Blob([JSON.stringify(dlData.content, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        } else {
+            const blob = new Blob([dlData.content], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        }
+        showMessage('Export completed', 'success');
+    } catch (e) {
+        console.error('Export error', e);
+        showMessage('Export error', 'error');
+    }
+}
 
 // Helper functions shared with blade template
 function getTypeLabel(type) {

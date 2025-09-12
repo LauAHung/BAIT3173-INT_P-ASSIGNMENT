@@ -250,7 +250,7 @@
 <script>
 // Auto-refresh dashboard stats every 30 seconds
 setInterval(function() {
-    fetch('/admin/api/dashboard/stats')
+    fetch('/api/admin/dashboard/stats')
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {

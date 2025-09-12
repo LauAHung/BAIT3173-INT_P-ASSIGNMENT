@@ -85,7 +85,7 @@ function closeMessage() {
 
 async function loadSubscribers() {
     try {
-        const res = await fetch('/admin/api/newsletter/subscribers', { headers: { 'Accept': 'application/json' }});
+        const res = await fetch('/api/admin/newsletter/subscribers', { headers: { 'Accept': 'application/json' }});
         const data = await res.json();
         const tbody = document.getElementById('subscriber-tbody');
         tbody.innerHTML = '';
@@ -102,7 +102,7 @@ async function loadSubscribers() {
                 btn.addEventListener('click', async function() {
                     const email = this.getAttribute('data-email');
                     try {
-                        const res = await fetch('/admin/api/newsletter/unsubscribe', {
+                        const res = await fetch('/api/admin/newsletter/unsubscribe', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const content = document.getElementById('email-content').value.trim();
         if (!subject || !content) return;
         try {
-            const res = await fetch('/admin/api/newsletter/send', {
+            const res = await fetch('/api/admin/newsletter/send', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

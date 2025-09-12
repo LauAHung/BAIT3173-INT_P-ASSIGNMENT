@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Load filters
     try {
-        const f = await fetch('/admin/api/dashboard/filters');
+        const f = await fetch('/api/admin/dashboard/filters');
         const fjson = await f.json();
         if (fjson.success) {
             (fjson.data.states || []).forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; stateSel.appendChild(o); });
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const params = new URLSearchParams();
         if (stateSel.value) params.append('state', stateSel.value);
         if (stationSel.value) params.append('station', stationSel.value);
-        const r = await fetch('/admin/api/dashboard/trips?' + params.toString());
+        const r = await fetch('/api/admin/dashboard/trips?' + params.toString());
         const j = await r.json();
         if (j.success) {
             const labels = j.data.map(x => x.ym);
@@ -131,13 +131,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     async function loadUsers() {
-        const r = await fetch('/admin/api/dashboard/users-growth');
+        const r = await fetch('/api/admin/dashboard/users-growth');
         const j = await r.json();
         if (j.success) { usersChart.data.labels = j.data.map(x => x.ym); usersChart.data.datasets[0].data = j.data.map(x => x.total); usersChart.update(); }
     }
 
     async function loadProfit() {
-        const r = await fetch('/admin/api/dashboard/profit');
+        const r = await fetch('/api/admin/dashboard/profit');
         const j = await r.json();
         if (j.success) { profitChart.data.labels = j.data.map(x => x.ym); profitChart.data.datasets[0].data = j.data.map(x => x.total); profitChart.update(); }
     }
