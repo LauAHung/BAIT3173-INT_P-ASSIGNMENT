@@ -388,7 +388,7 @@ class TrainApiController extends Controller
             DB::beginTransaction();
 
             $builder = new ConcreteBookingBuilder();
-            $builder->setUserId(Auth::id());
+            $builder->setUserId($request->input('user_id'));
             $director = new BookingDirector();
             $director->build($builder, $journey, $passengers, $selectedSeats, $journey2, $selectedSeats2);
             $booking = $builder->getBooking();
