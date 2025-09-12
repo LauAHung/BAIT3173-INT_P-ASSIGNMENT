@@ -8,6 +8,7 @@ class BookingDirector
         BookingBuilderInterface $builder,
         array $journey,
         array $passengers,
+        int $userId,
         array $selectedSeats = [],
         array $journey2 = [],
         array $selectedSeats2 = []

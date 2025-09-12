@@ -10,6 +10,7 @@ use App\Builder\ConcreteBookingBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 
 class TrainApiController extends Controller
@@ -387,7 +388,7 @@ class TrainApiController extends Controller
             DB::beginTransaction();
 
             $builder = new ConcreteBookingBuilder();
-            $builder->setUserId($request->input('user_id'));
+            $builder->setUserId(Auth::id());
             $director = new BookingDirector();
             $director->build($builder, $journey, $passengers, $selectedSeats, $journey2, $selectedSeats2);
             $booking = $builder->getBooking();
