@@ -206,7 +206,7 @@ class AdminController extends Controller
         $status = $request->get('status');
         $role = $request->get('role');
         
-        $resp = Http::get("{$this->apiBaseUrl}/admin/users", [
+        $resp = Http::get("{$this->apiBaseUrl}/user/list", [
             'page' => $page,
             'search' => $search,
             'status' => $status,
@@ -229,7 +229,7 @@ class AdminController extends Controller
             'status' => 'required|string|in:active,inactive,suspended,pending_verification'
         ]);
 
-        $resp = Http::put("{$this->apiBaseUrl}/admin/users/{$request->user_id}/status", [
+        $resp = Http::put("{$this->apiBaseUrl}/user/{$request->user_id}/status", [
             'status' => $request->status,
         ]);
         if ($resp->successful()) {
@@ -244,7 +244,7 @@ class AdminController extends Controller
      */
     public function deleteUser($userId): JsonResponse
     {
-        $resp = Http::delete("{$this->apiBaseUrl}/admin/users/{$userId}");
+        $resp = Http::delete("{$this->apiBaseUrl}/user/{$userId}");
         if ($resp->successful()) {
             return response()->json($resp->json());
         }

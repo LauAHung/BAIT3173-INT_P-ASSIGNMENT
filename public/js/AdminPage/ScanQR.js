@@ -139,7 +139,7 @@ async function handleQRCode(data) {
     stopScanner();
     // Expect data is TicketID
     try {
-        const res = await fetch(`/admin/api/tickets/${encodeURIComponent(data)}`, { headers: { 'Accept': 'application/json' } });
+        const res = await fetch(`/api/tickets/${encodeURIComponent(data)}`, { headers: { 'Accept': 'application/json' } });
         const json = await res.json();
         if (!res.ok || !json.success) {
             throw new Error(json.message || 'Invalid ticket');
@@ -219,8 +219,8 @@ let currentTicketId = null;
 async function updateStatus(newStatus) {
     if (!currentTicketId) return;
     const url = newStatus === 'checkin'
-        ? `/admin/api/tickets/${encodeURIComponent(currentTicketId)}/checkin`
-        : `/admin/api/tickets/${encodeURIComponent(currentTicketId)}/checkout`;
+        ? `/api/tickets/${encodeURIComponent(currentTicketId)}/checkin`
+        : `/api/tickets/${encodeURIComponent(currentTicketId)}/checkout`;
     try {
         const res = await fetch(url, {
             method: 'POST',
@@ -232,7 +232,7 @@ async function updateStatus(newStatus) {
         const json = await res.json();
         if (!res.ok || !json.success) throw new Error(json.message || 'Update failed');
         // refresh info
-        const infoRes = await fetch(`/admin/api/tickets/${encodeURIComponent(currentTicketId)}`, { headers: { 'Accept': 'application/json' } });
+        const infoRes = await fetch(`/api/tickets/${encodeURIComponent(currentTicketId)}`, { headers: { 'Accept': 'application/json' } });
         const infoJson = await infoRes.json();
         if (infoRes.ok && infoJson.success) displayFromApi(infoJson.data);
         showNotification(`${newStatus === 'checkin' ? 'Checked In' : 'Checked Out'} successfully!`, 'success');

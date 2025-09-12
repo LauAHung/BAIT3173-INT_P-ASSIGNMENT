@@ -36,6 +36,11 @@ Route::prefix('user')->group(function () {
     // Profile endpoints
     Route::get('/profile/{userId}', [UserWebServiceController::class, 'getProfile']);
     Route::put('/profile/{userId}', [UserWebServiceController::class, 'updateProfile']);
+
+    // Admin-use user management (open for now; can add middleware later)
+    Route::get('/list', [UserWebServiceController::class, 'listUsers']);
+    Route::put('/{userId}/status', [UserWebServiceController::class, 'updateUserStatus']);
+    Route::delete('/{userId}', [UserWebServiceController::class, 'deleteUser']);
 });
 
 
@@ -139,3 +144,8 @@ Route::get('/health', function () {
         'timestamp' => now()->toISOString()
     ]);
 });
+
+// Ticket APIs for QR scan/check-in/out (Booking module)
+Route::get('/tickets/{ticketId}', [AdminTicketController::class, 'show']);
+Route::post('/tickets/{ticketId}/checkin', [AdminTicketController::class, 'checkIn']);
+Route::post('/tickets/{ticketId}/checkout', [AdminTicketController::class, 'checkOut']);

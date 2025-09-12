@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class UserWebServiceController extends Controller
 {
@@ -287,7 +288,86 @@ class UserWebServiceController extends Controller
             ]
         ]);
     }
+
+    /**
+     * List users with optional search/status filters and pagination
+     * REST API: GET /api/user/list
+     */
+    public function listUsers(Request $request)
+    {
+        try {
+            $search = $request->get('search');
+            $status = $request->get('status');
+            $perPage = (int) $request->get('per_page', 10);
+
+            $query = User::query();
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+            if ($status !== null && $status !== '') {
+                $query->where('account_status', $status);
+            }
+            $users = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+            return response()->json([
+                'success' => true,
+                'data' => $users,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('listUsers failed', ['err' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to list users'], 500);
+        }
+    }
+
+    /**
+     * Update user status
+     * REST API: PUT /api/user/{userId}/status
+     */
+    public function updateUserStatus(Request $request, $userId)
+    {
+        $validator = Validator::make(array_merge($request->all(), ['userId' => $userId]), [
+            'userId' => 'required|string|regex:/^[0-9]+$/',
+            'status' => 'required|in:active,suspended,not_verified,admin'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        $user->account_status = $request->status;
+        $user->save();
+
+        return response()->json(['success' => true, 'message' => 'Status updated', 'user' => $user]);
+    }
+
+    /**
+     * Delete user (soft via status change to deleted)
+     * REST API: DELETE /api/user/{userId}
+     */
+    public function deleteUser($userId)
+    {
+        if (!preg_match('/^[0-9]+$/', (string) $userId)) {
+            return response()->json(['success' => false, 'message' => 'Invalid user id'], 422);
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+        $user->account_status = 'deleted';
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'User deleted']);
+    }
 }
+
 
 
 
