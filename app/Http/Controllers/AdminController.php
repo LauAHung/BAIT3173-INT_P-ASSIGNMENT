@@ -114,12 +114,8 @@ class AdminController extends Controller
      */
     public function getDashboardStats(): JsonResponse
     {
-        $resp = Http::get("{$this->apiBaseUrl}/admin/dashboard/stats");
-        if ($resp->successful()) {
-            return response()->json($resp->json());
-        }
-        Log::error('Failed to fetch admin dashboard stats', ['status' => $resp->status(), 'body' => $resp->body()]);
-        return response()->json(['success' => false, 'message' => 'Failed to fetch dashboard stats'], $resp->status());
+        $stats = AdminFacade::getDashboardStats();
+        return response()->json($stats);
     }
 
     /**
@@ -127,12 +123,23 @@ class AdminController extends Controller
      */
     public function getDashboardFilters(): JsonResponse
     {
-        $resp = Http::get("{$this->apiBaseUrl}/admin/dashboard/filters");
-        if ($resp->successful()) {
-            return response()->json($resp->json());
-        }
-        Log::error('Failed to fetch dashboard filters', ['status' => $resp->status(), 'body' => $resp->body()]);
-        return response()->json(['success' => false, 'message' => 'Failed to fetch filters'], $resp->status());
+        $states = \App\Models\Station::query()
+            ->whereNotNull('Location')
+            ->distinct()
+            ->pluck('Location')
+            ->values();
+        $stations = \App\Models\Station::query()
+            ->whereNotNull('StationName')
+            ->orderBy('StationName')
+            ->pluck('StationName')
+            ->values();
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'states' => $states,
+                'stations' => $stations,
+            ]
+        ]);
     }
 
     /**
@@ -140,12 +147,27 @@ class AdminController extends Controller
      */
     public function getTripsPerMonth(\Illuminate\Http\Request $request): JsonResponse
     {
-        $resp = Http::get("{$this->apiBaseUrl}/admin/dashboard/trips", $request->only(['state','station']));
-        if ($resp->successful()) {
-            return response()->json($resp->json());
-        }
-        Log::error('Failed to fetch trips per month', ['status' => $resp->status(), 'body' => $resp->body()]);
-        return response()->json(['success' => false, 'message' => 'Failed to fetch trips'], $resp->status());
+        $state = $request->get('state');
+        $station = $request->get('station');
+
+        $q = \App\Models\Booking::query()
+            ->join('Journeys', 'Bookings.JourneyID', '=', 'Journeys.JourneyID')
+            ->leftJoin('Stations as S', 'S.StationName', '=', 'Journeys.FromLocation')
+            ->when($station, function ($qq) use ($station) {
+                $qq->where('Journeys.FromLocation', $station);
+            })
+            ->when($state, function ($qq) use ($state) {
+                $qq->where('S.Location', $state);
+            })
+            ->selectRaw("DATE_FORMAT(Bookings.Created_at, '%Y-%m') as ym, count(*) as total")
+            ->groupBy('ym')
+            ->orderBy('ym');
+
+        $rows = $q->get();
+        return response()->json([
+            'success' => true,
+            'data' => $rows,
+        ]);
     }
 
     /**
@@ -153,12 +175,12 @@ class AdminController extends Controller
      */
     public function getUsersGrowth(): JsonResponse
     {
-        $resp = Http::get("{$this->apiBaseUrl}/admin/dashboard/users-growth");
-        if ($resp->successful()) {
-            return response()->json($resp->json());
-        }
-        Log::error('Failed to fetch users growth', ['status' => $resp->status(), 'body' => $resp->body()]);
-        return response()->json(['success' => false, 'message' => 'Failed to fetch users growth'], $resp->status());
+        $rows = \App\Models\User::query()
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, count(*) as total")
+            ->groupBy('ym')
+            ->orderBy('ym')
+            ->get();
+        return response()->json(['success' => true, 'data' => $rows]);
     }
 
     /**
@@ -166,12 +188,12 @@ class AdminController extends Controller
      */
     public function getProfitTrends(): JsonResponse
     {
-        $resp = Http::get("{$this->apiBaseUrl}/admin/dashboard/profit");
-        if ($resp->successful()) {
-            return response()->json($resp->json());
-        }
-        Log::error('Failed to fetch profit trends', ['status' => $resp->status(), 'body' => $resp->body()]);
-        return response()->json(['success' => false, 'message' => 'Failed to fetch profit trends'], $resp->status());
+        $rows = \App\Models\Booking::query()
+            ->selectRaw("DATE_FORMAT(Created_at, '%Y-%m') as ym, sum(Price) as total")
+            ->groupBy('ym')
+            ->orderBy('ym')
+            ->get();
+        return response()->json(['success' => true, 'data' => $rows]);
     }
 
     /**
