@@ -7,6 +7,12 @@ use App\Http\Controllers\Api\UserWebServiceController;
 use App\Http\Controllers\Api\ConcessionCardWebServiceController;
 use App\Http\Controllers\Api\BookingApiController;
 use App\Http\Controllers\Api\TrainApiController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\TicketController as AdminTicketController;
+use App\Http\Controllers\Admin\LogController as AdminLogController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\NewsletterController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -33,8 +39,8 @@ Route::prefix('user')->group(function () {
 });
 
 
-// Admin Module Web Services
-Route::prefix('admin')->group(function () {
+// Admin Module Web Services + Admin UI AJAX
+Route::prefix('admin')->middleware(['web','admin','admin.2fa'])->group(function () {
     // User management
     Route::get('/user/{userId}', [AdminWebServiceController::class, 'getUserInfo']);
     
@@ -48,7 +54,55 @@ Route::prefix('admin')->group(function () {
     Route::get('/logs', [AdminWebServiceController::class, 'getAdminLogs']);
     
     // Newsletter management
-    Route::get('/newsletter/subscribers', [AdminWebServiceController::class, 'getNewsletterSubscribers']);
+    Route::get('/newsletter/subscribers', [NewsletterController::class, 'list']);
+    Route::post('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe']);
+
+    // Admin UI AJAX endpoints (moved from web.php)
+    Route::get('/dashboard/stats', [AdminController::class, 'getDashboardStats']);
+    Route::get('/dashboard/filters', [AdminController::class, 'getDashboardFilters']);
+    Route::get('/dashboard/trips', [AdminController::class, 'getTripsPerMonth']);
+    Route::get('/dashboard/users-growth', [AdminController::class, 'getUsersGrowth']);
+    Route::get('/dashboard/profit', [AdminController::class, 'getProfitTrends']);
+
+    // Trains
+    Route::get('/trains', [AdminController::class, 'getTrains']);
+    Route::post('/trains', [AdminController::class, 'addTrain']);
+    Route::put('/trains/{id}', [AdminController::class, 'updateTrain']);
+    Route::delete('/trains/{id}', [AdminController::class, 'deleteTrain']);
+
+    // QR
+    Route::post('/qr/scan', [AdminController::class, 'scanQR']);
+    Route::post('/qr/generate', [AdminController::class, 'generateQR']);
+
+    // Tickets
+    Route::get('/tickets/{ticketId}', [AdminTicketController::class, 'show']);
+    Route::post('/tickets/{ticketId}/checkin', [AdminTicketController::class, 'checkIn']);
+    Route::post('/tickets/{ticketId}/checkout', [AdminTicketController::class, 'checkOut']);
+
+    // Newsletter send
+    Route::post('/newsletter/send', [AdminController::class, 'sendNewsletter']);
+    // Refunds
+    Route::post('/refunds/process', [AdminController::class, 'processRefund']);
+
+    // Users management
+    Route::get('/users', [AdminController::class, 'getUsers']);
+    Route::put('/users/{userId}/status', [AdminUserController::class, 'updateStatus']);
+    Route::delete('/users/{userId}', [AdminUserController::class, 'destroy']);
+    Route::get('/users/export', [AdminUserController::class, 'export'])
+        ->middleware(['admin.recent','throttle:1,2']);
+
+    // Sensitive endpoints: throttle + recent admin reauth
+    Route::middleware(['throttle:5,1','admin.recent'])->group(function () {
+        Route::get('/export', [AdminController::class, 'exportData']);
+        Route::get('/export/download', [AdminController::class, 'downloadExport']);
+        Route::post('/refunds/process', [AdminController::class, 'processRefund']);
+        Route::put('/trains/{id}', [AdminController::class, 'updateTrain']);
+        Route::delete('/trains/{id}', [AdminController::class, 'deleteTrain']);
+    });
+
+    // System info and logs
+    Route::get('/system/info', [AdminController::class, 'getSystemInfo']);
+    Route::get('/logs', [AdminLogController::class, 'list']);
 });
 
 // Concession Card Module Web Services
@@ -64,13 +118,7 @@ Route::prefix('concession')->group(function () {
     Route::get('/statistics', [ConcessionCardWebServiceController::class, 'getStatistics']);
 });
 
-// Friend's Booking Module Web Services
-Route::prefix('bookings')->group(function () {
-    Route::get('/bookings', [BookingApiController::class, 'index']);
-    Route::get('/bookings_detail/{id}', [BookingApiController::class, 'show']);
-    Route::post('/bookings/{id}/cancel', [BookingApiController::class, 'cancel']);
-    
-});
+
 
 // Normalized Booking APIs (explicit user and booking params)
 Route::get('/bookings/{userId}', [BookingApiController::class, 'index']);
