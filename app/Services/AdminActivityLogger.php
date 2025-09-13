@@ -12,12 +12,17 @@ class AdminActivityLogger
     {
         $user = Auth::user();
         $email = $user ? ($user->email ?? 'unknown') : 'guest';
+        $context = array_merge($details, [
+            'ip' => request()->ip(),
+            'user_agent' => request()->header('User-Agent'),
+            'actor_user_id' => $user->user_id ?? null,
+        ]);
 
         try {
             AdminActivityLog::create([
                 'admin_email' => $email,
                 'action' => $action,
-                'details' => $details,
+                'details' => $context,
             ]);
         } catch (\Throwable $e) {
             // Never block the main action due to logging failures

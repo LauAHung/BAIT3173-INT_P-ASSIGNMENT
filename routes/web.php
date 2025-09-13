@@ -18,6 +18,7 @@ Route::get('/', function () {
     return view('HomePage');
 })->name('HomePage');
 
+
 Route::get('/signup', function () {
     return view('SignUpPage');
 })->middleware('guest')->name('signup');
@@ -88,7 +89,7 @@ Route::middleware('auth.required')->group(function () {
 });
 
 // Admin routes
-Route::prefix('admin')->middleware('admin')->group(function () {
+Route::prefix('admin')->middleware(['admin','admin.2fa'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/users', [App\Http\Controllers\AdminController::class, 'users'])->name('admin.users');
     Route::get('/trains', [App\Http\Controllers\AdminController::class, 'trains'])->name('admin.trains');
@@ -97,28 +98,13 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('/refunds', [App\Http\Controllers\AdminController::class, 'refunds'])->name('admin.refunds');
     Route::get('/system-info', [App\Http\Controllers\AdminController::class, 'systemInfo'])->name('admin.system-info');
     
-    // API endpoints for AJAX
-    Route::get('/api/dashboard/stats', [App\Http\Controllers\AdminController::class, 'getDashboardStats']);
-    Route::get('/api/dashboard/filters', [App\Http\Controllers\AdminController::class, 'getDashboardFilters']);
-    Route::get('/api/dashboard/trips', [App\Http\Controllers\AdminController::class, 'getTripsPerMonth']);
-    Route::get('/api/dashboard/users-growth', [App\Http\Controllers\AdminController::class, 'getUsersGrowth']);
-    Route::get('/api/dashboard/profit', [App\Http\Controllers\AdminController::class, 'getProfitTrends']);
-    // Removed conflicting user management routes - using UserController instead
-    Route::get('/api/trains', [App\Http\Controllers\AdminController::class, 'getTrains']);
-    Route::post('/api/trains', [App\Http\Controllers\AdminController::class, 'addTrain']);
-    Route::put('/api/trains/{id}', [App\Http\Controllers\AdminController::class, 'updateTrain']);
-    Route::delete('/api/trains/{id}', [App\Http\Controllers\AdminController::class, 'deleteTrain']);
-    Route::post('/api/qr/scan', [App\Http\Controllers\AdminController::class, 'scanQR']);
-    Route::post('/api/qr/generate', [App\Http\Controllers\AdminController::class, 'generateQR']);
-    // Ticket info + status updates for ScanQR page
-    Route::get('/api/tickets/{ticketId}', [App\Http\Controllers\Admin\TicketController::class, 'show']);
-    Route::post('/api/tickets/{ticketId}/checkin', [App\Http\Controllers\Admin\TicketController::class, 'checkIn']);
-    Route::post('/api/tickets/{ticketId}/checkout', [App\Http\Controllers\Admin\TicketController::class, 'checkOut']);
-    Route::post('/api/newsletter/send', [App\Http\Controllers\AdminController::class, 'sendNewsletter']);
-    Route::post('/api/refunds/process', [App\Http\Controllers\AdminController::class, 'processRefund']);
-    Route::get('/api/export', [App\Http\Controllers\AdminController::class, 'exportData']);
-    Route::get('/api/system/info', [App\Http\Controllers\AdminController::class, 'getSystemInfo']);
-    Route::get('/api/logs', [App\Http\Controllers\Admin\LogController::class, 'list']);
+});
+// Admin 2FA routes
+Route::prefix('admin')->middleware('admin')->group(function () {
+    Route::get('/2fa/setup', [App\Http\Controllers\TwoFactorController::class, 'showSetup'])->name('admin.2fa.setup');
+    Route::post('/2fa/enable', [App\Http\Controllers\TwoFactorController::class, 'enable'])->name('admin.2fa.enable');
+    Route::get('/2fa/challenge', [App\Http\Controllers\TwoFactorController::class, 'showChallenge'])->name('admin.2fa.challenge');
+    Route::post('/2fa/verify', [App\Http\Controllers\TwoFactorController::class, 'verify'])->name('admin.2fa.verify');
 });
 
 // Booking Module
@@ -152,8 +138,6 @@ Route::get('/feedback', function () {
     return view('FeedbackPage');
 })->name('feedback');
 
-Route::get('/selectrating', function () { return view('SelectRatingPage'); })->name('selectrating');
-
 Route::get('/ratingsection', function () {
     return view('RatingSectionPage');
 })->name('ratingsection');
@@ -166,21 +150,25 @@ Route::get('/payment', function () {
     return view('PaymentPage');
 })->name('payment');
 
+
+Route::get('/selectrating', function () { return view('SelectRatingPage'); })->name('selectrating');
+
+
 // Admin Page (protected)
 Route::get('dashboard', function () {
     return view('AdminPage/Dashboard');
-})->middleware('admin')->name('dashboard');
+})->middleware(['admin','admin.2fa'])->name('dashboard');
 
 // Entry point: if user is admin, go dashboard; else 403
 Route::get('/admin', function () {
     $user = Auth::user();
     if ($user && $user->account_status === 'admin') {
-        return redirect()->route('dashboard');
+        return redirect()->route('admin.dashboard');
     }
     return response()->view('errors.403', [], 403);
 })->name('admin.index');
 
-Route::get('train-management', [App\Http\Controllers\Admin\TrainManagementController::class, 'index'])->middleware('admin')->name('train-management');
+Route::get('train-management', [App\Http\Controllers\Admin\TrainManagementController::class, 'index'])->middleware(['admin','admin.2fa'])->name('train-management');
 Route::get('test-train', function() {
     try {
         $stations = \App\Models\Station::all();
@@ -198,24 +186,26 @@ Route::post('admin/train-management/train/update', [App\Http\Controllers\Admin\T
 Route::post('admin/train-management/station/update', [App\Http\Controllers\Admin\TrainManagementController::class, 'updateStation'])->name('train-management.station.update');
 Route::post('admin/train-management/journey/update', [App\Http\Controllers\Admin\TrainManagementController::class, 'updateJourney'])->name('train-management.journey.update');
 
-Route::get('user-management', [App\Http\Controllers\Admin\UserController::class, 'index'])->middleware('admin')->name('user-management');
+Route::get('user-management', [App\Http\Controllers\Admin\UserController::class, 'index'])->middleware(['admin','admin.2fa'])->name('user-management');
 Route::put('admin/api/users/{userId}/status', [App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('admin.users.update-status');
 Route::delete('admin/api/users/{userId}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('admin.users.destroy');
-Route::get('admin/api/users/export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('admin.users.export');
+Route::get('admin/api/users/export', [App\Http\Controllers\Admin\UserController::class, 'export'])
+    ->middleware(['admin','admin.2fa','admin.recent','throttle:1,2'])
+    ->name('admin.users.export');
 
 Route::get('news-email-publish', function () {
     return view('AdminPage/NewsEmailPublish');
-})->middleware('admin')->name('news-email-publish');
+})->middleware(['admin','admin.2fa'])->name('news-email-publish');
 
 Route::get('card-approval', function () {
     return view('AdminPage/ConcessionCardApproval');
-})->middleware('admin')->name('card-approval');
+})->middleware(['admin','admin.2fa'])->name('card-approval');
 
 Route::get('scan_qr', function () {
     return view('AdminPage/ScanQR');
-})->middleware('admin')->name('scan_qr');
+})->middleware(['admin','admin.2fa'])->name('scan_qr');
 
-Route::get('log', [App\Http\Controllers\Admin\LogController::class, 'index'])->middleware('admin')->name('log');
+Route::get('log', [App\Http\Controllers\Admin\LogController::class, 'index'])->middleware(['admin','admin.2fa'])->name('log');
 
 // Newsletter subscription
 Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
@@ -238,6 +228,14 @@ Route::prefix('api/concession')->middleware('auth')->group(function () {
     // Admin routes for all applications (temporarily removed admin middleware for testing)
     Route::get('/admin/all-applications', [ConcessionCardController::class, 'getAllApplicationsForAdmin'])->name('concession.admin.all-applications');
     Route::get('/admin/all-stats', [ConcessionCardController::class, 'getAdminAllStats'])->name('concession.admin.all-stats');
+});
+
+// Admin-only concession exports with security guards
+Route::prefix('admin')->middleware(['admin','admin.2fa'])->group(function () {
+    Route::middleware(['throttle:5,1','admin.recent'])->group(function () {
+        Route::get('/api/concession/export/token', [App\Http\Controllers\ConcessionCardController::class, 'exportApplicationsIssueToken']);
+        Route::get('/api/concession/export/download', [App\Http\Controllers\ConcessionCardController::class, 'exportApplicationsDownload']);
+    });
 });
 
 //Discover

@@ -9,6 +9,7 @@ use App\Factories\UserFactoryManager;
 use App\Factories\AuthFactoryManager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 
 class GoogleAuthController extends Controller
 {
@@ -31,7 +32,7 @@ class GoogleAuthController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-    public function handleGoogleCallback()
+    public function handleGoogleCallback(Request $request)
     {
         try {
             // Get user info from Google
@@ -94,7 +95,16 @@ class GoogleAuthController extends Controller
             }
 
             Auth::login($user);
-
+            // Regenerate session; mark recent re-auth; enforce 2FA for admin
+            $request->session()->regenerate();
+            if ($user->account_status === 'admin') {
+                $request->session()->put('admin.recently_authenticated_at', time());
+                $request->session()->forget('admin.2fa.verified');
+                if ($user->two_factor_enabled && !empty($user->two_factor_secret)) {
+                    return redirect()->route('admin.2fa.challenge');
+                }
+                return redirect()->route('admin.2fa.setup');
+            }
             return redirect()->route('HomePage')->with('success', 'Google login successful');
         } catch (\Exception $e) {
             return redirect()->route('signin')->with('error', 'Google authentication failed: ' . $e->getMessage());

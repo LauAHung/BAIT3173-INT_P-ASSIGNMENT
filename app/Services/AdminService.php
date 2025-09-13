@@ -5,8 +5,9 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Train;
 use App\Models\Booking;
-use App\Models\Refund;
+// use App\Models\Refund; // Removed to avoid missing model error
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Cache;
 use Exception;
 
@@ -18,16 +19,19 @@ class AdminService
     public function getDashboardStats()
     {
         try {
-            $stats = Cache::remember('admin_dashboard_stats', 300, function () {
+            // Use a very short cache key to avoid DB cache key length limits
+            $stats = Cache::remember('ads', 300, function () {
                 return [
                     'total_users' => User::count(),
                     'active_users' => User::where('account_status', 'active')->count(),
                     'pending_users' => User::where('account_status', 'pending_verification')->count(),
                     'social_users' => User::whereNotNull('social_provider')->count(),
                     'total_trains' => Train::count(),
-                    'active_trains' => Train::where('status', 'active')->count(),
+                    'active_trains' => Train::where('Is_available', 'Active')->count(),
                     'total_bookings' => Booking::count(),
-                    'pending_refunds' => Refund::where('status', 'pending')->count(),
+                    'pending_refunds' => Schema::hasTable('refunds')
+                        ? DB::table('refunds')->where('status', 'pending')->count()
+                        : 0,
                     'recent_users' => User::latest()->take(5)->get(),
                     'recent_bookings' => Booking::with('user')->latest()->take(5)->get(),
                 ];

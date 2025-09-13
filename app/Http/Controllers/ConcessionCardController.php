@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 use App\Models\ConcessionApplication;
 use SplFileObject;
@@ -356,6 +358,134 @@ class ConcessionCardController extends Controller
                 'message' => 'Failed to reject application'
             ], 500);
         }
+    }
+
+    /**
+     * Issue short-lived one-time token for exporting applications (admin only)
+     */
+    public function exportApplicationsIssueToken(Request $request)
+    {
+        // Optional filters (future use)
+        $request->validate([
+            'format' => 'nullable|string|in:csv,json'
+        ]);
+
+        $userId = FacadesAuth::id() ?? 'guest';
+
+        // Per-minute per-user hard limit (in addition to route throttle)
+        $nowMinute = date('YmdHi');
+        $minuteKey = 'cex.min.' . $nowMinute;
+        $currentCount = (int) $request->session()->get($minuteKey, 0);
+        if ($currentCount >= 2) {
+            app(\App\Services\AdminActivityLogger::class)->log('concession_export_rate_limited', [ 'user_id' => $userId, 'count_minute' => $currentCount ]);
+            return response()->json(['success' => false, 'message' => 'Export rate limit exceeded. Try again later.'], 429);
+        }
+        $request->session()->put($minuteKey, $currentCount + 1);
+
+        // Cooldown per dataset (applications list)
+        $cooldownKey = 'cex.cool';
+        $lastTs = (int) $request->session()->get($cooldownKey, 0);
+        if (time() - $lastTs < 30) {
+            return response()->json(['success' => false, 'message' => 'Please wait before exporting applications again.'], 429);
+        }
+        $request->session()->put($cooldownKey, time());
+
+        $token = bin2hex(random_bytes(16));
+        $payload = [
+            'format' => $request->get('format', 'csv'),
+            'issued_at' => time()
+        ];
+        $request->session()->put('admin.concession_export_tokens.' . $token, $payload);
+
+        app(\App\Services\AdminActivityLogger::class)->log('concession_export_token_issued', [ 'format' => $payload['format'] ]);
+
+        return response()->json([
+            'success' => true,
+            'download_token' => $token,
+            'expires_in_seconds' => 120
+        ]);
+    }
+
+    /**
+     * Download applications export using short-lived token
+     */
+    public function exportApplicationsDownload(Request $request)
+    {
+        $request->validate(['token' => 'required|string|size:32']);
+
+        $key = 'admin.concession_export_tokens.' . $request->token;
+        $payload = $request->session()->get($key);
+        if (!$payload) {
+            return response()->json(['success' => false, 'message' => 'Invalid or expired token'], 401);
+        }
+        if ((time() - ($payload['issued_at'] ?? 0)) > 120) {
+            $request->session()->forget($key);
+            return response()->json(['success' => false, 'message' => 'Token expired'], 401);
+        }
+        // One-time use
+        $request->session()->forget($key);
+
+        // Build dataset
+        $rows = ConcessionApplication::orderBy('created_at', 'desc')->get();
+        $format = $payload['format'] ?? 'csv';
+
+        if ($format === 'json') {
+            $content = $rows->map(function ($app) {
+                return [
+                    'applicationId' => $app->application_id,
+                    'fullName' => $app->full_name,
+                    'type' => $app->type,
+                    'status' => $app->status,
+                    'ic' => $app->ic_number,
+                    'passportNumber' => $app->passport_number,
+                    'appliedDate' => optional($app->created_at)->toIso8601String(),
+                ];
+            });
+            $filename = 'concession_applications_' . now()->format('Y-m-d_His') . '.json';
+            app(\App\Services\AdminActivityLogger::class)->log('concession_export_download', [ 'format' => 'json', 'count' => $rows->count() ]);
+            return response()->json([
+                'success' => true,
+                'filename' => $filename,
+                'format' => 'json',
+                'content' => $content,
+            ]);
+        }
+
+        // CSV
+        $headers = ['Application ID','Full Name','Type','Status','IC','Passport','Applied Date'];
+        $lines = [];
+        $lines[] = implode(',', $headers);
+        foreach ($rows as $app) {
+            $fields = [
+                $app->application_id,
+                $app->full_name,
+                $app->type,
+                $app->status,
+                $app->ic_number,
+                $app->passport_number,
+                optional($app->created_at)->toDateTimeString(),
+            ];
+            $escaped = array_map(function ($v) {
+                $v = (string) $v;
+                if (str_contains($v, '"')) { $v = str_replace('"', '""', $v); }
+                if (str_contains($v, ',') || str_contains($v, '\n') || str_contains($v, '"')) {
+                    $v = '"' . $v . '"';
+                }
+                return $v;
+            }, $fields);
+            $lines[] = implode(',', $escaped);
+        }
+        $csv = implode("\n", $lines);
+        $filename = 'concession_applications_' . now()->format('Y-m-d_His') . '.csv';
+
+        app(\App\Services\AdminActivityLogger::class)->log('concession_export_download', [ 'format' => 'csv', 'count' => $rows->count() ]);
+
+        return response()->json([
+            'success' => true,
+            'filename' => $filename,
+            'format' => 'csv',
+            'content' => $csv,
+        ]);
     }
 
     public function getAdminStats(Request $request)

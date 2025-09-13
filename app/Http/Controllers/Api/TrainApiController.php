@@ -10,11 +10,35 @@ use App\Builder\ConcreteBookingBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 
 class TrainApiController extends Controller
 {
-    public function index(Request $request)
+    private function authorizeJourneyAccess($journeyId, $context = 'view')
+    {
+        $query = Journey::where('JourneyID', $journeyId)
+            ->where('Status', 'Scheduled')
+            ->where('DepartureTime', '>', now());
+
+        $journey = $query->first();
+         // Log for debug use
+        if (!$journey) {
+            Log::warning('Journey access denied', [
+                'journey_id' => $journeyId,
+                'reason' => 'Journey is not scheduled or is in the past'
+            ]);
+            throw new Exception('Only scheduled journeys with future departure times can be accessed.', 403);
+        }
+
+        Log::info('Journey access granted', [
+            'journey_id' => $journeyId,
+            'status' => $journey->Status,
+            'departure_time' => $journey->DepartureTime
+        ]);
+        return $journey;
+    }
+    public function getJourney(Request $request)
     {
         $query = Journey::query()->with('train')
             ->orderBy('DepartureTime', 'asc');
@@ -109,7 +133,7 @@ class TrainApiController extends Controller
         return response()->json(['journeys' => $journeys], 200);
     }
 
-    public function indexReturn(Request $request)
+    public function getJourneyReturn(Request $request)
     {
         $query = Journey::query()->with('train')
             ->orderBy('DepartureTime', 'asc');
@@ -187,9 +211,11 @@ class TrainApiController extends Controller
         $bookingType = $request->input('booking_type', 'OneWay');
         $passengers = $request->input('passengers', 1);
 
-        $journey = Journey::with('train')->find($journeyId);
-        if (!$journey) {
-            return response()->json(['error' => 'Journey not found.'], 404);
+        // for authorize journey access use
+        try {
+            $journey = $this->authorizeJourneyAccess($journeyId);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode());
         }
 
         if ($journey->Train->TrainService === 'ETS' && $passengers > $journey->SeatAvailable) {
@@ -373,7 +399,7 @@ class TrainApiController extends Controller
                 'message' => 'Booking created successfully. Proceed to payment.',
                 'booking' => $booking
             ], 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error('Booking creation failed: ' . $e->getMessage()); //debug use
             return response()->json(['error' => 'Failed to create booking, Please try again later.'], 500);

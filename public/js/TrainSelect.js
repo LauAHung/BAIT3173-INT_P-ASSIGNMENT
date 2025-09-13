@@ -29,7 +29,7 @@ flatpickr("#depart-date", {
     },
     disable: [
         function(date) {
-            // Disable depart-date input for return journey selection
+            // disable depart date for return journey
             return ;
         }
     ]

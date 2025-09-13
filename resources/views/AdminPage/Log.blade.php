@@ -67,7 +67,7 @@ async function loadLogs() {
     const params = new URLSearchParams();
     if (email) params.append('email', email);
     if (action) params.append('action', action);
-    const res = await fetch(`/admin/api/logs?${params.toString()}`, { headers: { 'Accept': 'application/json' } });
+    const res = await fetch(`/api/admin/logs?${params.toString()}`, { headers: { 'Accept': 'application/json' } });
     const data = await res.json();
     const tbody = document.getElementById('logs-tbody');
     tbody.innerHTML = '';

@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: 'Oops!',
             html: `<p style="font-size:18px; margin:10px 0;">${errorMessage}</p>`,
             confirmButtonText: 'Got it',
-            confirmButtonColor: '#d33', // Red confirm button
+            confirmButtonColor: '#d33',
             width: '500px',
             padding: '30px',
             backdrop: `
@@ -482,7 +482,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Selected outbound seats before submission:', selectedSeats);
         console.log('Selected return seats before submission:', selectedSeats2);
 
-        // Use SweetAlert2 for a better UI confirmation
         Swal.fire({
             title: 'Confirm Booking',
             text: 'Are you sure you want to proceed to payment? This will confirm your booking.',
@@ -537,5 +536,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<x-error-modal />
 @endsection

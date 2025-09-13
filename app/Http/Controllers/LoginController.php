@@ -73,12 +73,20 @@ class LoginController extends Controller
                     ]);
                 }
 
-                // Log the user in (remember me removed)
+                // Log the user in, then regenerate session to prevent fixation
                 Auth::login($user, false);
+                $request->session()->regenerate();
 
                 // Redirect based on role/status
                 if ($user->account_status === 'admin') {
-                    return redirect()->route('dashboard')->with('success', 'Welcome admin, ' . $user->first_name . '!');
+                    // Mark recent admin re-auth on fresh login
+                    $request->session()->put('admin.recently_authenticated_at', time());
+                    // Clear 2FA verified flag on each admin login; enforce 2FA
+                    $request->session()->forget('admin.2fa.verified');
+                    if ($user->two_factor_enabled && !empty($user->two_factor_secret)) {
+                        return redirect()->route('admin.2fa.challenge');
+                    }
+                    return redirect()->route('admin.2fa.setup');
                 }
 
                 // Default redirect to homepage after successful login
@@ -199,19 +207,6 @@ class LoginController extends Controller
             ->with(['show_reset_modal' => true, 'reset_email' => $request->email]);
     }
 
-    /**
-     * Show password reset form
-     */
-    // Deprecated token-based reset views removed in favor of OTP flow
-
-    /**
-     * Handle password reset
-     */
-    // Deprecated token-based reset handler removed in favor of OTP flow
-
-    /**
-     * Verify email address
-     */
     public function verifyEmail(string $token)
     {
         $success = $this->userRegistrationService->verifyEmail($token);

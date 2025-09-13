@@ -164,7 +164,7 @@ class TrainSelectionController extends Controller
             return array_merge($carry, is_array($item) ? $item : [$item]);
         }, []);
 
-        // always array even it is null
+        // to make sure always array even is null
         $selectedSeats2 = is_array($selectedSeatsInput2) ? array_reduce($selectedSeatsInput2, function ($carry, $item) {
             return array_merge($carry, is_array($item) ? $item : [$item]);
         }, []) : [];

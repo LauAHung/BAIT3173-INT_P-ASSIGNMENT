@@ -157,7 +157,6 @@
     </form>
 </section>
 <script>
-// Toggle passenger info section
 function togglePassenger(pid) {
     const info = document.getElementById(pid + '-info');
     const btn = document.getElementById('toggle-' + pid);
@@ -170,7 +169,6 @@ function togglePassenger(pid) {
     }
 }
 
-// Form validation
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form');
     const passengerCount = {{ $passengers }}; // Get passenger count from PHP
@@ -178,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (event) => {
         let isValid = true;
 
-        // Clear previous error messages and indicators
         document.querySelectorAll('.error').forEach(error => {
             error.textContent = '';
             error.classList.remove('show');
@@ -187,11 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
             indicator.classList.remove('show');
         });
 
-        // Validate each passenger dynamically
+        // validate for each passenger
         for (let i = 1; i <= passengerCount; i++) {
             let hasError = false; // Track if current passenger has any validation errors
 
-            // Get input fields for the current passenger
+            // get input fields
             const nameInput = document.querySelector(`input[name="passenger[${i}][name]"]`);
             const mykadInput = document.querySelector(`input[name="passenger[${i}][mykad]"]`);
             const passportInput = document.querySelector(`input[name="passenger[${i}][passport]"]`);
@@ -200,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const genderInputs = document.querySelectorAll(`input[name="passenger[${i}][gender]"]:checked`);
             const ticketType = document.querySelector(`select[name="passenger[${i}][ticket_type]"]`);
 
-            // Name validation: Letters, spaces, hyphens, apostrophes
+            // Name validation
             const nameRegex = /^[a-zA-Z\s'-]{2,}$/;
             if (!nameRegex.test(nameInput.value.trim())) {
                 isValid = false;
@@ -209,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById(`error-p${i}-name`).classList.add('show');
             }
 
-            // MyKad and Passport: At least one required, but not both
+            // MyKad and Passport, at least one required but not both
             const mykadRegex = /^\d{12}$/;
             const passportRegex = /^[a-zA-Z0-9]{6,12}$/;
             const hasMykad = mykadInput.value.trim() !== '';
@@ -252,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById(`error-p${i}-passport_expiry`).classList.add('show');
             }
 
-            // Contact number validation: Malaysian mobile format
+            // Contact number validation
             const contactRegex = /^01[0-9]-[0-9]{7,8}$/;
             if (!contactRegex.test(contactInput.value.trim())) {
                 isValid = false;
@@ -261,7 +258,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById(`error-p${i}-contact_no`).classList.add('show');
             }
 
-            // Gender validation: Ensure one option is selected
             if (genderInputs.length === 0) {
                 isValid = false;
                 hasError = true;
@@ -269,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById(`error-p${i}-gender`).classList.add('show');
             }
 
-            // Ticket type validation: Ensure an option is selected
             if (!ticketType.value) {
                 isValid = false;
                 hasError = true;
@@ -277,13 +272,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById(`error-p${i}-ticket_type`).classList.add('show');
             }
 
-            // Show error indicator for this passenger if any validation error occurred
             if (hasError) {
                 document.getElementById(`error-indicator-p${i}`).classList.add('show');
             }
         }
 
-        // Prevent form submission if validation fails
         if (!isValid) {
             event.preventDefault();
         }
@@ -291,5 +284,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<x-error-modal />
 @endsection
