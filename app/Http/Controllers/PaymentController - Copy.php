@@ -165,5 +165,4 @@ class PaymentController extends Controller
             return redirect()->route('booking')->with('error', 'Refund failed: ' . $e->getMessage());
         }
     }
-
 }
