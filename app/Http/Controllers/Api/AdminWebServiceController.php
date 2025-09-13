@@ -8,10 +8,13 @@ use Illuminate\Http\JsonResponse;
 use App\Models\User;
 use App\Models\Train;
 use App\Models\AdminActivityLog;
+use App\Models\Journey;
 use App\Models\NewsletterSubscriber;
 use App\Models\ConcessionApplication;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AdminWebServiceController extends Controller
 {
@@ -181,6 +184,44 @@ class AdminWebServiceController extends Controller
         ]);
     }
 
+    public function getJourneyById($journeyId)
+    {
+        $validator = Validator::make(['journeyId' => $journeyId], [
+            'journeyId' => ['required','string','regex:/^[a-zA-Z0-9]+$/']
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid JourneyID format. Only alphabets and numbers allowed.',
+                'data' => null
+            ], 400);
+        }
+
+        $journey = Journey::with('train')->where('JourneyID', $journeyId)->first();
+        if (!$journey) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Journey not found',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Journey details retrieved successfully',
+            'data' => [
+                'TrainID' => (string) $journey->TrainID,
+                'FromLocation' => (string) $journey->FromLocation,
+                'ToLocation' => (string) $journey->ToLocation,
+                'DepartureTime' => optional($journey->DepartureTime)->format('Y-m-d H:i:s'),
+                'ArrivalTime' => optional($journey->ArrivalTime)->format('Y-m-d H:i:s'),
+                'SeatAvailable' => (int) $journey->SeatAvailable,
+                'Price' => number_format((float) $journey->Price, 2, '.', ''),
+            ]
+        ]);
+    }
+
     /**
      * Get Newsletter Subscribers
      * REST API: GET /api/admin/newsletter/subscribers
@@ -217,6 +258,53 @@ class AdminWebServiceController extends Controller
             'status' => 'success',
             'message' => 'Newsletter subscribers retrieved successfully',
             'data' => $response
+        ]);
+    }
+
+    
+    public function decideConcession(Request $request)
+    {
+        $request->validate([
+            'applicationId' => ['required','string'],
+            'decision' => ['required','in:approve,reject'],
+            'remark' => ['nullable','string','max:500']
+        ]);
+
+        $application = \App\Models\ConcessionApplication::where('application_id', $request->applicationId)->first();
+        if (!$application) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Application not found',
+                'data' => null
+            ], 404);
+        }
+
+        $newStatus = $request->decision === 'approve' ? 'approved' : 'rejected';
+        $application->status = $newStatus;
+        if ($request->filled('remark')) {
+            $application->admin_notes = $request->remark;
+        }
+        $application->reviewed_at = now();
+        $application->reviewed_by = Auth::id();
+        $application->save();
+
+        // optional audit
+        try {
+            Log::info('concession_decision', [
+                'application_id' => $application->application_id,
+                'status' => $newStatus,
+                'reviewed_by' => Auth::id(),
+            ]);
+        } catch (\Throwable $e) {}
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Decision recorded',
+            'data' => [
+                'applicationId' => $application->application_id,
+                'status' => $application->status,
+                'reviewedAt' => optional($application->reviewed_at)->toISOString(),
+            ]
         ]);
     }
 }
