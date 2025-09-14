@@ -151,60 +151,77 @@ class ConcessionCardController extends Controller
     public function getApplications(Request $request)
     {
         try {
+            // Ensure user is authenticated
+            if (!Auth::check()) {
+                Log::warning('Unauthorized attempt to fetch applications', ['user_id' => Auth::id() ?? 'guest']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access. Please log in.'
+                ], 401);
+            }
+
             $userId = Auth::id();
-            Log::info('Getting applications for user ID: ' . $userId);
-            
-            // Get applications from database - only show user's own applications
+            Log::info('Fetching applications for user ID: ' . $userId);
+
+            // Fetch applications with error handling
             $applications = ConcessionApplication::where('user_id', $userId)
                 ->orderBy('created_at', 'desc')
                 ->get();
-                
+
+            if ($applications === null) {
+                Log::error('Database query returned null for user applications', ['user_id' => $userId]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch applications due to database issue'
+                ], 500);
+            }
+
             Log::info('Found ' . $applications->count() . ' applications for user ' . $userId);
-            
+
             // Transform data to match frontend format
             $transformedApplications = $applications->map(function ($app) {
                 $data = [
                     'id' => $app->application_id,
                     'type' => $app->type,
-                    'fullName' => $app->full_name,
-                    'ic' => $app->ic_number,
-                    'passportNumber' => $app->passport_number, // Always include passport number
-                    'status' => $app->status,
-                    'applicationDate' => $app->created_at->toIso8601String()
+                    'fullName' => $app->full_name ?? 'N/A',
+                    'ic' => $app->ic_number ?? null,
+                    'passportNumber' => $app->passport_number ?? null,
+                    'status' => $app->status ?? 'pending',
+                    'applicationDate' => $app->created_at ? $app->created_at->toIso8601String() : null
                 ];
 
                 // Add type-specific IC fields for admin page compatibility
                 if ($app->type === 'student') {
-                    $data['studentIc'] = $app->ic_number;
+                    $data['studentIc'] = $app->ic_number ?? null;
                 } elseif ($app->type === 'senior') {
-                    $data['seniorIc'] = $app->ic_number;
+                    $data['seniorIc'] = $app->ic_number ?? null;
                 }
 
                 // Add type-specific data
                 if ($app->type === 'oku') {
-                    $data['okuCardNumber'] = $app->oku_card_number;
-                    $data['disability'] = $app->disability_info;
-                    $data['oku_card_photo_path'] = $app->oku_card_photo_path; // Add debug field
+                    $data['okuCardNumber'] = $app->oku_card_number ?? null;
+                    $data['disability'] = $app->disability_info ?? null;
+                    $data['oku_card_photo_path'] = $app->oku_card_photo_path ?? null;
                     if ($app->oku_card_photo_path) {
                         $data['photoName'] = basename($app->oku_card_photo_path);
                         $data['photoUrl'] = asset('storage/' . $app->oku_card_photo_path);
                     }
                 } elseif ($app->type === 'senior') {
-                    $data['age'] = $app->age;
-                    $data['citizenship'] = $app->citizenship;
-                    $data['gender'] = $app->gender;
-                    $data['dateOfBirth'] = $app->date_of_birth;
-                    $data['senior_ic_photo_path'] = $app->senior_ic_photo_path; // Add debug field
+                    $data['age'] = $app->age ?? null;
+                    $data['citizenship'] = $app->citizenship ?? null;
+                    $data['gender'] = $app->gender ?? null;
+                    $data['dateOfBirth'] = $app->date_of_birth ?? null;
+                    $data['senior_ic_photo_path'] = $app->senior_ic_photo_path ?? null;
                     if ($app->senior_ic_photo_path) {
                         $data['photoName'] = basename($app->senior_ic_photo_path);
                         $data['photoUrl'] = asset('storage/' . $app->senior_ic_photo_path);
                     }
                 } elseif ($app->type === 'student') {
-                    $data['matrixNumber'] = $app->matrix_number;
-                    $data['schoolName'] = $app->school_name;
-                    $data['studentCitizenship'] = $app->citizenship;
-                    $data['educationLevel'] = $app->education_level;
-                    $data['student_id_photo_path'] = $app->student_id_photo_path; // Add debug field
+                    $data['matrixNumber'] = $app->matrix_number ?? null;
+                    $data['schoolName'] = $app->school_name ?? null;
+                    $data['studentCitizenship'] = $app->citizenship ?? null;
+                    $data['educationLevel'] = $app->education_level ?? null;
+                    $data['student_id_photo_path'] = $app->student_id_photo_path ?? null;
                     if ($app->student_id_photo_path) {
                         $data['photoName'] = basename($app->student_id_photo_path);
                         $data['photoUrl'] = asset('storage/' . $app->student_id_photo_path);
@@ -212,17 +229,23 @@ class ConcessionCardController extends Controller
                 }
 
                 return $data;
-            });
+            })->toArray();
 
             return response()->json([
                 'success' => true,
                 'applications' => $transformedApplications
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error fetching applications: ' . $e->getMessage());
+            ], 200);
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Database error fetching applications: ' . $e->getMessage(), ['user_id' => Auth::id() ?? 'guest']);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch applications'
+                'message' => 'Database error occurred while fetching applications'
+            ], 500);
+        } catch (\Exception $e) {
+            Log::error('Unexpected error fetching applications: ' . $e->getMessage(), ['user_id' => Auth::id() ?? 'guest']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch applications: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -314,14 +337,37 @@ class ConcessionCardController extends Controller
     public function viewApplication(Request $request, $id)
     {
         try {
+            // Validate application_id format
+            if (empty($id) || !is_string($id)) {
+                Log::warning('Invalid application ID provided', ['application_id' => $id, 'user_id' => Auth::id() ?? 'guest']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid application ID'
+                ], 400);
+            }
+
+            // Ensure user is authenticated
+            if (!Auth::check()) {
+                Log::warning('Unauthorized attempt to view application', ['application_id' => $id, 'user_id' => Auth::id() ?? 'guest']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access. Please log in.'
+                ], 401);
+            }
+
+            // Fetch application
             $application = ConcessionApplication::where('application_id', $id)
                 ->where('user_id', Auth::id())
                 ->first();
 
             if (!$application) {
+                Log::warning('Application not found or access denied', [
+                    'application_id' => $id,
+                    'user_id' => Auth::id()
+                ]);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Application not found or access denied'
+                    'message' => 'Application not found or you do not have access to this application'
                 ], 404);
             }
 
@@ -329,57 +375,77 @@ class ConcessionCardController extends Controller
             $data = [
                 'id' => $application->application_id,
                 'type' => $application->type,
-                'fullName' => $application->full_name,
-                'ic' => $application->ic_number,
-                'passportNumber' => $application->passport_number, // Always include passport number
-                'status' => $application->status,
-                'applicationDate' => $application->created_at->toIso8601String()
+                'fullName' => $application->full_name ?? 'N/A',
+                'ic' => $application->ic_number ?? null,
+                'passportNumber' => $application->passport_number ?? null,
+                'status' => $application->status ?? 'pending',
+                'applicationDate' => $application->created_at ? $application->created_at->toIso8601String() : null
             ];
 
             // Add type-specific IC fields for admin page compatibility
             if ($application->type === 'student') {
-                $data['studentIc'] = $application->ic_number;
+                $data['studentIc'] = $application->ic_number ?? null;
             } elseif ($application->type === 'senior') {
-                $data['seniorIc'] = $application->ic_number;
+                $data['seniorIc'] = $application->ic_number ?? null;
             }
 
             // Add type-specific data
             if ($application->type === 'oku') {
-                $data['okuCardNumber'] = $application->oku_card_number;
-                $data['disability'] = $application->disability_info;
+                $data['okuCardNumber'] = $application->oku_card_number ?? null;
+                $data['disability'] = $application->disability_info ?? null;
+                $data['oku_card_photo_path'] = $application->oku_card_photo_path ?? null;
                 if ($application->oku_card_photo_path) {
                     $data['photoName'] = basename($application->oku_card_photo_path);
                     $data['photoUrl'] = asset('storage/' . $application->oku_card_photo_path);
                 }
             } elseif ($application->type === 'senior') {
-                $data['age'] = $application->age;
-                $data['citizenship'] = $application->citizenship;
-                $data['gender'] = $application->gender;
-                $data['dateOfBirth'] = $application->date_of_birth;
+                $data['age'] = $application->age ?? null;
+                $data['citizenship'] = $application->citizenship ?? null;
+                $data['gender'] = $application->gender ?? null;
+                $data['dateOfBirth'] = $application->date_of_birth ?? null;
+                $data['senior_ic_photo_path'] = $application->senior_ic_photo_path ?? null;
                 if ($application->senior_ic_photo_path) {
                     $data['photoName'] = basename($application->senior_ic_photo_path);
                     $data['photoUrl'] = asset('storage/' . $application->senior_ic_photo_path);
                 }
             } elseif ($application->type === 'student') {
-                $data['matrixNumber'] = $application->matrix_number;
-                $data['schoolName'] = $application->school_name;
-                $data['studentCitizenship'] = $application->citizenship;
-                $data['educationLevel'] = $application->education_level;
+                $data['matrixNumber'] = $application->matrix_number ?? null;
+                $data['schoolName'] = $application->school_name ?? null;
+                $data['studentCitizenship'] = $application->citizenship ?? null;
+                $data['educationLevel'] = $application->education_level ?? null;
+                $data['student_id_photo_path'] = $application->student_id_photo_path ?? null;
                 if ($application->student_id_photo_path) {
                     $data['photoName'] = basename($application->student_id_photo_path);
                     $data['photoUrl'] = asset('storage/' . $application->student_id_photo_path);
                 }
             }
 
+            Log::info('Successfully fetched application', [
+                'application_id' => $application->application_id,
+                'user_id' => Auth::id()
+            ]);
+
             return response()->json([
                 'success' => true,
                 'application' => $data
+            ], 200);
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Database error viewing application: ' . $e->getMessage(), [
+                'application_id' => $id,
+                'user_id' => Auth::id() ?? 'guest'
             ]);
-        } catch (\Exception $e) {
-            Log::error('Error viewing application: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to view application'
+                'message' => 'Database error occurred while viewing application'
+            ], 500);
+        } catch (\Exception $e) {
+            Log::error('Unexpected error viewing application: ' . $e->getMessage(), [
+                'application_id' => $id,
+                'user_id' => Auth::id() ?? 'guest'
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to view application: ' . $e->getMessage()
             ], 500);
         }
     }
