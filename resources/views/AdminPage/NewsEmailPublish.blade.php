@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ subject, content, recipients: 'newsletter_subscribers' })
             });
             const data = await res.json();
-            if (data.success) {
+            if (data.success === true || data.status === 'success') {
                 showMessage('Newsletter sent successfully.', 'success');
             } else {
                 showMessage(data.message || 'Failed to send newsletter.', 'error');

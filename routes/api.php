@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AdminWebServiceController;
+use App\Http\Controllers\Api\AdminApiController;
 use App\Http\Controllers\Api\UserWebServiceController;
 use App\Http\Controllers\Api\ConcessionCardWebServiceController;
 use App\Http\Controllers\Api\BookingApiController;
@@ -62,6 +63,9 @@ Route::prefix('admin')->middleware(['web','admin','admin.2fa'])->group(function 
     
     // Admin logs
     Route::get('/logs', [AdminWebServiceController::class, 'getAdminLogs']);
+
+    // Journey details provider for Booking module
+    Route::get('/journey/{journeyId}', [AdminWebServiceController::class, 'getJourneyById']);
     
     // Newsletter management
     Route::get('/newsletter/subscribers', [NewsletterController::class, 'list']);
@@ -89,8 +93,8 @@ Route::prefix('admin')->middleware(['web','admin','admin.2fa'])->group(function 
     Route::post('/tickets/{ticketId}/checkin', [AdminTicketController::class, 'checkIn']);
     Route::post('/tickets/{ticketId}/checkout', [AdminTicketController::class, 'checkOut']);
 
-    // Newsletter send
-    Route::post('/newsletter/send', [AdminController::class, 'sendNewsletter']);
+    // Newsletter send (use in-app API controller)
+    Route::post('/newsletter/send', [AdminApiController::class, 'sendNewsletter']);
     // Refunds
     Route::post('/refunds/process', [AdminController::class, 'processRefund']);
 
@@ -113,6 +117,9 @@ Route::prefix('admin')->middleware(['web','admin','admin.2fa'])->group(function 
     // System info and logs
     Route::get('/system/info', [AdminController::class, 'getSystemInfo']);
     Route::get('/logs', [AdminLogController::class, 'list']);
+
+    // Concession decision publishing (Admin provides -> Concession consumes)
+    Route::post('/concession/decision', [AdminWebServiceController::class, 'decideConcession']);
 });
 
 // Concession Card Module Web Services
