@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use App\Models\ConcessionApplication;
 use SplFileObject;
@@ -24,10 +25,149 @@ class BasicApplicationProcessor implements ApplicationProcessorInterface {
             'application_id' => $applicationId,
             'type' => $request->type,
             'full_name' => $request->fullName,
-            'status' => 'pending'
+            'status' => 'pending',
+            'submission_ip' => $request->ip(), // Store IP for anomaly detection
+            'submission_city' => $request->submission_city ?? null, // Store city from anomaly detection
         ];
         $application = ConcessionApplication::create($applicationData);
         return $application;
+    }
+}
+
+class RecaptchaValidator implements ApplicationProcessorInterface {
+    protected $processor;
+    protected $secretKey;
+
+    public function __construct(ApplicationProcessorInterface $processor, $secretKey) {
+        $this->processor = $processor;
+        $this->secretKey = $secretKey;
+    }
+
+    public function process(Request $request) {
+        $recaptchaToken = $request->header('X-Recaptcha-Token');
+        if (!$recaptchaToken) {
+            Log::warning('reCAPTCHA token missing', ['user_id' => Auth::id() ?? 'guest']);
+            throw ValidationException::withMessages(['recaptcha' => 'reCAPTCHA token is required']);
+        }
+
+        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret' => $this->secretKey,
+            'response' => $recaptchaToken,
+            'remoteip' => $request->ip()
+        ]);
+
+        $result = $response->json();
+        if (!$result['success'] || $result['score'] < 0.5) {
+            Log::warning('reCAPTCHA verification failed', [
+                'user_id' => Auth::id() ?? 'guest',
+                'score' => $result['score'] ?? null,
+                'errors' => $result['error-codes'] ?? []
+            ]);
+            throw ValidationException::withMessages(['recaptcha' => 'reCAPTCHA verification failed']);
+        }
+
+        return $this->processor->process($request);
+    }
+}
+
+class AnomalyDetectionDecorator implements ApplicationProcessorInterface {
+    protected $processor;
+
+    public function __construct(ApplicationProcessorInterface $processor) {
+        $this->processor = $processor;
+    }
+
+    public function process(Request $request) {
+        $icNumber = $request->ic ?? $request->seniorIc ?? $request->studentIc ?? null;
+        
+        if ($icNumber) {
+            // Get city from IP using IPinfo API
+            $ip = $request->ip();
+            $city = $this->getCityFromIp($ip);
+            
+            // Check for recent applications with the same IC
+            $timeThreshold = now()->subHours(24);
+            $recentApplications = ConcessionApplication::where('ic_number', $icNumber)
+                ->where('created_at', '>=', $timeThreshold)
+                ->whereNotNull('submission_city')
+                ->get();
+
+            // Detect anomaly: same IC, different city within 24 hours
+            foreach ($recentApplications as $app) {
+                if ($app->submission_city && $city && $app->submission_city !== $city) {
+                    // Check for VPN/Proxy usage
+                    $isVpnOrProxy = $this->isVpnOrProxy($ip);
+                    
+                    Log::warning('Potential anomalous application detected', [
+                        'ic_number' => $icNumber,
+                        'current_city' => $city,
+                        'previous_city' => $app->submission_city,
+                        'ip' => $ip,
+                        'is_vpn_or_proxy' => $isVpnOrProxy,
+                        'user_id' => Auth::id() ?? 'guest',
+                        'application_id' => $app->application_id
+                    ]);
+
+                    throw ValidationException::withMessages([
+                        'ic' => 'Suspicious activity detected: Multiple applications with the same IC from different cities within 24 hours.'
+                    ]);
+                }
+            }
+
+            // Store city in request for BasicApplicationProcessor
+            $request->merge(['submission_city' => $city]);
+        }
+
+        return $this->processor->process($request);
+    }
+
+    protected function getCityFromIp($ip) {
+        try {
+            $response = Http::withToken(config('services.ipinfo.token'))
+                ->get("https://ipinfo.io/{$ip}/json");
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                $isVpnOrProxy = isset($data['privacy']['vpn']) && $data['privacy']['vpn'] || 
+                               isset($data['privacy']['proxy']) && $data['privacy']['proxy'];
+                
+                // Log VPN/Proxy usage
+                if ($isVpnOrProxy) {
+                    Log::info('VPN or Proxy detected', [
+                        'ip' => $ip,
+                        'user_id' => Auth::id() ?? 'guest',
+                        'privacy_data' => $data['privacy'] ?? []
+                    ]);
+                }
+
+                return $data['city'] ?? null;
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch city from IPinfo', [
+                'ip' => $ip,
+                'error' => $e->getMessage()
+            ]);
+        }
+        return null;
+    }
+
+    protected function isVpnOrProxy($ip) {
+        try {
+            $response = Http::withToken(config('services.ipinfo.token'))
+                ->get("https://ipinfo.io/{$ip}/json");
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                return isset($data['privacy']['vpn']) && $data['privacy']['vpn'] ||
+                       isset($data['privacy']['proxy']) && $data['privacy']['proxy'];
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to check VPN/Proxy status', [
+                'ip' => $ip,
+                'error' => $e->getMessage()
+            ]);
+        }
+        return false;
     }
 }
 
@@ -148,119 +288,40 @@ class StudentApplicationDecorator extends ApplicationDecorator {
 
 class ConcessionCardController extends Controller
 {
-    public function getApplications(Request $request)
+    protected function verifyRecaptcha(Request $request)
     {
-        try {
-            // Ensure user is authenticated
-            if (!Auth::check()) {
-                Log::warning('Unauthorized attempt to fetch applications', ['user_id' => Auth::id() ?? 'guest']);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized access. Please log in.'
-                ], 401);
-            }
+        $recaptchaToken = $request->header('X-Recaptcha-Token');
+        if (!$recaptchaToken) {
+            Log::warning('reCAPTCHA token missing', ['user_id' => Auth::id() ?? 'guest']);
+            throw ValidationException::withMessages(['recaptcha' => 'reCAPTCHA token is required']);
+        }
 
-            $userId = Auth::id();
-            Log::info('Fetching applications for user ID: ' . $userId);
+        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret' => config('services.recaptcha.secret_key'),
+            'response' => $recaptchaToken,
+            'remoteip' => $request->ip()
+        ]);
 
-            // Fetch applications with error handling
-            $applications = ConcessionApplication::where('user_id', $userId)
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            if ($applications === null) {
-                Log::error('Database query returned null for user applications', ['user_id' => $userId]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to fetch applications due to database issue'
-                ], 500);
-            }
-
-            Log::info('Found ' . $applications->count() . ' applications for user ' . $userId);
-
-            // Transform data to match frontend format
-            $transformedApplications = $applications->map(function ($app) {
-                $data = [
-                    'id' => $app->application_id,
-                    'type' => $app->type,
-                    'fullName' => $app->full_name ?? 'N/A',
-                    'ic' => $app->ic_number ?? null,
-                    'passportNumber' => $app->passport_number ?? null,
-                    'status' => $app->status ?? 'pending',
-                    'applicationDate' => $app->created_at ? $app->created_at->toIso8601String() : null
-                ];
-
-                // Add type-specific IC fields for admin page compatibility
-                if ($app->type === 'student') {
-                    $data['studentIc'] = $app->ic_number ?? null;
-                } elseif ($app->type === 'senior') {
-                    $data['seniorIc'] = $app->ic_number ?? null;
-                }
-
-                // Add type-specific data
-                if ($app->type === 'oku') {
-                    $data['okuCardNumber'] = $app->oku_card_number ?? null;
-                    $data['disability'] = $app->disability_info ?? null;
-                    $data['oku_card_photo_path'] = $app->oku_card_photo_path ?? null;
-                    if ($app->oku_card_photo_path) {
-                        $data['photoName'] = basename($app->oku_card_photo_path);
-                        $data['photoUrl'] = asset('storage/' . $app->oku_card_photo_path);
-                    }
-                } elseif ($app->type === 'senior') {
-                    $data['age'] = $app->age ?? null;
-                    $data['citizenship'] = $app->citizenship ?? null;
-                    $data['gender'] = $app->gender ?? null;
-                    $data['dateOfBirth'] = $app->date_of_birth ?? null;
-                    $data['senior_ic_photo_path'] = $app->senior_ic_photo_path ?? null;
-                    if ($app->senior_ic_photo_path) {
-                        $data['photoName'] = basename($app->senior_ic_photo_path);
-                        $data['photoUrl'] = asset('storage/' . $app->senior_ic_photo_path);
-                    }
-                } elseif ($app->type === 'student') {
-                    $data['matrixNumber'] = $app->matrix_number ?? null;
-                    $data['schoolName'] = $app->school_name ?? null;
-                    $data['studentCitizenship'] = $app->citizenship ?? null;
-                    $data['educationLevel'] = $app->education_level ?? null;
-                    $data['student_id_photo_path'] = $app->student_id_photo_path ?? null;
-                    if ($app->student_id_photo_path) {
-                        $data['photoName'] = basename($app->student_id_photo_path);
-                        $data['photoUrl'] = asset('storage/' . $app->student_id_photo_path);
-                    }
-                }
-
-                return $data;
-            })->toArray();
-
-            return response()->json([
-                'success' => true,
-                'applications' => $transformedApplications
-            ], 200);
-        } catch (\Illuminate\Database\QueryException $e) {
-            Log::error('Database error fetching applications: ' . $e->getMessage(), ['user_id' => Auth::id() ?? 'guest']);
-            return response()->json([
-                'success' => false,
-                'message' => 'Database error occurred while fetching applications'
-            ], 500);
-        } catch (\Exception $e) {
-            Log::error('Unexpected error fetching applications: ' . $e->getMessage(), ['user_id' => Auth::id() ?? 'guest']);
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch applications: ' . $e->getMessage()
-            ], 500);
+        $result = $response->json();
+        if (!$result['success'] || $result['score'] < 0.5) {
+            Log::warning('reCAPTCHA verification failed', [
+                'user_id' => Auth::id() ?? 'guest',
+                'score' => $result['score'] ?? null,
+                'errors' => $result['error-codes'] ?? []
+            ]);
+            throw ValidationException::withMessages(['recaptcha' => 'reCAPTCHA verification failed']);
         }
     }
 
     public function submitApplication(Request $request)
     {
         try {
-            // Common validation
             $request->validate([
                 'type' => 'required|in:oku,senior,student',
                 'fullName' => 'required|string|max:255',
                 'passportNumber' => 'nullable|string',
             ]);
 
-            // Build the processor chain using Decorator pattern
             $processor = new BasicApplicationProcessor();
             $type = $request->type;
 
@@ -272,21 +333,21 @@ class ConcessionCardController extends Controller
                 $processor = new StudentApplicationDecorator($processor);
             }
 
-            // Process the application
+            $processor = new AnomalyDetectionDecorator($processor); // Add anomaly detection
+            $processor = new RecaptchaValidator($processor, config('services.recaptcha.secret_key'));
+
             $application = $processor->process($request);
 
-            // Build response data
             $responseData = [
                 'id' => $application->application_id,
                 'type' => $application->type,
                 'fullName' => $application->full_name,
                 'ic' => $application->ic_number,
-                'passportNumber' => $application->passport_number, // Always include passport number
+                'passportNumber' => $application->passport_number,
                 'status' => $application->status,
                 'applicationDate' => $application->created_at->toIso8601String()
             ];
 
-            // Add type-specific data to response
             if ($application->type === 'oku') {
                 $responseData['okuCardNumber'] = $application->oku_card_number;
                 $responseData['disability'] = $application->disability_info;
@@ -334,10 +395,117 @@ class ConcessionCardController extends Controller
         }
     }
 
+    public function getApplications(Request $request)
+    {
+        try {
+            $this->verifyRecaptcha($request);
+
+            if (!Auth::check()) {
+                Log::warning('Unauthorized attempt to fetch applications', ['user_id' => Auth::id() ?? 'guest']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access. Please log in.'
+                ], 401);
+            }
+
+            $userId = Auth::id();
+            Log::info('Fetching applications for user ID: ' . $userId);
+
+            $applications = ConcessionApplication::where('user_id', $userId)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            if ($applications === null) {
+                Log::error('Database query returned null for user applications', ['user_id' => $userId]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch applications due to database issue'
+                ], 500);
+            }
+
+            Log::info('Found ' . $applications->count() . ' applications for user ' . $userId);
+
+            $transformedApplications = $applications->map(function ($app) {
+                $data = [
+                    'id' => $app->application_id,
+                    'type' => $app->type,
+                    'fullName' => $app->full_name ?? 'N/A',
+                    'ic' => $app->ic_number ?? null,
+                    'passportNumber' => $app->passport_number ?? null,
+                    'status' => $app->status ?? 'pending',
+                    'applicationDate' => $app->created_at ? $app->created_at->toIso8601String() : null
+                ];
+
+                if ($app->type === 'student') {
+                    $data['studentIc'] = $app->ic_number ?? null;
+                } elseif ($app->type === 'senior') {
+                    $data['seniorIc'] = $app->ic_number ?? null;
+                }
+
+                if ($app->type === 'oku') {
+                    $data['okuCardNumber'] = $app->oku_card_number ?? null;
+                    $data['disability'] = $app->disability_info ?? null;
+                    $data['oku_card_photo_path'] = $app->oku_card_photo_path ?? null;
+                    if ($app->oku_card_photo_path) {
+                        $data['photoName'] = basename($app->oku_card_photo_path);
+                        $data['photoUrl'] = asset('storage/' . $app->oku_card_photo_path);
+                    }
+                } elseif ($app->type === 'senior') {
+                    $data['age'] = $app->age ?? null;
+                    $data['citizenship'] = $app->citizenship ?? null;
+                    $data['gender'] = $app->gender ?? null;
+                    $data['dateOfBirth'] = $app->date_of_birth ?? null;
+                    $data['senior_ic_photo_path'] = $app->senior_ic_photo_path ?? null;
+                    if ($app->senior_ic_photo_path) {
+                        $data['photoName'] = basename($app->senior_ic_photo_path);
+                        $data['photoUrl'] = asset('storage/' . $app->senior_ic_photo_path);
+                    }
+                } elseif ($app->type === 'student') {
+                    $data['matrixNumber'] = $app->matrix_number ?? null;
+                    $data['schoolName'] = $app->school_name ?? null;
+                    $data['studentCitizenship'] = $app->citizenship ?? null;
+                    $data['educationLevel'] = $app->education_level ?? null;
+                    $data['student_id_photo_path'] = $app->student_id_photo_path ?? null;
+                    if ($app->student_id_photo_path) {
+                        $data['photoName'] = basename($app->student_id_photo_path);
+                        $data['photoUrl'] = asset('storage/' . $app->student_id_photo_path);
+                    }
+                }
+
+                return $data;
+            })->toArray();
+
+            return response()->json([
+                'success' => true,
+                'applications' => $transformedApplications
+            ], 200);
+        } catch (ValidationException $e) {
+            Log::error('Validation failed: ' . $e->getMessage(), ['user_id' => Auth::id() ?? 'guest']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Database error fetching applications: ' . $e->getMessage(), ['user_id' => Auth::id() ?? 'guest']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Database error occurred while fetching applications'
+            ], 500);
+        } catch (\Exception $e) {
+            Log::error('Unexpected error fetching applications: ' . $e->getMessage(), ['user_id' => Auth::id() ?? 'guest']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch applications: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function viewApplication(Request $request, $id)
     {
         try {
-            // Validate application_id format
+            $this->verifyRecaptcha($request);
+
             if (empty($id) || !is_string($id)) {
                 Log::warning('Invalid application ID provided', ['application_id' => $id, 'user_id' => Auth::id() ?? 'guest']);
                 return response()->json([
@@ -346,7 +514,6 @@ class ConcessionCardController extends Controller
                 ], 400);
             }
 
-            // Ensure user is authenticated
             if (!Auth::check()) {
                 Log::warning('Unauthorized attempt to view application', ['application_id' => $id, 'user_id' => Auth::id() ?? 'guest']);
                 return response()->json([
@@ -355,7 +522,6 @@ class ConcessionCardController extends Controller
                 ], 401);
             }
 
-            // Fetch application
             $application = ConcessionApplication::where('application_id', $id)
                 ->where('user_id', Auth::id())
                 ->first();
@@ -371,7 +537,6 @@ class ConcessionCardController extends Controller
                 ], 404);
             }
 
-            // Transform data to match frontend format
             $data = [
                 'id' => $application->application_id,
                 'type' => $application->type,
@@ -382,14 +547,12 @@ class ConcessionCardController extends Controller
                 'applicationDate' => $application->created_at ? $application->created_at->toIso8601String() : null
             ];
 
-            // Add type-specific IC fields for admin page compatibility
             if ($application->type === 'student') {
                 $data['studentIc'] = $application->ic_number ?? null;
             } elseif ($application->type === 'senior') {
                 $data['seniorIc'] = $application->ic_number ?? null;
             }
 
-            // Add type-specific data
             if ($application->type === 'oku') {
                 $data['okuCardNumber'] = $application->oku_card_number ?? null;
                 $data['disability'] = $application->disability_info ?? null;
@@ -429,6 +592,13 @@ class ConcessionCardController extends Controller
                 'success' => true,
                 'application' => $data
             ], 200);
+        } catch (ValidationException $e) {
+            Log::error('Validation failed: ' . $e->getMessage(), ['user_id' => Auth::id() ?? 'guest']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Illuminate\Database\QueryException $e) {
             Log::error('Database error viewing application: ' . $e->getMessage(), [
                 'application_id' => $id,
@@ -453,7 +623,6 @@ class ConcessionCardController extends Controller
     public function approveApplication(Request $request, $id)
     {
         try {
-            // For admin approval, don't restrict by user_id
             $application = ConcessionApplication::where('application_id', $id)->first();
 
             if (!$application) {
@@ -486,7 +655,6 @@ class ConcessionCardController extends Controller
     public function rejectApplication(Request $request, $id)
     {
         try {
-            // For admin rejection, don't restrict by user_id
             $application = ConcessionApplication::where('application_id', $id)->first();
 
             if (!$application) {
@@ -516,19 +684,14 @@ class ConcessionCardController extends Controller
         }
     }
 
-    /**
-     * Issue short-lived one-time token for exporting applications (admin only)
-     */
     public function exportApplicationsIssueToken(Request $request)
     {
-        // Optional filters (future use)
         $request->validate([
             'format' => 'nullable|string|in:csv,json'
         ]);
 
         $userId = FacadesAuth::id() ?? 'guest';
 
-        // Per-minute per-user hard limit (in addition to route throttle)
         $nowMinute = date('YmdHi');
         $minuteKey = 'cex.min.' . $nowMinute;
         $currentCount = (int) $request->session()->get($minuteKey, 0);
@@ -538,7 +701,6 @@ class ConcessionCardController extends Controller
         }
         $request->session()->put($minuteKey, $currentCount + 1);
 
-        // Cooldown per dataset (applications list)
         $cooldownKey = 'cex.cool';
         $lastTs = (int) $request->session()->get($cooldownKey, 0);
         if (time() - $lastTs < 30) {
@@ -562,9 +724,6 @@ class ConcessionCardController extends Controller
         ]);
     }
 
-    /**
-     * Download applications export using short-lived token
-     */
     public function exportApplicationsDownload(Request $request)
     {
         $request->validate(['token' => 'required|string|size:32']);
@@ -578,10 +737,8 @@ class ConcessionCardController extends Controller
             $request->session()->forget($key);
             return response()->json(['success' => false, 'message' => 'Token expired'], 401);
         }
-        // One-time use
         $request->session()->forget($key);
 
-        // Build dataset
         $rows = ConcessionApplication::orderBy('created_at', 'desc')->get();
         $format = $payload['format'] ?? 'csv';
 
@@ -607,7 +764,6 @@ class ConcessionCardController extends Controller
             ]);
         }
 
-        // CSV
         $headers = ['Application ID','Full Name','Type','Status','IC','Passport','Applied Date'];
         $lines = [];
         $lines[] = implode(',', $headers);
@@ -668,34 +824,26 @@ class ConcessionCardController extends Controller
         }
     }
 
-    /**
-     * Get all applications for admin approval page
-     * This method returns ALL applications regardless of user
-     */
     public function getAllApplicationsForAdmin(Request $request)
     {
         try {
-            // Check if user is authenticated
+            $this->verifyRecaptcha($request);
+
             if (!Auth::check()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized access'
                 ], 401);
             }
-            
-            // For now, allow all authenticated users to access admin data
-            // TODO: Add proper admin role checking
 
-            // Get all applications from database
             $applications = ConcessionApplication::with('user')
                 ->orderBy('created_at', 'desc')
                 ->get();
-                
+
             Log::info('Found ' . $applications->count() . ' applications for admin review');
             Log::info('Current user ID: ' . Auth::id());
             Log::info('Applications data: ' . json_encode($applications->toArray()));
-            
-            // Transform data to match frontend format
+
             $transformedApplications = $applications->map(function ($app) {
                 $data = [
                     'id' => $app->application_id,
@@ -712,14 +860,12 @@ class ConcessionCardController extends Controller
                     'adminNotes' => $app->admin_notes
                 ];
 
-                // Add type-specific IC fields for admin page compatibility
                 if ($app->type === 'student') {
                     $data['studentIc'] = $app->ic_number;
                 } elseif ($app->type === 'senior') {
                     $data['seniorIc'] = $app->ic_number;
                 }
 
-                // Add type-specific data
                 if ($app->type === 'oku') {
                     $data['okuCardNumber'] = $app->oku_card_number;
                     $data['disability'] = $app->disability_info;
@@ -757,6 +903,13 @@ class ConcessionCardController extends Controller
                 'success' => true,
                 'applications' => $transformedApplications
             ]);
+        } catch (ValidationException $e) {
+            Log::error('Validation failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Error fetching all applications for admin: ' . $e->getMessage());
             return response()->json([
@@ -766,9 +919,6 @@ class ConcessionCardController extends Controller
         }
     }
 
-    /**
-     * Get admin statistics for all applications
-     */
     public function getAdminAllStats(Request $request)
     {
         try {
@@ -778,9 +928,6 @@ class ConcessionCardController extends Controller
                     'message' => 'Unauthorized access'
                 ], 401);
             }
-            
-            // For now, allow all authenticated users to access admin data
-            // TODO: Add proper admin role checking
 
             $stats = [
                 'total' => ConcessionApplication::count(),
@@ -802,9 +949,6 @@ class ConcessionCardController extends Controller
         }
     }
 
-    /**
-     * Serve schools data (primary and secondary) parsed from CSV.
-     */
     public function schoolsData()
     {
         try {
@@ -831,16 +975,14 @@ class ConcessionCardController extends Controller
                 }
                 if ($index === 0) {
                     $headers = $row ?: [];
-                    // Normalize headers: trim, remove BOM, uppercase
                     $normalizedHeaders = array_map(function ($h) {
                         $h = (string) $h;
-                        $h = preg_replace('/^\xEF\xBB\xBF/u', '', $h) ?? $h; // strip UTF-8 BOM
+                        $h = preg_replace('/^\xEF\xBB\xBF/u', '', $h) ?? $h;
                         return strtoupper(trim($h));
                     }, $headers);
                     continue;
                 }
 
-                // Map row to associative array by headers
                 $record = [];
                 foreach ($normalizedHeaders as $i => $key) {
                     if ($key === null || $key === '') continue;
@@ -851,7 +993,6 @@ class ConcessionCardController extends Controller
                 $typeLabel = $record['JENIS/LABEL'] ?? ($record['JENIS'] ?? '');
                 $nameField = $record['NAMASEKOLAH'] ?? '';
 
-                // Normalize state and district
                 $state = $record['NEGERI'] ?? '';
                 $district = $record['PPD'] ?? '';
                 $code = $record['KODSEKOLAH'] ?? '';
@@ -864,30 +1005,25 @@ class ConcessionCardController extends Controller
                     'district' => (string) $district
                 ];
 
-                // Normalize fields for robust matching
                 $levelNorm = strtoupper(trim((string) $level));
                 $typeNorm = strtoupper(trim((string) $typeLabel));
                 $typeCompact = preg_replace('/[^A-Z0-9]/', '', $typeNorm);
                 $nameNorm = strtoupper(trim((string) $name));
                 $nameCompact = preg_replace('/[^A-Z0-9]/', '', $nameNorm);
 
-                // Primary schools: PERINGKAT contains 'RENDAH'
                 if (strpos($levelNorm, 'RENDAH') !== false) {
                     $primary[] = $school;
                     continue;
                 }
 
-                // Secondary schools: PERINGKAT contains 'MENENGAH'
                 if (strpos($levelNorm, 'MENENGAH') !== false) {
                     $secondary[] = $school;
                     continue;
                 }
 
-                // Fallback: classify by JENIS/LABEL variants
                 $isSecondary = false;
                 $isPrimary = false;
 
-                // Secondary indicators
                 $secondaryIndicators = [
                     'SMK','SMKA','SMA','SMJK','SBP','SBPI','MRSM','KV','KPV','SMV','SM SAINS','SEKOLAH MENENGAH','SEK MEN','MENENGAH'
                 ];
@@ -898,7 +1034,6 @@ class ConcessionCardController extends Controller
                     }
                 }
 
-                // Primary indicators
                 $primaryIndicators = [
                     'SK','SJKC','SJK T','SJKT','SJK (C)','SJK (T)','SJK','SRK','SRJK','SEKOLAH KEBANGSAAN','SEK KEBANGSAAN','SEKOLAH JENIS','K9','RENDAH','SKM'
                 ];
@@ -919,7 +1054,6 @@ class ConcessionCardController extends Controller
                     continue;
                 }
 
-                // If ambiguous, prefer primary for SK/SJK patterns, else ignore
                 if ($isPrimary) {
                     $primary[] = $school;
                 } elseif ($isSecondary) {

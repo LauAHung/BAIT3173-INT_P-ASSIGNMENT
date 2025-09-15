@@ -692,7 +692,7 @@ function setRequiredFields(type) {
     });
 
     const requiredFields = {
-        oku: ['okuIc', 'okuCardNumber', 'disabilityType', 'okuCardPhoto'],
+        oku: ['okuIc', 'okuCardNumber', 'okuCardPhoto'],
         senior: ['seniorIc', 'seniorIcPhoto'],
         student: ['studentCitizenship', 'educationLevel', 'schoolName', 'matrixNumber', 'studentIdPhoto']
     };
@@ -742,47 +742,59 @@ async function handleFormSubmission(e) {
     }
 
     formData.append('_token', document.querySelector('input[name="_token"]')?.value);
-    console.log('Form data collected:', {
-        type: formData.get('type'),
-        fullName: formData.get('fullName'),
-        ic: formData.get('okuIc') || formData.get('seniorIc') || formData.get('studentIc'),
-        citizenship: formData.get('studentCitizenship'),
-        schoolName: formData.get('schoolName')
-    });
+
+    const fullNameEl = document.getElementById('fullName');
+    const fullName = fullNameEl?.value?.trim();
 
     const application = {
         id: 'APP' + Date.now(),
         type: currentType,
-        fullName: formData.get('fullName'),
+        fullName: fullName,
         status: 'pending',
         applicationDate: new Date().toISOString()
     };
 
+    let icValue;
     if (currentType === 'oku') {
-        application.ic = formData.get('ic');
-        application.okuCardNumber = formData.get('okuCardNumber');
-        application.disabilityType = formData.get('disabilityType');
+        icValue = document.getElementById('okuIc')?.value?.trim();
+        application.ic = icValue;
+        application.okuCardNumber = document.getElementById('okuCardNumber')?.value?.trim();
+        application.disabilityType = document.getElementById('disabilityType')?.value;
         if (application.disabilityType === 'other') {
-            application.otherDisability = formData.get('otherDisability');
+            application.otherDisability = document.getElementById('otherDisability')?.value?.trim();
         }
-        const photo = formData.get('okuCardPhoto');
-        if (photo?.size > 0) application.photoName = photo.name;
+        const photoInput = document.getElementById('okuCardPhoto');
+        if (photoInput?.files[0]) application.photoName = photoInput.files[0].name;
     } else if (currentType === 'senior') {
-        application.ic = formData.get('seniorIc');
-        application.age = parseInt(formData.get('age')) || null;
-        application.gender = formData.get('gender');
-        const photo = formData.get('seniorIcPhoto');
-        if (photo?.size > 0) application.photoName = photo.name;
+        icValue = document.getElementById('seniorIc')?.value?.trim();
+        application.ic = icValue;
+        application.age = parseInt(document.getElementById('seniorAge')?.value) || null;
+        application.gender = document.getElementById('seniorGender')?.value;
+        const photoInput = document.getElementById('seniorIcPhoto');
+        if (photoInput?.files[0]) application.photoName = photoInput.files[0].name;
     } else if (currentType === 'student') {
-        application.studentCitizenship = formData.get('studentCitizenship');
-        application.ic = formData.get('studentIc');
-        application.passportNumber = formData.get('passportNumber');
-        application.educationLevel = formData.get('educationLevel');
-        application.schoolName = formData.get('schoolName');
-        application.matrixNumber = formData.get('matrixNumber');
-        const photo = formData.get('studentIdPhoto');
-        if (photo?.size > 0) application.photoName = photo.name;
+        application.studentCitizenship = document.getElementById('studentCitizenship')?.value?.trim();
+        const citizenship = application.studentCitizenship?.toLowerCase();
+        if (citizenship === 'malaysia') {
+            icValue = document.getElementById('studentIc')?.value?.trim();
+            application.ic = icValue;
+        } else {
+            application.passportNumber = document.getElementById('studentPassport')?.value?.trim();
+        }
+        application.educationLevel = document.getElementById('educationLevel')?.value;
+        application.schoolName = document.getElementById('schoolName')?.value?.trim();
+        application.matrixNumber = document.getElementById('matrixNumber')?.value?.trim();
+        const photoInput = document.getElementById('studentIdPhoto');
+        if (photoInput?.files[0]) application.photoName = photoInput.files[0].name;
     }
+
+    console.log('Form data collected:', {
+        type: currentType,
+        fullName: fullName,
+        ic: icValue,
+        citizenship: application.studentCitizenship,
+        schoolName: application.schoolName
+    });
 
     console.log('Validating application:', application);
     const result = okuHandler.handle(application);
@@ -1193,7 +1205,7 @@ function renderUserApplications(userApplications) {
                         <p class="application-id">ID: ${app.id}</p>
                         <p class="application-date">Applied: ${formatDate(app.applicationDate)}</p>
                         <div class="application-ic">
-                            <strong>IC:</strong> ${getIcNumber(app) || 'N/A'}
+                            <strong>ID:</strong> ${getIcNumber(app) || 'N/A'}
                         </div>
                     </div>
                     <div class="application-footer">
@@ -1292,12 +1304,15 @@ function viewApplication(app) {
         detailsTable += `
             <tr><td>IC Number</td><td>${app.ic || '-'}</td></tr>
             <tr><td>Age</td><td>${app.age || '-'}</td></tr>
+            <tr><td>Gender</td><td>${app.gender || '-'}</td></tr>
             ${app.photoUrl ? `<tr><td>IC Photo</td><td><a href="${app.photoUrl}" target="_blank">View Photo</a></td></tr>` : `<tr><td>IC Photo</td><td>${app.photoName || 'No photo uploaded'}</td></tr>`}
         `;
     } else if (app.type === 'student') {
         console.log('Rendering Student application details');
+        const idLabel = (app.studentCitizenship === 'Malaysia' ? 'IC Number' : 'Passport Number');
+        const idValue = app.ic || app.passportNumber || '-';
         detailsTable += `
-            <tr><td>${app.studentCitizenship === 'Malaysia' ? 'IC Number' : 'Passport Number'}</td><td>${app.ic || app.passportNumber || '-'}</td></tr>
+            <tr><td>${idLabel}</td><td>${idValue}</td></tr>
             <tr><td>Citizenship</td><td>${app.studentCitizenship || '-'}</td></tr>
             <tr><td>Education Level</td><td>${app.educationLevel || '-'}</td></tr>
             <tr><td>School Name</td><td>${app.schoolName || '-'}</td></tr>
@@ -1354,208 +1369,8 @@ function formatDate(dateString) {
 }
 
 function getIcNumber(application) {
-    return application.ic || application.studentIc || application.seniorIc || 'N/A';
-}
-
-
-// Render user applications
-function renderUserApplications(userApplications) {
-    console.log('Rendering user applications:', userApplications);
-    const content = document.getElementById('userApplicationsContent');
-    if (!content) {
-        console.error('User applications content element not found');
-        Swal.fire({
-            title: 'Error',
-            text: 'User applications content element not found. Please check the HTML.',
-            icon: 'error'
-        });
-        return;
+    if (application.type === 'student' && application.studentCitizenship?.toLowerCase() !== 'malaysia') {
+        return application.passportNumber || 'N/A';
     }
-
-    if (!userApplications?.length) {
-        console.log('No applications found, rendering empty state');
-        content.innerHTML = `
-            <div class="no-applications">
-                <i class="fas fa-file-alt"></i>
-                <h3>No Applications Yet</h3>
-                <p>You haven't submitted any concession card applications yet.</p>
-                <button class="btn btn-primary" onclick="showScreen('main')">Apply Now</button>
-            </div>
-        `;
-        return;
-    }
-
-    const sortedApplications = userApplications.sort((a, b) => new Date(b.applicationDate) - new Date(a.applicationDate));
-    content.innerHTML = `
-        <div class="applications-grid">
-            ${sortedApplications.map(app => `
-                <div class="application-card ${app.status}">
-                    <div class="application-header">
-                        <div class="application-type">
-                            <span class="type-badge ${app.type}">${getTypeLabel(app.type)}</span>
-                        </div>
-                        <div class="application-status">
-                            <span class="status-badge ${app.status}">${getStatusLabel(app.status)}</span>
-                        </div>
-                    </div>
-                    <div class="application-body">
-                        <h4>${app.fullName || '-'}</h4>
-                        <p class="application-id">ID: ${app.id}</p>
-                        <p class="application-date">Applied: ${formatDate(app.applicationDate)}</p>
-                        <div class="application-ic">
-                            <strong>IC:</strong> ${getIcNumber(app) || 'N/A'}
-                        </div>
-                    </div>
-                    <div class="application-footer">
-                        <button class="btn btn-sm btn-info" onclick="viewUserApplication('${app.id}')">
-                            <i class="fas fa-eye"></i> View Details
-                        </button>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-    console.log('User applications rendered');
-}
-
-// View user application
-async function viewUserApplication(applicationId) {
-    console.log('Attempting to view application:', applicationId);
-    const modal = document.getElementById('viewModal');
-    if (!modal) {
-        console.error('View modal element not found');
-        Swal.fire({
-            title: 'Error',
-            text: 'View modal element not found. Please check the HTML.',
-            icon: 'error'
-        });
-        return;
-    }
-
-    try {
-        console.log('Fetching application data from /concession/view/', applicationId);
-        const response = await fetch(`/concession/view/${applicationId}`, {
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-            }
-        });
-        console.log('View application response status:', response.status);
-        const data = await response.json();
-        console.log('View application response data:', JSON.stringify(data, null, 2));
-
-        if (!data.success) {
-            console.error('Server responded with failure:', data.message);
-            throw new Error(data.message || 'Application not found');
-        }
-
-        const app = data.application;
-        if (!app || !app.id) {
-            console.error('Application data is missing or invalid:', app);
-            throw new Error('Application data is missing or invalid');
-        }
-
-        const index = applications.findIndex(a => a.id === applicationId);
-        if (index !== -1) {
-            applications[index] = app;
-            console.log('Updated existing application in local storage:', applicationId);
-        } else {
-            applications.push(app);
-            console.log('Added new application to local storage:', applicationId);
-        }
-        localStorage.setItem('concessionApplications', JSON.stringify(applications));
-        console.log('Application data saved to local storage');
-
-        viewApplication(app);
-    } catch (error) {
-        console.error('Error viewing application:', error.message, error.stack);
-        Swal.fire({
-            title: 'Error',
-            text: 'Failed to load application details: ' + error.message,
-            icon: 'error'
-        });
-    }
-}
-
-// View application details
-function viewApplication(app) {
-    console.log('Displaying application details for ID:', app?.id);
-    const modal = document.getElementById('viewModal');
-    const modalContent = document.getElementById('applicationDetails');
-
-    if (!modal || !modalContent) {
-        console.error('Modal or application details element not found', { modal, modalContent });
-        Swal.fire({
-            title: 'Error',
-            text: 'Unable to display application details: Modal elements missing',
-            icon: 'error'
-        });
-        return;
-    }
-
-    if (!app || !app.id) {
-        console.error('Invalid application data:', app);
-        Swal.fire({
-            title: 'Error',
-            text: 'Invalid application data',
-            icon: 'error'
-        });
-        return;
-    }
-
-    let detailsTable = `
-        <h3>Application Details</h3>
-        <table class="details-table">
-            <tr><th>Field</th><th>Value</th></tr>
-            <tr><td>Application ID</td><td>${app.id || '-'}</td></tr>
-            <tr><td>Name</td><td>${app.fullName || '-'}</td></tr>
-            <tr><td>Concession Type</td><td>${getTypeLabel(app.type)}</td></tr>
-            <tr><td>Status</td><td>${getStatusLabel(app.status)}</td></tr>
-            <tr><td>Date & Time</td><td>${formatDate(app.applicationDate)}</td></tr>
-    `;
-
-    if (app.type === 'oku') {
-        console.log('Rendering OKU application details');
-        detailsTable += `
-            <tr><td>IC Number</td><td>${app.ic || '-'}</td></tr>
-            <tr><td>OKU Card Number</td><td>${app.okuCardNumber || '-'}</td></tr>
-            <tr><td>Disability Type</td><td>${app.disabilityType || '-'}</td></tr>
-            ${app.disabilityType === 'other' && app.otherDisability ? `<tr><td>Other Disability</td><td>${app.otherDisability || '-'}</td></tr>` : ''}
-            ${app.photoUrl ? `<tr><td>OKU Card Photo</td><td><a href="${app.photoUrl}" target="_blank">View Photo</a></td></tr>` : `<tr><td>OKU Card Photo</td><td>${app.photoName || 'No photo uploaded'}</td></tr>`}
-        `;
-    } else if (app.type === 'senior') {
-        console.log('Rendering Senior application details');
-        detailsTable += `
-            <tr><td>IC Number</td><td>${app.ic || '-'}</td></tr>
-            <tr><td>Age</td><td>${app.age || '-'}</td></tr>
-            <tr><td>Gender</td><td>${app.gender || '-'}</td></tr>
-            ${app.photoUrl ? `<tr><td>IC Photo</td><td><a href="${app.photoUrl}" target="_blank">View Photo</a></td></tr>` : `<tr><td>IC Photo</td><td>${app.photoName || 'No photo uploaded'}</td></tr>`}
-        `;
-    } else if (app.type === 'student') {
-        console.log('Rendering Student application details');
-        detailsTable += `
-            <tr><td>${app.studentCitizenship === 'Malaysia' ? 'IC Number' : 'Passport Number'}</td><td>${app.ic || app.passportNumber || '-'}</td></tr>
-            <tr><td>Citizenship</td><td>${app.studentCitizenship || '-'}</td></tr>
-            <tr><td>Education Level</td><td>${app.educationLevel || '-'}</td></tr>
-            <tr><td>School Name</td><td>${app.schoolName || '-'}</td></tr>
-            <tr><td>Matrix Number</td><td>${app.matrixNumber || '-'}</td></tr>
-            ${app.photoUrl ? `<tr><td>Student ID Photo</td><td><a href="${app.photoUrl}" target="_blank">View Photo</a></td></tr>` : `<tr><td>Student ID Photo</td><td>${app.photoName || 'No photo uploaded'}</td></tr>`}
-        `;
-    }
-
-    if (app.adminNotes) {
-        detailsTable += `<tr><td>Admin Notes</td><td>${app.adminNotes || '-'}</td></tr>`;
-    }
-    if (app.reviewedAt) {
-        detailsTable += `<tr><td>Reviewed At</td><td>${formatDate(app.reviewedAt)}</td></tr>`;
-    }
-    if (app.reviewedBy) {
-        detailsTable += `<tr><td>Reviewed By</td><td>${app.reviewedBy || '-'}</td></tr>`;
-    }
-
-    detailsTable += '</table>';
-    modalContent.innerHTML = detailsTable;
-    console.log('Setting modal content and displaying modal');
-    modal.classList.add('active');
-    console.log('Modal should now be visible with application details');
+    return application.ic || 'N/A';
 }
