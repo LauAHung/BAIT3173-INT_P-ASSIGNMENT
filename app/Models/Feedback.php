@@ -17,7 +17,7 @@ class Feedback extends Model
 
     protected $fillable = [
         'feeback_id',
-        'BookingID',   // ✅ fixed casing
+        'BookingID', 
         'feedback_time',
         'rating_value',
         'feedback_text',

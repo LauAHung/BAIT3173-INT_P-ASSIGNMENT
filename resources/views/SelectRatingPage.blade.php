@@ -7,6 +7,15 @@
 @endpush
 
 @section('content')
+@extends('Layout.master')
+
+@section('title', 'Feedback Page')
+
+@push('styles')
+    <link href="{{ asset('css/FeedbackPage.css') }}" rel="stylesheet">
+@endpush
+
+@section('content')
 <div class="feedback-container">
     <!-- Rate Card -->
     <a href="{{ route('selectrating') }}" class="card-link">
