@@ -60,7 +60,7 @@ class OkuApplicationDecorator extends ApplicationDecorator {
             'ic_number' => $request->ic,
             'oku_card_number' => $request->okuCardNumber,
             'disability_info' => $disability,
-            'citizenship' => $request->citizenship ?? 'MY',
+            'citizenship' => $request->citizenship ?? 'Malaysia',
             'oku_card_photo_path' => $photoPath,
         ]);
         return $application;
@@ -82,7 +82,7 @@ class SeniorApplicationDecorator extends ApplicationDecorator {
         if ($age < 0) {
             $age += 100;
         }
-        if ($age < 60) {
+        if ($age < 59) {
             throw ValidationException::withMessages(['seniorIc' => 'The IC number indicates an age below 60. Senior concession requires age 60 or above.']);
         }
         $birth_year = (int) date('Y') - $age;

@@ -199,11 +199,6 @@
                                     <span class="error-message"></span>
                                 </div>
                                 <div class="form-group">
-                                    <label for="seniorContactNumber">Contact Number *</label>
-                                    <input type="text" id="seniorContactNumber" name="contactNumber" required>
-                                    <span class="error-message"></span>
-                                </div>
-                                <div class="form-group">
                                     <label for="calculatedAge">Age</label>
                                     <input type="text" id="calculatedAge" name="calculatedAge" readonly>
                                     <span class="error-message"></span>
@@ -400,7 +395,6 @@
             <!-- Modals -->
             <div id="viewModal" class="modal">
                 <div class="modal-content">
-                    <h3>Application Details</h3>
                     <div id="applicationDetails"></div>
                     <div class="modal-actions">
                         <button id="closeView" class="btn btn-secondary">Close</button>
