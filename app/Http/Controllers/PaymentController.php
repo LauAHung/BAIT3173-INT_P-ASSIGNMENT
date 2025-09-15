@@ -2,58 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\Booking;
-use App\Models\Ticket;
-use App\Models\Seat;
-use App\Models\Journey;
-
-use App\Strategy\PaymentContext;
-use App\Strategy\WalletPayment;
-use App\Strategy\CreditCardPayment;
-use App\Strategy\EWalletPayment;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
+    protected $apiBaseUrl;
+
     public function __construct()
     {
-        $this->middleware('auth'); // Require authentication
+        $this->middleware('auth'); 
+        $this->apiBaseUrl = config('app.api_base_url', 'http://localhost:8001/api');
     }
 
     // ---------------- STRIPE TOP-UP ----------------
     public function showPaymentForm()
-    {
-        return view('payment'); // Stripe top-up page
+    {    $booking = Booking::findOrFail($bookingId);
+        return view('payment');
     }
 
     public function processPayment(Request $request)
     {
-        $request->validate([
-            'amount' => 'required|numeric|min:0.5',
-            'stripeToken' => 'required'
-        ]);
+        $response = Http::post("{$this->apiBaseUrl}/payment/topup", $request->all());
 
-        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
-
-        try {
-            $amount = floatval($request->amount);
-
-            \Stripe\Charge::create([
-                'amount' => (int)($amount * 100), // cents
-                'currency' => 'myr',
-                'source' => $request->stripeToken,
-                'description' => 'Wallet Top-up',
-            ]);
-
-            return back()->with('success', 'Top-up successful!');
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
+        return $response->successful()
+            ? back()->with('success', $response['message'])
+            : back()->with('error', $response['error'] ?? 'Top-up failed.');
     }
 
     // ---------------- BOOKING PAYMENT ----------------
@@ -61,109 +37,74 @@ class PaymentController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
-            Log::warning('Unauthenticated access to showPaymentPage', ['bookingId' => $bookingId]);
             return redirect()->route('signin')->with('error', 'Please log in to proceed with payment.');
         }
 
-        $booking = Booking::findOrFail($bookingId);
-        $tickets = $booking->tickets; // eager load tickets
+        $response = Http::get("{$this->apiBaseUrl}/payment/{$bookingId}/info");
 
-        return view('PaymentPage', compact('user', 'booking', 'tickets'));
+        if ($response->successful()) {
+            $bookingData = $response->json();
+            return view('PaymentPage', [
+                'user'    => $user,
+                'booking' => (object) $bookingData['booking'],
+                'journey' => (object) $bookingData['journey']
+            ]);
+        }
+
+        return redirect()->route('booking')->with('error', 'Unable to load booking info.');
     }
 
     public function completePayment(Request $request, $bookingId)
-{
-    $user = Auth::user();
-    $booking = Booking::where('BookingID', $bookingId)->firstOrFail();
+    {
+        $user = Auth::user();
 
-    DB::beginTransaction();
-    try {
-        switch ($request->method) {
-            case 'Wallet':
-                $strategy = new WalletPayment();
-                break;
-            case 'Credit Card':
-                $strategy = new CreditCardPayment();
-                break;
-            case 'EWallet':
-                $strategy = new EWalletPayment();
-                break;
-            default:
-                throw new \Exception("Invalid payment method.");
-        }
+        // ✅ Merge user_id into the payload
+       $payload = array_merge($request->all(), [
+    'user_id' => $user->user_id,  // ✅ use user_id, not id
+]);
 
-        $context = new PaymentContext($strategy);
-        $context->execute($user, $booking);
-
-        DB::commit();
-        return back()->with('success', "Payment completed via {$booking->PaymentType}!");
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return back()->with('error', $e->getMessage());
+        $response = Http::post("{$this->apiBaseUrl}/payment/{$bookingId}/pay", $payload);
+        
+        return $response->successful()
+            ? back()->with('success', $response['message'])
+            : back()->with('error', $response['error'] ?? 'Payment failed.');
     }
-}
 
     // ---------------- REFUND ----------------
     public function showRefundPage($bookingId)
-    {
-        $user = Auth::user();
-        $booking = Booking::findOrFail($bookingId);
+{
+    $user = Auth::user();
 
-        return view('RefundPage', compact('user', 'booking'));
+    // Call API to get booking details
+    $response = Http::get("{$this->apiBaseUrl}/payment/{$bookingId}/info");
+
+    if ($response->successful()) {
+        $bookingData = $response->json();
+
+        return view('RefundPage', [
+            'user'    => $user,
+            'booking' => (object) $bookingData['booking'],
+            'journey' => (object) $bookingData['journey']
+        ]);
     }
 
-    public function processRefund(Request $request, $bookingId)
-    {
-        $user = Auth::user();
-        $booking = Booking::findOrFail($bookingId);
+    return redirect()->route('booking')->with('error', 'Unable to load booking info for refund.');
+}
 
-        $journey = Journey::findOrFail($booking->JourneyID);
-        $departureDate = Carbon::parse($journey->DepartureTime);
-        $now = Carbon::now();
 
-        if ($now->diffInHours($departureDate, false) <= 72) {
-            return redirect()->route('refund.page', $bookingId)
-                ->with('error', 'Refund is not allowed within 3 days of departure.');
-        }
+   public function processRefund(Request $request, $bookingId)
+{
+    $user = Auth::user();
 
-        $refundAmount = $booking->Price * 0.8; // Deduct 20%
+    $payload = array_merge($request->all(), [
+        'user_id' => $user->user_id,
+    ]);
 
-        DB::beginTransaction();
-        try {
-            // Refund to wallet
-            $user->wallet_balance += $refundAmount;
-            $user->save();
+    $response = Http::post("{$this->apiBaseUrl}/payment/{$bookingId}/refund", $payload);
 
-            // Update booking status
-            $booking->Status = 'Refunded';
-            $booking->save();
-
-            // Update tickets & free seats
-            $tickets = Ticket::where('BookingID', $bookingId)->get();
-            foreach ($tickets as $ticket) {
-                $ticket->update(['Status' => 'Refunded']);
-                Seat::where('SeatID', $ticket->SeatID)
-                    ->update(['is_available' => 'Y', 'status' => 'Refunded']);
-            }
-
-            // Update Journey seat availability
-            $journey->increment('SeatAvailable', $booking->TicketNo);
-
-            DB::commit();
-
-            return redirect()->route('booking')->with([
-                'success' => "Refund successful! RM " . number_format($refundAmount, 2) . " returned to your wallet.",
-                'showRefundedTab' => true
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Refund failed', [
-                'bookingId' => $bookingId,
-                'error' => $e->getMessage()
-            ]);
-
-            return redirect()->route('booking')->with('error', 'Refund failed: ' . $e->getMessage());
-        }
-    }
+    return $response->successful()
+        ? back()->with('success', $response['message'])
+        : back()->with('error', $response['error'] ?? 'Refund failed.');
+}
 
 }
