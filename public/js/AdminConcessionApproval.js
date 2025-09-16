@@ -8,19 +8,32 @@ document.addEventListener('DOMContentLoaded', async function() {
 async function loadApplications() {
 	try {
 		showLoading();
-		const response = await fetch('/api/concession/admin/all-applications');
+		const response = await fetch('/api/concession/applications', {
+			method: 'GET',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+				'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+			},
+			credentials: 'same-origin'
+		});
+		
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		
 		const data = await response.json();
-		if (data.success) {
-			applications = data.applications;
+		if (data.status === 'success') {
+			applications = data.data || [];
 			filteredApplications = [...applications];
 			renderApplications();
 			updateStats();
 		} else {
-			showMessage('Failed to load applications', 'error');
+			showMessage('Failed to load applications: ' + (data.message || 'Unknown error'), 'error');
 		}
 	} catch (error) {
 		console.error('Error loading applications:', error);
-		showMessage('Error loading applications', 'error');
+		showMessage('Error loading applications: ' + error.message, 'error');
 	} finally {
 		hideLoading();
 	}
@@ -179,11 +192,18 @@ async function approveApplication(applicationId) {
 		const response = await fetch(`/api/concession/applications/${applicationId}/approve`, {
 			method: 'POST',
 			headers: {
+				'Accept': 'application/json',
 				'Content-Type': 'application/json',
 				'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 			},
+			credentials: 'same-origin',
 			body: JSON.stringify({ notes: prompt('Add approval notes (optional):') || '' })
 		});
+		
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		
 		const data = await response.json();
 		if (data.success) {
 			showMessage('Application approved successfully', 'success');
@@ -194,7 +214,7 @@ async function approveApplication(applicationId) {
 		}
 	} catch (error) {
 		console.error('Error approving application:', error);
-		showMessage('Error approving application', 'error');
+		showMessage('Error approving application: ' + error.message, 'error');
 	}
 }
 
@@ -204,11 +224,18 @@ async function rejectApplication(applicationId) {
 		const response = await fetch(`/api/concession/applications/${applicationId}/reject`, {
 			method: 'POST',
 			headers: {
+				'Accept': 'application/json',
 				'Content-Type': 'application/json',
 				'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 			},
+			credentials: 'same-origin',
 			body: JSON.stringify({ notes: prompt('Add rejection reason (optional):') || '' })
 		});
+		
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		
 		const data = await response.json();
 		if (data.success) {
 			showMessage('Application rejected successfully', 'success');
@@ -219,7 +246,7 @@ async function rejectApplication(applicationId) {
 		}
 	} catch (error) {
 		console.error('Error rejecting application:', error);
-		showMessage('Error rejecting application', 'error');
+		showMessage('Error rejecting application: ' + error.message, 'error');
 	}
 }
 

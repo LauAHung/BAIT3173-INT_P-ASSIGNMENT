@@ -56,8 +56,7 @@ Route::prefix('admin')->middleware(['web','admin','admin.2fa'])->group(function 
     // Train management
     Route::get('/train/{trainId}', [AdminWebServiceController::class, 'getTrainInfo']);
     
-    // Admin logs
-    Route::get('/logs', [AdminWebServiceController::class, 'getAdminLogs']);
+    // Admin logs (deduped: handled by Admin\LogController below)
 
     // Journey details provider for Booking module
     Route::get('/journey/{journeyId}', [AdminWebServiceController::class, 'getJourneyById']);
@@ -118,13 +117,19 @@ Route::prefix('admin')->middleware(['web','admin','admin.2fa'])->group(function 
 });
 
 // Concession Card Module Web Services
-Route::prefix('concession')->group(function () {
+Route::prefix('concession')->middleware('auth')->group(function () {
     // User applications
     Route::get('/user/{userId}', [ConcessionCardWebServiceController::class, 'getUserApplications']);
     
     // Application management
     Route::get('/application/{applicationId}', [ConcessionCardWebServiceController::class, 'getApplicationDetails']);
     Route::post('/application', [ConcessionCardWebServiceController::class, 'submitApplication']);
+    
+    // Admin approval routes
+    Route::get('/applications', [ConcessionCardWebServiceController::class, 'getAllApplications']);
+    Route::get('/applications/{applicationId}', [ConcessionCardWebServiceController::class, 'getApplicationDetails']);
+    Route::post('/applications/{applicationId}/approve', [ConcessionCardWebServiceController::class, 'approveApplication']);
+    Route::post('/applications/{applicationId}/reject', [ConcessionCardWebServiceController::class, 'rejectApplication']);
     
     // Statistics
     Route::get('/statistics', [ConcessionCardWebServiceController::class, 'getStatistics']);

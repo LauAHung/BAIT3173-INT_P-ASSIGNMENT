@@ -253,6 +253,121 @@ class ConcessionCardWebServiceController extends Controller
             'data' => $response
         ]);
     }
+
+    /**
+     * Get All Applications for Admin
+     * REST API: GET /api/concession/applications
+     */
+    public function getAllApplications()
+    {
+        try {
+            $applications = ConcessionApplication::with('user')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $transformedApplications = $applications->map(function ($app) {
+                return [
+                    'id' => $app->application_id,
+                    'type' => $app->type,
+                    'fullName' => $app->full_name,
+                    'status' => $app->status,
+                    'applicationDate' => $app->created_at->toISOString(),
+                    'icNumber' => $app->ic_number,
+                    'passportNumber' => $app->passport_number,
+                    'userDetails' => [
+                        'userId' => $app->user_id,
+                        'userName' => $app->user ? $app->user->name : 'Unknown',
+                        'userEmail' => $app->user ? $app->user->email : 'Unknown'
+                    ]
+                ];
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Applications retrieved successfully',
+                'data' => $transformedApplications
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in getAllApplications: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve applications: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
+    }
+
+    /**
+     * Approve Application
+     * REST API: POST /api/concession/applications/{applicationId}/approve
+     */
+    public function approveApplication(Request $request, $applicationId)
+    {
+        try {
+            $application = ConcessionApplication::where('application_id', $applicationId)->first();
+            
+            if (!$application) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Application not found'
+                ], 404);
+            }
+
+            $application->update([
+                'status' => 'approved',
+                'reviewed_at' => now(),
+                'reviewed_by' => auth()->id(),
+                'admin_notes' => $request->input('notes', '')
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Application approved successfully'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error approving application: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to approve application: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reject Application
+     * REST API: POST /api/concession/applications/{applicationId}/reject
+     */
+    public function rejectApplication(Request $request, $applicationId)
+    {
+        try {
+            $application = ConcessionApplication::where('application_id', $applicationId)->first();
+            
+            if (!$application) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Application not found'
+                ], 404);
+            }
+
+            $application->update([
+                'status' => 'rejected',
+                'reviewed_at' => now(),
+                'reviewed_by' => auth()->id(),
+                'admin_notes' => $request->input('notes', '')
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Application rejected successfully'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error rejecting application: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject application: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
 

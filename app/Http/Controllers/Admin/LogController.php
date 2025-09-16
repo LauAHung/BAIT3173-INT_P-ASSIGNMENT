@@ -1,4 +1,8 @@
 <?php
+/**
+ * author: Lau Aik Hung
+ * student id: 23WMR14555
+ */
 
 namespace App\Http\Controllers\Admin;
 
@@ -22,7 +26,20 @@ class LogController extends Controller
         if ($action = $request->get('action')) {
             $q->where('action', $action);
         }
-        $rows = $q->limit(200)->get(['admin_email','action','details','created_at']);
+        $rows = $q->limit(200)->get(['admin_email','action','details','created_at'])
+            ->map(function (AdminActivityLog $log) {
+                $details = $log->details;
+                if (is_string($details)) {
+                    $decoded = json_decode($details, true);
+                    $details = json_last_error() === JSON_ERROR_NONE ? $decoded : $details;
+                }
+                return [
+                    'admin_email' => $log->admin_email,
+                    'action' => $log->action,
+                    'details' => $details,
+                    'created_at' => optional($log->created_at)->toISOString(),
+                ];
+            });
         return response()->json(['success' => true, 'data' => $rows]);
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use App\Models\ConcessionApplication;
 use SplFileObject;
@@ -297,23 +298,52 @@ class ConcessionCardController extends Controller
     public function approveApplication(Request $request, $id)
     {
         try {
-            // For admin approval, don't restrict by user_id
-            $application = ConcessionApplication::where('application_id', $id)->first();
+            // Prefer calling Admin Module API to publish decision
+            $baseUrl = rtrim(config('services.admin.base_url', 'http://localhost:8000/api/admin'), '/');
+            $endpoint = $baseUrl . '/concession/decision';
 
+            $sessionCookieName = config('session.cookie', 'laravel_session');
+            $sessionCookieVal = $request->cookie($sessionCookieName);
+            $xsrfCookieVal = $request->cookie('XSRF-TOKEN');
+            $host = parse_url($baseUrl, PHP_URL_HOST) ?: 'localhost';
+
+            $resp = Http::withHeaders([
+                    'X-CSRF-TOKEN' => csrf_token(),
+                    'X-Requested-With' => 'XMLHttpRequest',
+                ])
+                ->withCookies(array_filter([
+                    $sessionCookieName => $sessionCookieVal,
+                    'XSRF-TOKEN' => $xsrfCookieVal,
+                ]), $host)
+                ->post($endpoint, [
+                    'applicationId' => $id,
+                    'decision' => 'approve',
+                    'remark' => (string) $request->input('notes', ''),
+                ]);
+
+            if ($resp->successful()) {
+                $data = $resp->json();
+                return response()->json([
+                    'success' => ($data['status'] ?? '') === 'success',
+                    'message' => $data['message'] ?? 'Decision recorded',
+                    'data' => $data['data'] ?? null,
+                ], 200);
+            }
+
+            // Fallback: local update if remote call fails
+            $application = ConcessionApplication::where('application_id', $id)->first();
             if (!$application) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Application not found'
                 ], 404);
             }
-
             $application->update([
                 'status' => 'approved',
                 'reviewed_at' => now(),
                 'reviewed_by' => Auth::id(),
                 'admin_notes' => $request->input('notes', '')
             ]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Application approved successfully'
@@ -330,23 +360,52 @@ class ConcessionCardController extends Controller
     public function rejectApplication(Request $request, $id)
     {
         try {
-            // For admin rejection, don't restrict by user_id
-            $application = ConcessionApplication::where('application_id', $id)->first();
+            // Prefer calling Admin Module API to publish decision
+            $baseUrl = rtrim(config('services.admin.base_url', 'http://localhost:8000/api/admin'), '/');
+            $endpoint = $baseUrl . '/concession/decision';
 
+            $sessionCookieName = config('session.cookie', 'laravel_session');
+            $sessionCookieVal = $request->cookie($sessionCookieName);
+            $xsrfCookieVal = $request->cookie('XSRF-TOKEN');
+            $host = parse_url($baseUrl, PHP_URL_HOST) ?: 'localhost';
+
+            $resp = Http::withHeaders([
+                    'X-CSRF-TOKEN' => csrf_token(),
+                    'X-Requested-With' => 'XMLHttpRequest',
+                ])
+                ->withCookies(array_filter([
+                    $sessionCookieName => $sessionCookieVal,
+                    'XSRF-TOKEN' => $xsrfCookieVal,
+                ]), $host)
+                ->post($endpoint, [
+                    'applicationId' => $id,
+                    'decision' => 'reject',
+                    'remark' => (string) $request->input('notes', ''),
+                ]);
+
+            if ($resp->successful()) {
+                $data = $resp->json();
+                return response()->json([
+                    'success' => ($data['status'] ?? '') === 'success',
+                    'message' => $data['message'] ?? 'Decision recorded',
+                    'data' => $data['data'] ?? null,
+                ], 200);
+            }
+
+            // Fallback: local update if remote call fails
+            $application = ConcessionApplication::where('application_id', $id)->first();
             if (!$application) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Application not found'
                 ], 404);
             }
-
             $application->update([
                 'status' => 'rejected',
                 'reviewed_at' => now(),
                 'reviewed_by' => Auth::id(),
                 'admin_notes' => $request->input('notes', '')
             ]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Application rejected successfully'
