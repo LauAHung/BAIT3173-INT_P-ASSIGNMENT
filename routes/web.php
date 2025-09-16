@@ -273,6 +273,13 @@ Route::post('/ratingsection/{bookingId}', [FeedbackController::class, 'store'])-
 
 Route::get('/feedback/view', [FeedbackController::class, 'viewFeedback'])->name('viewfeedback');
 Route::get('/viewfeedback', [FeedbackController::class, 'viewFeedback'])->name('viewfeedback');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/feedback/create/{bookingId}', [FeedbackController::class, 'create'])->name('feedback.create');
+    Route::post('/feedback/{bookingId}', [FeedbackController::class, 'store'])->name('feedback.store');
+    Route::get('/feedback/view', [FeedbackController::class, 'viewFeedback'])->name('feedback.view');
+});
+
 // Concession Card Application routes
 Route::get('/concession_card', function () {
     return view('ConcessionCardPage');

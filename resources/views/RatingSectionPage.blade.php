@@ -16,41 +16,35 @@
             
             <!-- Left side: logo + train info -->
             <div class="rating-ticket-left">
-                <img src="{{ asset('images/logo/' . ($booking->Journey->Train->TrainService ?? 'default_logo') . '_logo.png') }}" 
+                <img src="{{ asset('images/logo/' . ($journey->train_service ?? 'default_logo') . '_logo.png') }}" 
                      alt="Train Service Logo" 
                      class="rating-ticket-logo">
-                <div class="rating-train-no">Train No: {{ $booking->Journey->Train->TrainNo ?? 'Unknown' }}</div>
+                <div class="rating-train-no">Train No: {{ $journey->train_no ?? 'Unknown' }}</div>
             </div>
 
             <!-- Right side: journey details -->
             <div class="rating-ticket-details">
-                <div class="rating-booking-id">Booking ID: {{ $booking->BookingID }}</div>
+                <div class="rating-booking-id">Booking ID: {{ $booking->booking_id ?? 'Unknown' }}</div>
+
                 <div class="rating-route-row">
-                    <span class="station">{{ $booking->Journey->FromLocation ?? 'Unknown' }}</span>
+                    <span class="station">{{ $journey->from_location ?? 'Unknown' }}</span>
                     <span class="train-icon center-icon"><i class="fas fa-train"></i></span>
-                    <span class="station">{{ $booking->Journey->ToLocation ?? 'Unknown' }}</span>
+                    <span class="station">{{ $journey->to_location ?? 'Unknown' }}</span>
                 </div>
 
                 <div class="rating-time-row">
                     <span class="time">
-                        {{ $booking->Journey->DepartureTime 
-                            ? date('g:i A', strtotime($booking->Journey->DepartureTime)) 
-                            : 'Unknown' }}
+                        {{ !empty($journey->departure_time) ? date('g:i A', strtotime($journey->departure_time)) : 'Unknown' }}
                     </span>
                     <span class="train-icon center-icon"><i class="fas fa-train"></i></span>
                     <span class="time">
-                        {{ $booking->Journey->ArrivalTime 
-                            ? date('g:i A', strtotime($booking->Journey->ArrivalTime)) 
-                            : 'Unknown' }}
+                        {{ !empty($journey->arrival_time) ? date('g:i A', strtotime($journey->arrival_time)) : 'Unknown' }}
                     </span>
                 </div>
 
                 <div class="rating-date-row">
                     <span class="date">
-                        Date: 
-                        {{ $booking->Journey->DepartureTime 
-                            ? date('d F Y', strtotime($booking->Journey->DepartureTime)) 
-                            : 'Unknown' }}
+                        Date: {{ !empty($journey->departure_time) ? date('d F Y', strtotime($journey->departure_time)) : 'Unknown' }}
                     </span>
                 </div>
             </div>
@@ -61,7 +55,7 @@
     <div class="rating-feedbackform" style="max-width:100%">
         <h2>Leave a Review</h2>
 
-        <form action="{{ route('rating.store', $booking->BookingID) }}" method="POST">
+        <form id="ratingForm" action="{{ route('rating.store', $booking->booking_id ) }}" method="POST">
             @csrf
 
             <div class="rating-stars">
@@ -77,23 +71,42 @@
                 <label for="star5">&#9733;</label>
             </div>
 
-            <textarea name="feedback" class="rating-feedback" placeholder="Write your feedback..." required></textarea>
+            <!-- Removed required -->
+            <textarea name="feedback" class="rating-feedback" placeholder="Write your feedback..."></textarea>
 
             <button type="submit" class="rating-submit-btn">Submit Review</button>
         </form>
     </div>
-
-    <p>Selected Star: <span id="selected-star">0</span></p>
 </div>
 
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    // Show selected star
-    const stars = document.querySelectorAll('input[name="rating"]');
-    const display = document.getElementById('selected-star');
-    stars.forEach(star => {
-        star.addEventListener('change', () => {
-            display.textContent = star.value;
-        });
+    // Form validation with SweetAlert
+    document.getElementById('ratingForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // stop immediate submit
+        const rating = document.querySelector('input[name="rating"]:checked');
+        const feedback = document.querySelector('.rating-feedback').value.trim();
+
+        if (!rating || feedback === '') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Incomplete Review',
+                text: 'Please rate and provide feedback before submitting.',
+                confirmButtonColor: '#d33'
+            });
+        } else {
+            Swal.fire({
+                icon: 'success',
+                title: 'Thank you!',
+                text: 'Your feedback has been submitted successfully.',
+                confirmButtonColor: '#3085d6'
+            }).then(() => {
+                // only submit when user closes swal
+                e.target.submit();
+            });
+        }
     });
 </script>
 @endsection

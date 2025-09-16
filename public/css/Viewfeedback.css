@@ -131,3 +131,47 @@ body {
     font-size: 0.9em;
     color: #888;
 }
+
+.feedback-journey {
+    width: 250px;           /* fixed width */
+    min-width: 250px;       /* ensure it doesn't shrink */
+    max-width: 250px;       /* ensure it doesn't grow */
+    margin-top: 10px;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-left: 3px solid #915690;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #333;
+    text-align: left;       /* left-align all text */
+    display: inline-block;  /* keeps it in one block */
+}
+.circle-filter {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 12px;
+    cursor: pointer;
+}
+
+.circle-filter {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 15px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.circle-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #f6f4f4;
+    background-color: #f4b9ee;
+    display: inline-block;
+    margin-right: 6px;
+    transition: all 0.3s ease;
+}
+
+.circle-btn.active {
+    background-color: #c1a0bf;
+}
