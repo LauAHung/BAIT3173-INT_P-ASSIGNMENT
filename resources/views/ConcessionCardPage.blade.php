@@ -199,11 +199,6 @@
                                     <span class="error-message"></span>
                                 </div>
                                 <div class="form-group">
-                                    <label for="calculatedAge">Age</label>
-                                    <input type="text" id="calculatedAge" name="calculatedAge" readonly>
-                                    <span class="error-message"></span>
-                                </div>
-                                <div class="form-group">
                                     <label for="seniorIcPhoto">IC Photo *</label>
                                     <div class="file-upload" id="seniorFileUpload" onclick="document.getElementById('seniorIcPhoto').click()">
                                         <input type="file" id="seniorIcPhoto" name="seniorIcPhoto" accept="image/*" required>
@@ -402,42 +397,6 @@
                 </div>
             </div>
         </main>
-
-        <script>
-            // Add event listener for senior IC number input to calculate age
-            document.addEventListener('DOMContentLoaded', function() {
-                const seniorIcInput = document.getElementById('seniorIc');
-                const calculatedAgeInput = document.getElementById('calculatedAge');
-                const seniorAgeInput = document.getElementById('seniorAge');
-                const seniorGenderInput = document.getElementById('seniorGender');
-
-                if (seniorIcInput && calculatedAgeInput && seniorAgeInput && seniorGenderInput) {
-                    seniorIcInput.addEventListener('input', function() {
-                        const ic = this.value.replace(/[^0-9]/g, ''); // Remove non-digits
-                        if (ic.length === 12) {
-                            const yy = parseInt(ic.substring(0, 2));
-                            const mm = ic.substring(2, 4);
-                            const dd = ic.substring(4, 6);
-                            const currentYear = new Date().getFullYear() % 100; // Get last two digits of current year
-                            let age = currentYear - yy;
-                            if (age < 0) {
-                                age += 100; // Handle cases like 99 -> 1999
-                            }
-                            calculatedAgeInput.value = `${age} years`;
-                            seniorAgeInput.value = age; // Update hidden age field
-                            
-                            // Calculate gender
-                            const lastDigit = parseInt(ic.substring(11, 12));
-                            seniorGenderInput.value = lastDigit % 2 === 1 ? 'male' : 'female';
-                        } else {
-                            calculatedAgeInput.value = '';
-                            seniorAgeInput.value = '';
-                            seniorGenderInput.value = '';
-                        }
-                    });
-                }
-            });
-        </script>
 
         <script src="{{ asset('js/ConcessionCard.js') }}" defer></script>
     @endsection
