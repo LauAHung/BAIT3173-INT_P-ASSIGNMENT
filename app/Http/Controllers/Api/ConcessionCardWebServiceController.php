@@ -40,7 +40,7 @@ class ConcessionCardWebServiceController extends Controller
                 'type' => $app->type,
                 'fullName' => $app->full_name,
                 'status' => $app->status,
-                'appliedDate' => $app->created_at->toISOString(),
+                'appliedDate' => $app->created_at->toIso8601String(),
                 'icNumber' => $app->ic_number,
                 'passportNumber' => $app->passport_number
             ];
@@ -78,7 +78,7 @@ class ConcessionCardWebServiceController extends Controller
             'type' => $application->type,
             'fullName' => $application->full_name,
             'status' => $application->status,
-            'appliedDate' => $application->created_at->toISOString(),
+            'appliedDate' => $application->created_at->toIso8601String(),
             'userDetails' => [
                 'userId' => $application->user_id,
                 'userName' => $application->user->name,
@@ -196,7 +196,7 @@ class ConcessionCardWebServiceController extends Controller
                 'applicationId' => $application->application_id,
                 'type' => $application->type,
                 'status' => $application->status,
-                'appliedDate' => $application->created_at->toISOString()
+                'appliedDate' => $application->created_at->toIso8601String()
             ]
         ], 201);
     }
@@ -241,7 +241,7 @@ class ConcessionCardWebServiceController extends Controller
                         'type' => $app->type,
                         'fullName' => $app->full_name,
                         'status' => $app->status,
-                        'appliedDate' => $app->created_at->toISOString(),
+                        'appliedDate' => $app->created_at->toIso8601String(),
                         'userName' => $app->user->name
                     ];
                 });
@@ -271,7 +271,7 @@ class ConcessionCardWebServiceController extends Controller
                     'type' => $app->type,
                     'fullName' => $app->full_name,
                     'status' => $app->status,
-                    'applicationDate' => $app->created_at->toISOString(),
+                    'applicationDate' => $app->created_at->toIso8601String(),
                     'icNumber' => $app->ic_number,
                     'passportNumber' => $app->passport_number,
                     'userDetails' => [

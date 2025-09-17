@@ -53,6 +53,7 @@ class OkuApplicationDecorator extends ApplicationDecorator {
         $photoPath = null;
         if ($request->hasFile('okuCardPhoto')) {
             $photoPath = $request->file('okuCardPhoto')->store('oku_card_photos', 'public');
+            Log::info('OKU card photo stored', ['path' => $photoPath]);
         }
         $application = $this->processor->process($request);
         $disability = $request->disabilityType === 'other' ? $request->otherDisability : $request->disabilityType;
@@ -92,6 +93,7 @@ class SeniorApplicationDecorator extends ApplicationDecorator {
         $photoPath = null;
         if ($request->hasFile('seniorIcPhoto')) {
             $photoPath = $request->file('seniorIcPhoto')->store('senior_ic_photos', 'public');
+            Log::info('Senior IC photo stored', ['path' => $photoPath]);
         }
         $application = $this->processor->process($request);
         $application->update([
@@ -131,6 +133,7 @@ class StudentApplicationDecorator extends ApplicationDecorator {
         $photoPath = null;
         if ($request->hasFile('studentIdPhoto')) {
             $photoPath = $request->file('studentIdPhoto')->store('student_photos', 'public');
+            Log::info('Student ID photo stored', ['path' => $photoPath]);
         }
         $application = $this->processor->process($request);
         $application->update([
@@ -355,19 +358,17 @@ class ConcessionCardController extends Controller
                 ], 401);
             }
 
-            // Fetch application
-            $application = ConcessionApplication::where('application_id', $id)
-                ->where('user_id', Auth::id())
-                ->first();
+            // Fetch application (admin can view any application)
+            $application = ConcessionApplication::where('application_id', $id)->first();
 
             if (!$application) {
-                Log::warning('Application not found or access denied', [
+                Log::warning('Application not found', [
                     'application_id' => $id,
                     'user_id' => Auth::id()
                 ]);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Application not found or you do not have access to this application'
+                    'message' => 'Application not found'
                 ], 404);
             }
 
@@ -453,36 +454,43 @@ class ConcessionCardController extends Controller
     public function approveApplication(Request $request, $id)
     {
         try {
-            // Prefer calling Admin Module API to publish decision
-            $baseUrl = rtrim(config('services.admin.base_url', 'http://localhost:8000/api/admin'), '/');
-            $endpoint = $baseUrl . '/concession/decision';
+            // Prefer calling Admin Module API to publish decision, but fall back gracefully
+            $remoteSucceeded = false;
+            try {
+                $baseUrl = rtrim(config('services.admin.base_url', 'http://localhost:8000/api/admin'), '/');
+                $endpoint = $baseUrl . '/concession/decision';
 
-            $sessionCookieName = config('session.cookie', 'laravel_session');
-            $sessionCookieVal = $request->cookie($sessionCookieName);
-            $xsrfCookieVal = $request->cookie('XSRF-TOKEN');
-            $host = parse_url($baseUrl, PHP_URL_HOST) ?: 'localhost';
+                $sessionCookieName = config('session.cookie', 'laravel_session');
+                $sessionCookieVal = $request->cookie($sessionCookieName);
+                $xsrfCookieVal = $request->cookie('XSRF-TOKEN');
+                $host = parse_url($baseUrl, PHP_URL_HOST) ?: 'localhost';
 
-            $resp = Http::withHeaders([
-                    'X-CSRF-TOKEN' => csrf_token(),
-                    'X-Requested-With' => 'XMLHttpRequest',
-                ])
-                ->withCookies(array_filter([
-                    $sessionCookieName => $sessionCookieVal,
-                    'XSRF-TOKEN' => $xsrfCookieVal,
-                ]), $host)
-                ->post($endpoint, [
-                    'applicationId' => $id,
-                    'decision' => 'approve',
-                    'remark' => (string) $request->input('notes', ''),
-                ]);
+                $resp = Http::withHeaders([
+                        'X-CSRF-TOKEN' => csrf_token(),
+                        'X-Requested-With' => 'XMLHttpRequest',
+                    ])
+                    ->timeout(2)
+                    ->connectTimeout(1)
+                    ->withCookies(array_filter([
+                        $sessionCookieName => $sessionCookieVal,
+                        'XSRF-TOKEN' => $xsrfCookieVal,
+                    ]), $host)
+                    ->post($endpoint, [
+                        'applicationId' => $id,
+                        'decision' => 'approve',
+                        'remark' => (string) $request->input('notes', ''),
+                    ]);
 
-            if ($resp->successful()) {
-                $data = $resp->json();
-                return response()->json([
-                    'success' => ($data['status'] ?? '') === 'success',
-                    'message' => $data['message'] ?? 'Decision recorded',
-                    'data' => $data['data'] ?? null,
-                ], 200);
+                if ($resp->successful()) {
+                    $data = $resp->json();
+                    return response()->json([
+                        'success' => ($data['status'] ?? '') === 'success',
+                        'message' => $data['message'] ?? 'Decision recorded',
+                        'data' => $data['data'] ?? null,
+                    ], 200);
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Remote approve call failed, falling back to local', ['error' => $e->getMessage(), 'application_id' => $id]);
             }
 
             // Fallback: local update if remote call fails
@@ -515,36 +523,42 @@ class ConcessionCardController extends Controller
     public function rejectApplication(Request $request, $id)
     {
         try {
-            // Prefer calling Admin Module API to publish decision
-            $baseUrl = rtrim(config('services.admin.base_url', 'http://localhost:8000/api/admin'), '/');
-            $endpoint = $baseUrl . '/concession/decision';
+            // Prefer calling Admin Module API to publish decision, but fall back gracefully
+            try {
+                $baseUrl = rtrim(config('services.admin.base_url', 'http://localhost:8000/api/admin'), '/');
+                $endpoint = $baseUrl . '/concession/decision';
 
-            $sessionCookieName = config('session.cookie', 'laravel_session');
-            $sessionCookieVal = $request->cookie($sessionCookieName);
-            $xsrfCookieVal = $request->cookie('XSRF-TOKEN');
-            $host = parse_url($baseUrl, PHP_URL_HOST) ?: 'localhost';
+                $sessionCookieName = config('session.cookie', 'laravel_session');
+                $sessionCookieVal = $request->cookie($sessionCookieName);
+                $xsrfCookieVal = $request->cookie('XSRF-TOKEN');
+                $host = parse_url($baseUrl, PHP_URL_HOST) ?: 'localhost';
 
-            $resp = Http::withHeaders([
-                    'X-CSRF-TOKEN' => csrf_token(),
-                    'X-Requested-With' => 'XMLHttpRequest',
-                ])
-                ->withCookies(array_filter([
-                    $sessionCookieName => $sessionCookieVal,
-                    'XSRF-TOKEN' => $xsrfCookieVal,
-                ]), $host)
-                ->post($endpoint, [
-                    'applicationId' => $id,
-                    'decision' => 'reject',
-                    'remark' => (string) $request->input('notes', ''),
-                ]);
+                $resp = Http::withHeaders([
+                        'X-CSRF-TOKEN' => csrf_token(),
+                        'X-Requested-With' => 'XMLHttpRequest',
+                    ])
+                    ->timeout(2)
+                    ->connectTimeout(1)
+                    ->withCookies(array_filter([
+                        $sessionCookieName => $sessionCookieVal,
+                        'XSRF-TOKEN' => $xsrfCookieVal,
+                    ]), $host)
+                    ->post($endpoint, [
+                        'applicationId' => $id,
+                        'decision' => 'reject',
+                        'remark' => (string) $request->input('notes', ''),
+                    ]);
 
-            if ($resp->successful()) {
-                $data = $resp->json();
-                return response()->json([
-                    'success' => ($data['status'] ?? '') === 'success',
-                    'message' => $data['message'] ?? 'Decision recorded',
-                    'data' => $data['data'] ?? null,
-                ], 200);
+                if ($resp->successful()) {
+                    $data = $resp->json();
+                    return response()->json([
+                        'success' => ($data['status'] ?? '') === 'success',
+                        'message' => $data['message'] ?? 'Decision recorded',
+                        'data' => $data['data'] ?? null,
+                    ], 200);
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Remote reject call failed, falling back to local', ['error' => $e->getMessage(), 'application_id' => $id]);
             }
 
             // Fallback: local update if remote call fails
