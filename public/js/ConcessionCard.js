@@ -692,7 +692,7 @@ function setRequiredFields(type) {
     });
 
     const requiredFields = {
-        oku: ['okuIc', 'okuCardNumber', 'okuCardPhoto'],
+        oku: ['okuIc', 'okuCardNumber', 'disabilityType', 'okuCardPhoto'],
         senior: ['seniorIc', 'seniorIcPhoto'],
         student: ['studentCitizenship', 'educationLevel', 'schoolName', 'matrixNumber', 'studentIdPhoto']
     };
@@ -755,17 +755,29 @@ async function handleFormSubmission(e) {
     };
 
     let icValue;
-    if (currentType === 'oku') {
-        icValue = document.getElementById('okuIc')?.value?.trim();
-        application.ic = icValue;
-        application.okuCardNumber = document.getElementById('okuCardNumber')?.value?.trim();
-        application.disabilityType = document.getElementById('disabilityType')?.value;
-        if (application.disabilityType === 'other') {
-            application.otherDisability = document.getElementById('otherDisability')?.value?.trim();
-        }
-        const photoInput = document.getElementById('okuCardPhoto');
-        if (photoInput?.files[0]) application.photoName = photoInput.files[0].name;
-    } else if (currentType === 'senior') {
+    // In handleFormSubmission function, inside the if (currentType === 'oku') block, after collecting the values:
+
+if (currentType === 'oku') {
+    icValue = document.getElementById('okuIc')?.value?.trim();
+    application.ic = icValue;
+    application.okuCardNumber = document.getElementById('okuCardNumber')?.value?.trim();
+    application.disabilityType = document.getElementById('disabilityType')?.value?.trim();
+    
+    // Explicitly append OKU-specific fields to FormData to ensure they are sent
+    formData.append('disabilityType', application.disabilityType || '');
+    if (application.disabilityType === 'other') {
+        application.otherDisability = document.getElementById('otherDisability')?.value?.trim();
+        formData.append('otherDisability', application.otherDisability || '');
+    }
+    
+    const photoInput = document.getElementById('okuCardPhoto');
+    if (photoInput?.files[0]) application.photoName = photoInput.files[0].name;
+    
+    console.log('OKU specific data:', {
+        disabilityType: application.disabilityType,
+        otherDisability: application.otherDisability
+    });
+}else if (currentType === 'senior') {
         icValue = document.getElementById('seniorIc')?.value?.trim();
         application.ic = icValue;
         application.age = parseInt(document.getElementById('seniorAge')?.value) || null;

@@ -48,7 +48,6 @@ class OkuApplicationDecorator extends ApplicationDecorator {
             'ic' => 'required|string|size:12|regex:/^\d+$/',
             'okuCardNumber' => 'required|string|min:8',
             'disabilityType' => 'required|string|in:visual,hearing,mobility,cognitive,other',
-            'otherDisability' => 'required_if:disabilityType,other|string',
             'okuCardPhoto' => 'required|image|max:2048',
         ]);
         $photoPath = null;
@@ -201,7 +200,7 @@ class ConcessionCardController extends Controller
                 // Add type-specific data
                 if ($app->type === 'oku') {
                     $data['okuCardNumber'] = $app->oku_card_number ?? null;
-                    $data['disability'] = $app->disability_info ?? null;
+                    $data['disabilityType'] = $app->disability_info ?? null;
                     $data['oku_card_photo_path'] = $app->oku_card_photo_path ?? null;
                     if ($app->oku_card_photo_path) {
                         $data['photoName'] = basename($app->oku_card_photo_path);
@@ -393,7 +392,7 @@ class ConcessionCardController extends Controller
             // Add type-specific data
             if ($application->type === 'oku') {
                 $data['okuCardNumber'] = $application->oku_card_number ?? null;
-                $data['disability'] = $application->disability_info ?? null;
+                $data['disabilityType'] = $application->disability_info ?? null;
                 $data['oku_card_photo_path'] = $application->oku_card_photo_path ?? null;
                 if ($application->oku_card_photo_path) {
                     $data['photoName'] = basename($application->oku_card_photo_path);
