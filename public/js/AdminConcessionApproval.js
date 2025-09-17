@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 async function loadApplications() {
 	try {
 		showLoading();
-		const response = await fetch('/api/concession/applications', {
+		const response = await fetch('/api/concession/admin/all-applications', {
 			method: 'GET',
 			headers: {
 				'Accept': 'application/json',
@@ -23,13 +23,14 @@ async function loadApplications() {
 		}
 		
 		const data = await response.json();
-		if (data.status === 'success') {
-			applications = data.data || [];
+		const ok = (data && (data.status === 'success' || data.success === true));
+		if (ok) {
+			applications = (data.data || data.applications || []);
 			filteredApplications = [...applications];
 			renderApplications();
 			updateStats();
 		} else {
-			showMessage('Failed to load applications: ' + (data.message || 'Unknown error'), 'error');
+			showMessage('Failed to load applications: ' + ((data && data.message) || 'Unknown error'), 'error');
 		}
 	} catch (error) {
 		console.error('Error loading applications:', error);
@@ -119,10 +120,11 @@ function resetFilters() {
 
 async function viewApplication(applicationId) {
 	try {
-		const response = await fetch(`/api/concession/applications/${applicationId}`);
+		const response = await fetch(`/concession/view/${applicationId}`);
 		const data = await response.json();
-		if (data.success) {
-			showApplicationModal(data.application);
+		if (data && (data.success === true || data.status === 'success')) {
+			const app = data.application || data.data;
+			showApplicationModal(app);
 		} else {
 			showMessage('Failed to load application details', 'error');
 		}
@@ -189,7 +191,7 @@ function showApplicationModal(application) {
 async function approveApplication(applicationId) {
 	if (!confirm('Are you sure you want to approve this application?')) return;
 	try {
-		const response = await fetch(`/api/concession/applications/${applicationId}/approve`, {
+		const response = await fetch(`/concession/approve/${applicationId}`, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
@@ -205,7 +207,7 @@ async function approveApplication(applicationId) {
 		}
 		
 		const data = await response.json();
-		if (data.success) {
+		if (data && (data.success === true || data.status === 'success')) {
 			showMessage('Application approved successfully', 'success');
 			loadApplications();
 			closeModal();
@@ -221,7 +223,7 @@ async function approveApplication(applicationId) {
 async function rejectApplication(applicationId) {
 	if (!confirm('Are you sure you want to reject this application?')) return;
 	try {
-		const response = await fetch(`/api/concession/applications/${applicationId}/reject`, {
+		const response = await fetch(`/concession/reject/${applicationId}`, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
@@ -237,7 +239,7 @@ async function rejectApplication(applicationId) {
 		}
 		
 		const data = await response.json();
-		if (data.success) {
+		if (data && (data.success === true || data.status === 'success')) {
 			showMessage('Application rejected successfully', 'success');
 			loadApplications();
 			closeModal();
@@ -323,8 +325,7 @@ function getTypeSpecificDetails(application) {
 				<div class="detail-grid">
 					<div class="detail-item"><label>OKU Card Number:</label><span>${application.okuCardNumber || 'N/A'}</span></div>
 					<div class="detail-item"><label>Disability Info:</label><span>${application.disability || 'N/A'}</span></div>
-					${application.photoUrl ? `
-					<div class="detail-item"><label>OKU Card Photo:</label><div class="photo-container"><img src="${application.photoUrl}" alt="OKU Card Photo" class="student-photo" onclick="showPhotoModal('${application.photoUrl}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none;">Photo not available</span></div></div>` : ''}
+					${application.photoUrl ? `<div class="detail-item"><label>OKU Card Photo:</label><div class="photo-container"><img src="${application.photoUrl}" alt="OKU Card Photo" class="student-photo" onclick="showPhotoModal('${application.photoUrl}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none;">Photo not available</span></div></div>` : '<div class="detail-item"><label>OKU Card Photo:</label><span>No photo uploaded</span></div>'}
 				</div>
 			</div>`;
 	} else if (application.type === 'senior') {
@@ -334,7 +335,7 @@ function getTypeSpecificDetails(application) {
 				<div class="detail-item"><label>Gender:</label><span>${application.gender || 'N/A'}</span></div>
 				<div class="detail-item"><label>Citizenship:</label><span>${application.citizenship || 'N/A'}</span></div>
 				<div class="detail-item"><label>Date of Birth:</label><span>${application.dateOfBirth || 'N/A'}</span></div>
-				${application.photoUrl ? `<div class="detail-item"><label>IC Photo:</label><div class="photo-container"><img src="${application.photoUrl}" alt="IC Photo" class="student-photo" onclick="showPhotoModal('${application.photoUrl}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none;">Photo not available</span></div></div>` : ''}
+				${application.photoUrl ? `<div class="detail-item"><label>IC Photo:</label><div class="photo-container"><img src="${application.photoUrl}" alt="IC Photo" class="student-photo" onclick="showPhotoModal('${application.photoUrl}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none;">Photo not available</span></div></div>` : '<div class="detail-item"><label>IC Photo:</label><span>No photo uploaded</span></div>'}
 			</div></div>`;
 	} else if (application.type === 'student') {
 		details = `
@@ -343,7 +344,7 @@ function getTypeSpecificDetails(application) {
 				<div class="detail-item"><label>School Name:</label><span>${application.schoolName || 'N/A'}</span></div>
 				<div class="detail-item"><label>Education Level:</label><span>${application.educationLevel || 'N/A'}</span></div>
 				<div class="detail-item"><label>Citizenship:</label><span>${application.studentCitizenship || 'N/A'}</span></div>
-				${application.photoUrl ? `<div class="detail-item"><label>Student ID Photo:</label><div class="photo-container"><img src="${application.photoUrl}" alt="Student ID Photo" class="student-photo" onclick="showPhotoModal('${application.photoUrl}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none;">Photo not available</span></div></div>` : ''}
+				${application.photoUrl ? `<div class="detail-item"><label>Student ID Photo:</label><div class="photo-container"><img src="${application.photoUrl}" alt="Student ID Photo" class="student-photo" onclick="showPhotoModal('${application.photoUrl}')" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none;">Photo not available</span></div></div>` : '<div class="detail-item"><label>Student ID Photo:</label><span>No photo uploaded</span></div>'}
 			</div></div>`;
 	}
 	return details;
