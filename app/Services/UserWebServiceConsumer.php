@@ -152,6 +152,32 @@ class UserWebServiceConsumer
         }
     }
 
+    public function getAdminUserInfo($userId, $queryFlag = 1)
+    {
+        try {
+            $response = Http::timeout($this->timeout)
+                ->get($this->baseUrl . '/user/' . $userId, [
+                    'queryFlag' => $queryFlag,
+                ]);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            return [
+                'status' => 'error',
+                'message' => 'Failed to retrieve admin user info',
+                'error' => $response->body()
+            ];
+        } catch (Exception $e) {
+            return [
+                'status' => 'error',
+                'message' => 'Failed to connect to admin service',
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
     /**
      * Update user status via Admin module
      */

@@ -4,7 +4,7 @@
 @section('page-title', 'Scan QR')
 
 @push('styles')
-    <link href="css/AdminPage/ScanQR.css" rel="stylesheet">
+    <link href="{{ asset('css/AdminPage/ScanQR.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
 @endpush
 

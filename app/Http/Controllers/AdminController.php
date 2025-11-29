@@ -1,4 +1,8 @@
 <?php
+/**
+ * author: Lau Aik Hung
+ * student id: 23WMR14555
+ */
 
 namespace App\Http\Controllers;
 
@@ -318,12 +322,11 @@ class AdminController extends Controller
      */
     public function deleteTrain($trainId): JsonResponse
     {
-        $resp = Http::delete("{$this->apiBaseUrl}/admin/trains/{$trainId}");
-        if ($resp->successful()) {
-            return response()->json($resp->json());
-        }
-        Log::error('Failed to delete train', ['status' => $resp->status(), 'body' => $resp->body()]);
-        return response()->json(['success' => false, 'message' => 'Failed to delete train'], $resp->status());
+        // Deleting trains is disabled in this module
+        return response()->json([
+            'success' => false,
+            'message' => 'Deleting trains is disabled'
+        ], 405);
     }
 
     /**

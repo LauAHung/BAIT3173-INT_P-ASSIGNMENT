@@ -1,4 +1,8 @@
 <?php
+/**
+ * author: Lau Aik Hung
+ * student id: 23WMR14555
+ */
 
 namespace App\Services;
 
@@ -8,8 +12,36 @@ use App\Models\Journey;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class AdminModuleService
+class TrainManagementService
 {
+    /**
+     * List trains with pagination and optional search
+     */
+    public function listTrains(int $page = 1, int $perPage = 10, ?string $search = null): array
+    {
+        try {
+            $q = Train::query()->with('station');
+            if ($search) {
+                $like = "%{$search}%";
+                $q->where(function($qq) use ($like) {
+                    $qq->where('TrainNo', 'like', $like)
+                       ->orWhere('TrainService', 'like', $like)
+                       ->orWhere('Is_available', 'like', $like);
+                });
+            }
+            $p = $q->orderByDesc('Created_at')
+                  ->paginate($perPage, ['*'], 'page', $page);
+            return [
+                'success' => true,
+                'data' => $p,
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to list trains: ' . $e->getMessage(),
+            ];
+        }
+    }
     public function createTrain(array $data): array
     {
         // Auto-generate Train ID
@@ -240,5 +272,6 @@ class AdminModuleService
         return 'JR' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
     }
 }
+
 
 

@@ -5,7 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Services\AdminService;
 use App\Services\UserService;
-use App\Services\TrainService;
+// use App\Services\TrainService; // Deprecated: list operations moved to TrainManagementService
 use App\Services\QRScannerService;
 use App\Services\NewsletterService;
 use App\Services\RefundService;
@@ -31,9 +31,9 @@ class AppServiceProvider extends ServiceProvider
             return new UserService($app->make(\App\Factories\UserFactoryManager::class));
         });
 
-        $this->app->singleton(TrainService::class, function ($app) {
-            return new TrainService();
-        });
+        // $this->app->singleton(TrainService::class, function ($app) {
+        //     return new TrainService();
+        // });
 
         $this->app->singleton(QRScannerService::class, function ($app) {
             return new QRScannerService();

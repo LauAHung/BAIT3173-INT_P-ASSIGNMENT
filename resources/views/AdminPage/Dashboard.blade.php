@@ -4,7 +4,7 @@
 @section('page-title', 'Dashboard')
 
 @push('styles')
-    <link href="css/AdminPage/Dashboard.css" rel="stylesheet">
+    <link href="{{ asset('css/AdminPage/Dashboard.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')

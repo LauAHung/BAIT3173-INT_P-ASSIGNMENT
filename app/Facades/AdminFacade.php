@@ -1,4 +1,8 @@
 <?php
+/**
+ * author: Lau Aik Hung
+ * student id: 23WMR14555
+ */
 
 namespace App\Facades;
 
@@ -6,7 +10,7 @@ use Illuminate\Support\Facades\Facade;
 use App\Services\AdminService;
 use App\Services\UserService;
 use App\Services\TrainService;
-use App\Services\AdminModuleService;
+use App\Services\TrainManagementService;
 use App\Services\QRScannerService;
 use App\Services\NewsletterService;
 use App\Services\RefundService;
@@ -61,7 +65,7 @@ class AdminFacade extends Facade
      */
     public static function getTrains($page = 1, $perPage = 10, $search = null)
     {
-        return app(TrainService::class)->getTrains($page, $perPage, $search);
+        return app(TrainManagementService::class)->listTrains((int)$page, (int)$perPage, $search);
     }
 
     /**
@@ -69,7 +73,7 @@ class AdminFacade extends Facade
      */
     public static function addTrain($trainData)
     {
-        return app(AdminModuleService::class)->createTrain($trainData);
+        return app(TrainManagementService::class)->createTrain($trainData);
     }
 
     /**
@@ -78,42 +82,38 @@ class AdminFacade extends Facade
     public static function updateTrain($trainId, $trainData)
     {
         $merged = array_merge($trainData, ['train_id' => $trainId]);
-        return app(AdminModuleService::class)->updateTrain($merged);
+        return app(TrainManagementService::class)->updateTrain($merged);
     }
 
     /**
      * Delete train
      */
-    public static function deleteTrain($trainId)
-    {
-        // No direct delete in module for safety; could be implemented if needed
-        return ['success' => false, 'message' => 'Deleting trains is disabled'];
-    }
+    
 
     // Stations
     public static function addStation($data)
     {
-        return app(AdminModuleService::class)->createStation($data);
+        return app(TrainManagementService::class)->createStation($data);
     }
     public static function updateStation($data)
     {
-        return app(AdminModuleService::class)->updateStation($data);
+        return app(TrainManagementService::class)->updateStation($data);
     }
 
     // Journeys
     public static function addJourney($data)
     {
-        return app(AdminModuleService::class)->createJourney($data);
+        return app(TrainManagementService::class)->createJourney($data);
     }
     public static function updateJourney($data)
     {
-        return app(AdminModuleService::class)->updateJourney($data);
+        return app(TrainManagementService::class)->updateJourney($data);
     }
 
     // Users
     public static function adminUpdateUserStatus($userId, $status)
     {
-        return app(AdminModuleService::class)->updateUserStatus($userId, $status);
+        return app(TrainManagementService::class)->updateUserStatus($userId, $status);
     }
 
     /**
