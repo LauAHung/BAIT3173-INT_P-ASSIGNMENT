@@ -68,6 +68,12 @@
     box-shadow: 0 0 12px rgba(122, 66, 244, 0.6);
     background: linear-gradient(to bottom, #f9f6ff, #ffffff);
 }
+/* Highlight selected box */
+input[type="radio"]:checked + label {
+    border: 2px solid #7a42f4;
+    box-shadow: 0 0 12px rgba(122, 66, 244, 0.6);
+    background: linear-gradient(to bottom, #f9f6ff, #ffffff);
+}
 
 /* === Dynamic Forms === */
 /* Form title */

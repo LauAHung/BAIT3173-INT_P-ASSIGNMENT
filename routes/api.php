@@ -15,6 +15,11 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\NewsletterController;
 
 
+use App\Http\Controllers\Api\PaymentApiController;
+
+use App\Http\Controllers\Api\FeedbackApiController;
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -161,3 +166,22 @@ Route::get('/health', function () {
 Route::get('/tickets/{ticketId}', [AdminTicketController::class, 'show']);
 Route::post('/tickets/{ticketId}/checkin', [AdminTicketController::class, 'checkIn']);
 Route::post('/tickets/{ticketId}/checkout', [AdminTicketController::class, 'checkOut']);
+
+Route::prefix('payment')->group(function () {
+    Route::post('/topup', [PaymentApiController::class, 'topup']);              // Wallet top-up
+    Route::get('/{bookingId}/info', [PaymentApiController::class, 'getBookingInfo']); // Booking details
+    Route::post('/{bookingId}/pay', [PaymentApiController::class, 'completePayment']); // Booking payment
+    Route::post('/{bookingId}/refund', [PaymentApiController::class, 'processRefund']); // Refund
+    
+});
+
+Route::get('/payment/debugUser/{user_id?}', [PaymentApiController::class, 'debugUser']);
+
+
+Route::prefix('feedback')->group(function () {
+    Route::post('/{bookingId}/store', [FeedbackApiController::class, 'store']);
+    Route::get('/{bookingId}', [FeedbackApiController::class, 'getBookingFeedback']);
+    Route::get('/user/{userId}', [FeedbackApiController::class, 'getUserFeedback']);
+    Route::get('/ratingsection/{bookingId}/info', [App\Http\Controllers\Api\FeedbackApiController::class, 'getBookingInfoForRating']);
+
+});

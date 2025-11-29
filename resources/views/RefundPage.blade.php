@@ -17,8 +17,9 @@
         <h2 class="section-title">Ticket Summary</h2>
         <div class="ticket-summary">
             <p><strong>Booking ID:</strong> {{ $booking->BookingID }}</p>
-            <p><strong>Train:</strong> {{ $booking->Journey->Train->TrainNo ?? 'Unknown' }}</p>
-            <p><strong>From:</strong> {{ $booking->Journey->FromLocation }} → {{ $booking->Journey->ToLocation }}</p>
+              <p><strong>Train:</strong> {{ $journey->TrainNo ?? 'Unknown' }}</p>
+            <p><strong>From:</strong> {{ $journey->FromLocation }} → {{ $journey->ToLocation }}</p>
+
             <p><strong>Amount:</strong> RM {{ number_format($booking->Price, 2) }}</p>
         </div>
 
@@ -49,32 +50,15 @@
     </div>
 </div>
 
-<!-- SweetAlert for error/success -->
+<!-- SweetAlert & Refund.js -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Refund Blocked',
-                text: '{{ session("error") }}',
-                confirmButtonColor: '#d33'
-            }).then(() => {
-                window.location.href = "{{ route('booking') }}"; // redirect after OK
-            });
-        @endif
-
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: '{{ session("success") }}',
-                confirmButtonColor: '#3085d6'
-            }).then(() => {
-                window.location.href = "{{ route('booking') }}"; // redirect after OK
-            });
-        @endif
-    });
+    // Pass Laravel session messages into JS global vars
+    window.refundSuccess = @json(session('success'));
+    window.refundError   = @json(session('error'));
+    window.refundRedirectUrl = "{{ route('booking') }}";
 </script>
-
+<script src="{{ asset('js/Refund.js') }}"></script>
 @endsection
+
+

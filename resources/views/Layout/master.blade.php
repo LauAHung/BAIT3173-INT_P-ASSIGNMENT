@@ -21,7 +21,7 @@
             <ul>
                 <li><a href="{{ route('HomePage') }}">Ticketing</a></li>
                 <li><a href="{{ route('DiscoverPage') }}">Discover</a></li>
-                <li><a href="{{ route('feedback') }}">Feedback</a></li>
+                <li><a href="{{ route('viewfeedback') }}">Feedback</a></li>
                 <li><a href="{{ route('concession_card') }}">Card Application</a></li>
             </ul>
         </nav>

@@ -124,281 +124,279 @@
                     </div>
                 </div>
 
-            <!-- Application Form Screen -->
-            <div id="formScreen" class="screen">
-                <div class="form-container">
-                    <div class="form-header">
-                        <button id="backBtn" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back
-                        </button>
-                        <h2 id="formTitle">Application Form</h2>
-                    </div>
+                <!-- Application Form Screen -->
+                <div id="formScreen" class="screen">
+                    <div class="form-container">
+                        <div class="form-header">
+                            <button id="backBtn" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                            <h2 id="formTitle">Application Form</h2>
+                        </div>
 
-                            <form id="applicationForm" enctype="multipart/form-data">
-                                @csrf
-                                <input type="hidden" id="applicationType" name="type">
-                                
-                                <!-- Common Fields -->
+                        <form id="applicationForm" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" id="applicationType" name="type">
+                            
+                            <!-- Common Fields -->
+                            <div class="form-group">
+                                <label for="fullName">Full Name *</label>
+                                <input type="text" id="fullName" name="fullName" required>
+                                <span class="error-message"></span>
+                            </div>
+
+                            <!-- OKU Specific Fields -->
+                            <div id="okuFields" class="conditional-fields">
                                 <div class="form-group">
-                                    <label for="fullName">Full Name *</label>
-                                    <input type="text" id="fullName" name="fullName" required>
+                                    <label for="okuIc">IC Number *</label>
+                                    <input type="text" id="okuIc" name="ic" maxlength="12" required>
                                     <span class="error-message"></span>
                                 </div>
-
-                                <!-- OKU Specific Fields -->
-                                <div id="okuFields" class="conditional-fields">
-                                    <div class="form-group">
-                                        <label for="okuIc">IC Number *</label>
-                                        <input type="text" id="okuIc" name="ic" maxlength="12" required>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="okuCardNumber">OKU Card Number *</label>
-                                        <input type="text" id="okuCardNumber" name="okuCardNumber" required>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="disabilityType">Disability Type *</label>
-                                        <select id="disabilityType" name="disabilityType" required>
-                                            <option value="">Select Disability Type</option>
-                                            <option value="visual">Visual Impairment</option>
-                                            <option value="hearing">Hearing Impairment</option>
-                                            <option value="mobility">Mobility Impairment</option>
-                                            <option value="cognitive">Cognitive Disability</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group" id="otherDisabilityContainer">
-                                        <label for="otherDisability">Other Disability Information *</label>
-                                        <textarea id="otherDisability" name="otherDisability" rows="3"></textarea>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="okuCardPhoto">OKU Card Photo *</label>
-                                        <div class="file-upload" id="okuFileUpload" onclick="document.getElementById('okuCardPhoto').click()">
-                                            <input type="file" id="okuCardPhoto" name="okuCardPhoto" accept="image/*" required>
-                                            <div class="file-upload-content">
-                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                                    <polyline points="7,10 12,15 17,10"/>
-                                                    <line x1="12" y1="15" x2="12" y2="3"/>
-                                                </svg>
-                                                <p>Click to upload OKU card photo</p>
-                                            </div>
-                                        </div>
-                                        <span class="error-message"></span>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="okuCardNumber">OKU Card Number *</label>
+                                    <input type="text" id="okuCardNumber" name="okuCardNumber" required>
+                                    <span class="error-message"></span>
                                 </div>
-
-                                <!-- Senior Citizen Specific Fields -->
-                                <div id="seniorFields" class="conditional-fields">
-                                    <div class="form-group">
-                                        <label for="seniorIc">IC Number *</label>
-                                        <input type="text" id="seniorIc" name="seniorIc" maxlength="12" required>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="seniorIcPhoto">IC Photo *</label>
-                                        <div class="file-upload" id="seniorFileUpload" onclick="document.getElementById('seniorIcPhoto').click()">
-                                            <input type="file" id="seniorIcPhoto" name="seniorIcPhoto" accept="image/*" required>
-                                            <div class="file-upload-content">
-                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                                    <polyline points="7,10 12,15 17,10"/>
-                                                    <line x1="12" y1="15" x2="12" y2="3"/>
-                                                </svg>
-                                                <p>Click to upload IC photo</p>
-                                            </div>
-                                        </div>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <!-- Auto-calculated fields (hidden) -->
-                                    <input type="hidden" id="seniorAge" name="age">
-                                    <input type="hidden" id="seniorGender" name="gender">
+                                <div class="form-group">
+                                    <label for="disabilityType">Disability Type *</label>
+                                    <select id="disabilityType" name="disabilityType" required>
+                                        <option value="">Select Disability Type</option>
+                                        <option value="visual">Visual Impairment</option>
+                                        <option value="hearing">Hearing Impairment</option>
+                                        <option value="mobility">Mobility Impairment</option>
+                                        <option value="cognitive">Cognitive Disability</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <span class="error-message"></span>
                                 </div>
-
-                                <!-- Student Specific Fields -->
-                                <div id="studentFields" class="conditional-fields">
-                                    <div class="form-group">
-                                        <label for="studentCitizenship">Citizenship *</label>
-                                        <div class="autocomplete-container">
-                                            <input type="text" id="studentCitizenship" name="studentCitizenship" placeholder="Type to search nationality..." autocomplete="off" required>
-                                            <div id="studentCitizenshipDropdown" class="autocomplete-dropdown"></div>
-                                        </div>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group" id="studentIcContainer">
-                                        <label for="studentIc">IC Number *</label>
-                                        <input type="text" id="studentIc" name="studentIc" maxlength="12">
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group" id="studentPassportContainer" style="display: none;">
-                                        <label for="studentPassport">Passport Number *</label>
-                                        <input type="text" id="studentPassport" name="passportNumber">
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="educationLevel">Education Level *</label>
-                                        <select id="educationLevel" name="educationLevel" required>
-                                            <option value="">Select Education Level</option>
-                                            <option value="primary">Primary School</option>
-                                            <option value="secondary">Secondary School</option>
-                                            <option value="university">University</option>
-                                        </select>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="schoolName">School Name *</label>
-                                        <div class="autocomplete-container">
-                                            <input type="text" id="schoolName" name="schoolName" placeholder="Type to search school..." autocomplete="off" required>
-                                            <div id="schoolNameDropdown" class="autocomplete-dropdown"></div>
-                                        </div>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="matrixNumber">Matrix Number *</label>
-                                        <input type="text" id="matrixNumber" name="matrixNumber" required>
-                                        <span class="error-message"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="studentIdPhoto">Student ID Photo *</label>
-                                        <div class="file-upload" id="studentFileUpload" onclick="document.getElementById('studentIdPhoto').click()">
-                                            <input type="file" id="studentIdPhoto" name="studentIdPhoto" accept="image/*" required>
-                                            <div class="file-upload-content">
-                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                                    <polyline points="7,10 12,15 17,10"/>
-                                                    <line x1="12" y1="15" x2="12" y2="3"/>
-                                                </svg>
-                                                <p>Click to upload student ID photo</p>
-                                            </div>
-                                        </div>
-                                        <span class="error-message"></span>
-                                    </div>
+                                <div class="form-group" id="otherDisabilityContainer">
+                                    <label for="otherDisability">Other Disability Information *</label>
+                                    <textarea id="otherDisability" name="otherDisability" rows="3"></textarea>
+                                    <span class="error-message"></span>
                                 </div>
-
-                                <div class="form-actions">
-                                    <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
-                                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                                <div class="form-group">
+                                    <label for="okuCardPhoto">OKU Card Photo *</label>
+                                    <div class="file-upload" id="okuFileUpload" onclick="document.getElementById('okuCardPhoto').click()">
+                                        <input type="file" id="okuCardPhoto" name="okuCardPhoto" accept="image/*" required>
+                                        <div class="file-upload-content">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                <polyline points="7,10 12,15 17,10"/>
+                                                <line x1="12" y1="15" x2="12" y2="3"/>
+                                            </svg>
+                                            <p>Click to upload OKU card photo</p>
+                                        </div>
+                                    </div>
+                                    <span class="error-message"></span>
                                 </div>
-                            </form>
+                            </div>
+
+                            <!-- Senior Citizen Specific Fields -->
+                            <div id="seniorFields" class="conditional-fields">
+                                <div class="form-group">
+                                    <label for="seniorIc">IC Number *</label>
+                                    <input type="text" id="seniorIc" name="seniorIc" maxlength="12" required>
+                                    <span class="error-message"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="seniorIcPhoto">IC Photo *</label>
+                                    <div class="file-upload" id="seniorFileUpload" onclick="document.getElementById('seniorIcPhoto').click()">
+                                        <input type="file" id="seniorIcPhoto" name="seniorIcPhoto" accept="image/*" required>
+                                        <div class="file-upload-content">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                <polyline points="7,10 12,15 17,10"/>
+                                                <line x1="12" y1="15" x2="12" y2="3"/>
+                                            </svg>
+                                            <p>Click to upload IC photo</p>
+                                        </div>
+                                    </div>
+                                    <span class="error-message"></span>
+                                </div>
+                                <!-- Auto-calculated fields (hidden) -->
+                                <input type="hidden" id="seniorAge" name="age">
+                                <input type="hidden" id="seniorGender" name="gender">
+                            </div>
+
+                            <!-- Student Specific Fields -->
+                            <div id="studentFields" class="conditional-fields">
+                                <div class="form-group">
+                                    <label for="studentCitizenship">Citizenship *</label>
+                                    <div class="autocomplete-container">
+                                        <input type="text" id="studentCitizenship" name="studentCitizenship" placeholder="Type to search nationality..." autocomplete="off" required>
+                                        <div id="studentCitizenshipDropdown" class="autocomplete-dropdown"></div>
+                                    </div>
+                                    <span class="error-message"></span>
+                                </div>
+                                <div class="form-group" id="studentIcContainer">
+                                    <label for="studentIc">IC Number *</label>
+                                    <input type="text" id="studentIc" name="studentIc" maxlength="12">
+                                    <span class="error-message"></span>
+                                </div>
+                                <div class="form-group" id="studentPassportContainer" style="display: none;">
+                                    <label for="studentPassport">Passport Number *</label>
+                                    <input type="text" id="studentPassport" name="passportNumber">
+                                    <span class="error-message"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="educationLevel">Education Level *</label>
+                                    <select id="educationLevel" name="educationLevel" required>
+                                        <option value="">Select Education Level</option>
+                                        <option value="primary">Primary School</option>
+                                        <option value="secondary">Secondary School</option>
+                                        <option value="university">University</option>
+                                    </select>
+                                    <span class="error-message"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="schoolName">School Name *</label>
+                                    <div class="autocomplete-container">
+                                        <input type="text" id="schoolName" name="schoolName" placeholder="Type to search school..." autocomplete="off" required>
+                                        <div id="schoolNameDropdown" class="autocomplete-dropdown"></div>
+                                    </div>
+                                    <span class="error-message"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="matrixNumber">Matrix Number *</label>
+                                    <input type="text" id="matrixNumber" name="matrixNumber" required>
+                                    <span class="error-message"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="studentIdPhoto">Student ID Photo *</label>
+                                    <div class="file-upload" id="studentFileUpload" onclick="document.getElementById('studentIdPhoto').click()">
+                                        <input type="file" id="studentIdPhoto" name="studentIdPhoto" accept="image/*" required>
+                                        <div class="file-upload-content">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                <polyline points="7,10 12,15 17,10"/>
+                                                <line x1="12" y1="15" x2="12" y2="3"/>
+                                            </svg>
+                                            <p>Click to upload student ID photo</p>
+                                        </div>
+                                    </div>
+                                    <span class="error-message"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Submit Application</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Status Screen -->
+                <div id="statusScreen" class="screen">
+                    <div class="status-container">
+                        <button id="statusBackBtn" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Main Menu
+                        </button>
+                        
+                        <div id="statusContent" class="status-content">
+                            <!-- Status content will be populated by JavaScript -->
                         </div>
                     </div>
+                </div>
 
-            <!-- Status Screen -->
-            <div id="statusScreen" class="screen">
-                <div class="status-container">
-                    <button id="statusBackBtn" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Main Menu
-                    </button>
+                <!-- Admin Screen -->
+                <div id="adminScreen" class="screen">
+                    <div class="admin-container">
+                        <div class="admin-header">
+                            <h2>Admin Dashboard</h2>
+                            <button id="adminBackBtn" class="btn btn-secondary">Back to Main</button>
+                        </div>
+
+                        <div class="admin-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div>
+                                    <p>Total Applications</p>
+                                    <span id="totalApps">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon pending">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <p>Pending Review</p>
+                                    <span id="pendingApps">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon approved">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>
+                                    <p>Approved</p>
+                                    <span id="approvedApps">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon rejected">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                <div>
+                                    <p>Rejected</p>
+                                    <span id="rejectedApps">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="applications-table">
+                            <h3>Applications</h3>
+                            <div class="table-container">
+                                <table id="applicationsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Applicant</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Applications will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Applications Status Section -->
+            @auth
+            <section class="user-applications-section">
+                <div class="container">
+                    <div class="section-header">
+                        <h2>My Applications</h2>
+                        <p>Track the status of your concession card applications</p>
+                    </div>
                     
-                    <div id="statusContent" class="status-content">
-                        <!-- Status content will be populated by JavaScript -->
+                    <div class="applications-status">
+                        <div id="userApplicationsContent">
+                            <!-- User applications will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            @endauth
+
+            <!-- Modals -->
+            <div id="viewModal" class="modal">
+                <div class="modal-content">
+                    <div id="applicationDetails"></div>
+                    <div class="modal-actions">
+                        <button id="closeView" class="btn btn-secondary">Close</button>
                     </div>
                 </div>
             </div>
+        </main>
 
-            <!-- Admin Screen -->
-            <div id="adminScreen" class="screen">
-                <div class="admin-container">
-                    <div class="admin-header">
-                        <h2>Admin Dashboard</h2>
-                        <button id="adminBackBtn" class="btn btn-secondary">Back to Main</button>
-                    </div>
-
-                    <div class="admin-stats">
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <div>
-                                <p>Total Applications</p>
-                                <span id="totalApps">0</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon pending">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div>
-                                <p>Pending Review</p>
-                                <span id="pendingApps">0</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon approved">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div>
-                                <p>Approved</p>
-                                <span id="approvedApps">0</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon rejected">
-                                <i class="fas fa-times-circle"></i>
-                            </div>
-                            <div>
-                                <p>Rejected</p>
-                                <span id="rejectedApps">0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="applications-table">
-                        <h3>Applications</h3>
-                        <div class="table-container">
-                            <table id="applicationsTable">
-                                <thead>
-                                    <tr>
-                                        <th>Applicant</th>
-                                        <th>Type</th>
-                                        <th>Status</th>
-                                        <th>Date</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Applications will be populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- User Applications Status Section -->
-        @auth
-        <section class="user-applications-section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>My Applications</h2>
-                    <p>Track the status of your concession card applications</p>
-                </div>
-                
-                <div class="applications-status">
-                    <div id="userApplicationsContent">
-                        <!-- User applications will be loaded here -->
-                    </div>
-                </div>
-            </div>
-        </section>
-        @endauth
-
-        <!-- Modals -->
-        <div id="viewModal" class="modal">
-            <div class="modal-content">
-                <h3>Application Details</h3>
-                <div id="applicationDetails"></div>
-                <div class="modal-actions">
-                    <button id="closeView" class="btn btn-secondary">Close</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-<script src="{{ asset('js/ConcessionCard.js') }}" defer></script>
-    
-@endsection
+        <script src="{{ asset('js/ConcessionCard.js') }}" defer></script>
+    @endsection

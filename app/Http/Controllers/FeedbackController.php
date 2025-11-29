@@ -2,68 +2,93 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\Booking;
-use App\Models\Feedback;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class FeedbackController extends Controller
 {
-    // Show rating form
-    public function create($bookingId)
+    protected $apiBaseUrl;
+
+    public function __construct()
     {
-        $booking = Booking::with('Journey')->find($bookingId);
-
-        if (!$booking) {
-            return redirect()->route('booking')->with('error', 'Booking not found.');
-        }
-
-        return view('RatingSectionPage', compact('booking'));
+        $this->middleware('auth'); 
+        $this->apiBaseUrl = config('app.api_base_url', 'http://localhost:8001/api');
     }
 
-    // Store rating
+    // ---------------- CREATE FEEDBACK ----------------
+   public function create($bookingId)
+{
+    // Call the correct API endpoint for rating section info
+    $response = Http::get("{$this->apiBaseUrl}/feedback/ratingsection/{$bookingId}/info");
+
+    $bookingData = $response->successful() ? $response->json() : null;
+
+    // Prevent null access
+    $booking = isset($bookingData['booking']) ? (object) $bookingData['booking'] : null;
+    $journey = isset($bookingData['journey']) ? (object) $bookingData['journey'] : null;
+
+    if (!$booking) {
+        return back()->with('error', 'Booking not found.');
+    }
+
+    return view('RatingSectionPage', [
+        'BookingID' => $booking->booking_id ?? $bookingId,
+        'booking'   => $booking,
+        'journey'   => $journey
+    ]);
+}
+
+
+    // ---------------- STORE FEEDBACK ----------------
     public function store(Request $request, $bookingId)
     {
+        $user = Auth::user();
+
         $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-            'feedback' => 'required|string|max:1000',
+            'rating'   => 'required|integer|min:1|max:5',
+            'feedback' => 'nullable|string|max:500',
         ]);
 
-        // Generate feedback ID (F followed by 5 digits)
-        $lastFeedback = Feedback::orderBy('feeback_id', 'desc')->first();
-        $lastId = $lastFeedback ? (int)substr($lastFeedback->feeback_id, 1) : 0;
-        $newId = 'F' . str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
+        $payload = [
+            'rating'   => $request->input('rating'),
+            'feedback' => $request->input('feedback'),
+            'user_id'  => $user->user_id,
+        ];
 
-        Feedback::create([
-            'feeback_id'   => $newId,
-            'BookingID'    => $bookingId,  // ✅ FIXED
-            'feedback_time'=> Carbon::today()->toDateString(),
-            'rating_value' => $request->rating,
-            'feedback_text'=> $request->feedback,
+        $response = Http::post("{$this->apiBaseUrl}/feedback/{$bookingId}/store", $payload);
+
+        if ($response->successful()) {
+            return redirect()->route('booking')
+                ->with('success', 'Thank you for your feedback!');
+        }
+
+        Log::error("Feedback API failed", [
+            'bookingId' => $bookingId,
+            'user_id'   => $user->user_id,
+            'payload'   => $payload,
+            'response'  => $response->json(),
         ]);
 
-        return redirect()->route('booking')->with('success', 'Thank you for your feedback!');
+        return back()->with('error', $response['error'] ?? 'Feedback failed.');
     }
 
-    // Display feedback
+    // ---------------- VIEW FEEDBACK ----------------
     public function viewFeedback()
     {
         $user = Auth::user();
 
-        $myFeedback = Feedback::select('Feedback.*', 'users.first_name', 'users.last_name')
-            ->join('Bookings', 'Feedback.BookingID', '=', 'Bookings.BookingID')  // ✅ FIXED
-            ->join('users', 'Bookings.UserID', '=', 'users.user_id')             // ✅ FIXED
-            ->where('users.user_id', $user->user_id)
-            ->get();
+        $response = Http::get("{$this->apiBaseUrl}/feedback/user/{$user->user_id}");
 
-        $otherFeedback = Feedback::select('Feedback.*', 'users.first_name', 'users.last_name')
-            ->join('Bookings', 'Feedback.BookingID', '=', 'Bookings.BookingID')  // ✅ FIXED
-            ->join('users', 'Bookings.UserID', '=', 'users.user_id')             // ✅ FIXED
-            ->where('users.user_id', '!=', $user->user_id)
-            ->get();
+        if ($response->successful()) {
+            $data = $response->json();
+            return view('ViewFeedbackPage', [
+                'myFeedback'    => collect($data['myFeedback']),
+                'otherFeedback' => collect($data['otherFeedback']),
+            ]);
+        }
 
-        return view('ViewFeedbackPage', compact('myFeedback', 'otherFeedback'));
+        return back()->with('error', 'Unable to load feedback.');
     }
 }
