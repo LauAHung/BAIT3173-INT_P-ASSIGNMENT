@@ -59,3 +59,99 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+
+# Train Ticketing System
+
+A web-based train booking application built with Laravel. This system allows users to search for trains, book tickets, and manage their user accounts, while administrators can manage train schedules and system settings.
+
+## 📋 Requirements
+
+Before you begin, ensure you have the following installed:
+
+*   **PHP 8.2+**
+*   **Composer**
+*   **Node.js & NPM**
+*   **MySQL or MariaDB**
+
+## 🚀 Installation & Setup
+
+1.  **Clone or Download**:
+    Download the project files to your local machine.
+
+2.  **Install Dependencies**:
+    ```bash
+    composer install
+    npm install
+    ```
+
+3.  **Environment Setup**:
+    Copy `.env.example` to `.env` and configure your database credentials.
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+
+4.  **Database Setup**:
+    Run migrations and seeders.
+    ```bash
+    php artisan migrate --seed
+    ```
+
+5.  **Build Assets**:
+    ```bash
+    npm run dev
+    ```
+
+6.  **Run Application**:
+    ```bash
+    php artisan serve
+    ```
+    Access the application at `http://localhost:8000`.
+
+---
+
+## 📖 Step-by-Step Usage Guide
+
+### 1. Register Account
+To access the booking features, create a new user account.
+
+*   **Navigate**: Click on **Sign Up** in the navigation bar.
+*   **Action**: Fill in the registration form.
+*   **Test Credentials (Seeded)**:
+    *   **Email Address**: `test@example.com`
+    *   **Password**: `password`
+
+### 2. Login Account
+Access your account to book tickets.
+
+*   **Navigate**: Click on **Sign In**.
+*   **Action**: Enter your credentials.
+
+### 3. Admin Access
+To view the admin dashboard (train management, users, etc.).
+
+*   **Note**: No default admin account is seeded. You can create one manually or using Tinker:
+    ```bash
+    php artisan tinker
+    ```
+    ```php
+    User::factory()->create(['email' => 'admin@example.com', 'account_status' => 'admin']);
+    ```
+*   **Navigate**: Login with the admin account. You will be redirected to the Admin Dashboard.
+*   **Test Credentials (Manual Setup)**:
+    *   **Email Address**: `admin@example.com`
+    *   **Password**: `password`
+
+### 4. Search Train
+Once logged in, search for available trains.
+
+*   **Navigate**: Go to **Train Selection**.
+*   **Action**: Select Depart/Return stations and dates.
+*   **Stations**: e.g., `KL Sentral`, `Butterworth`, `Ipoh`.
+
+## 🛠 Troubleshooting
+
+*   **Database Error**: Ensure your `.env` file has the correct database credentials.
+*   **Vite Manifest Not Found**: Run `npm run build` or keep `npm run dev` running.
